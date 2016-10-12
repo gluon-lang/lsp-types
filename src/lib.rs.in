@@ -206,12 +206,11 @@ pub struct Range {
 }
 
 /// Represents a location inside a resource, such as a line inside a text file.
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Location {
     pub uri: String,
     pub range: Range,
 }
-
-
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -830,6 +829,7 @@ pub struct DocumentSymbolParams {
  * Represents information about programming constructs like variables, classes,
  * interfaces etc.
  */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct SymbolInformation {
     /**
      * The name of this symbol.
@@ -856,6 +856,7 @@ pub struct SymbolInformation {
 /**
  * A symbol kind.
  */
+enum_from_primitive!{
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum SymbolKind {
     File = 1,
@@ -876,6 +877,21 @@ pub enum SymbolKind {
     Number = 16,
     Boolean = 17,
     Array = 18,
+}
+}
+
+impl serde::Deserialize for SymbolKind {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: serde::Deserializer,
+    {
+        use enum_primitive::FromPrimitive;
+
+        let i = try!(u8::deserialize(deserializer));
+        SymbolKind::from_u8(i).ok_or_else(|| {
+            D::Error::invalid_value("Expected a value between 1 and 18 (inclusive) to deserialize \
+                                     to MessageType")
+        })
+    }
 }
 
 impl serde::Serialize for SymbolKind {

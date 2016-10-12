@@ -5,13 +5,15 @@ build = "build.rs"
 authors = ["Markus Westerlind <marwes91@gmail.com>"]
 
 [dependencies]
+enum_primitive = "0.1.0"
+
 serde = "0.8.11"
 serde_json = "0.8.0"
+serde_derive = { version = "0.8", optional = true }
 
-[build-dependencies.serde_codegen]
-version = "0.8.0"
-optional = true
-
+[build-dependencies]
+serde_codegen = { version = "0.8.0", optional = true }
 
 [features]
 default = ["serde_codegen"]
+nightly = ["serde_derive"]
