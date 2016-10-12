@@ -1,0 +1,17 @@
+[package]
+name = "vscode-languageserver-types"
+version = "0.1.0"
+build = "build.rs"
+authors = ["Markus Westerlind <marwes91@gmail.com>"]
+
+[dependencies]
+serde = "0.8.11"
+serde_json = "0.8.0"
+
+[build-dependencies.serde_codegen]
+version = "0.8.0"
+optional = true
+
+
+[features]
+default = ["serde_codegen"]
