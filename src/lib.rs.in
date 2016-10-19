@@ -21,14 +21,14 @@ pub struct DidChangeTextDocumentParams {
     pub content_changes: Vec<TextDocumentContentChangeEvent>,
 }
 
-//// Text documents are identified using a URI. On the protocol level, URIs are passed as strings. The corresponding JSON structure looks like this:
+/// Text documents are identified using a URI. On the protocol level, URIs are passed as strings. The corresponding JSON structure looks like this:
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentIdentifier {
     /// The text document's URI.
     pub uri: String,
 }
 
-//// An identifier to denote a specific version of a text document.
+/// An identifier to denote a specific version of a text document.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier {
     /// The text document's URI.
@@ -138,31 +138,31 @@ pub struct FileEvent {
     pub typ: FileChangeType,
 }
 
-//// Position in a text document expressed as zero-based line and character offset.
+/// Position in a text document expressed as zero-based line and character offset.
 #[derive(Debug, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
 pub struct Position {
-    //// Line position in a document (zero-based).
+    /// Line position in a document (zero-based).
     pub line: u64,
-    //// Character offset on a line in a document (zero-based).
+    /// Character offset on a line in a document (zero-based).
     pub character: u64,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
 pub struct Range {
-    //// The range's start position.
+    /// The range's start position.
     pub start: Position,
-    //// The range's end position.
+    /// The range's end position.
     pub end: Position,
 }
 
-//// Represents a location inside a resource, such as a line inside a text file.
+/// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Location {
     pub uri: String,
     pub range: Range,
 }
 
-//// A parameter literal used in requests to pass a text document and a position inside that document.
+/// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentPositionParams {
     /// The text document.
@@ -193,12 +193,12 @@ pub struct ClientCapabilities {
     _dummy: Option<()>,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct InitializeResult {
     pub capabilities: ServerCapabilities,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct InitializeError {
     /// Indicates whether the client should retry to send the
     /// initilize request after showing the message provided
@@ -206,7 +206,7 @@ pub struct InitializeError {
     pub retry: bool,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if="Option::is_none")]
@@ -282,6 +282,22 @@ pub enum TextDocumentSyncKind {
     Incremental = 2,
 }
 
+impl serde::Deserialize for TextDocumentSyncKind {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: serde::Deserializer,
+    {
+        Ok(match try!(u8::deserialize(deserializer)) {
+            0 => TextDocumentSyncKind::None,
+            1 => TextDocumentSyncKind::Full,
+            2 => TextDocumentSyncKind::Incremental,
+            _ => {
+                return Err(D::Error::invalid_value("Expected a value between 1 and 2 (inclusive) \
+                                                    to deserialize to TextDocumentSyncKind"))
+            }
+        })
+    }
+}
+
 impl serde::Serialize for TextDocumentSyncKind {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
         where S: serde::Serializer,
@@ -291,7 +307,7 @@ impl serde::Serialize for TextDocumentSyncKind {
 }
 
 /// Completion options.
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct CompletionOptions {
     /// The server provides support to resolve additional information for a completion item.
     #[serde(skip_serializing_if="Option::is_none")]
@@ -332,8 +348,8 @@ pub struct DocumentOnTypeFormattingOptions {
     pub more_trigger_character: Vec<String>,
 }
 
-//// A textual edit applicable to a text document.
-#[derive(Debug, PartialEq, Default, Serialize)]
+/// A textual edit applicable to a text document.
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct TextEdit {
     /// The range of the text document to be manipulated. To insert
     /// text into a document create a range where start === end.
@@ -344,8 +360,8 @@ pub struct TextEdit {
     pub new_text: String,
 }
 
-//// A workspace edit represents changes to many resources managed in the workspace.
-#[derive(Debug, PartialEq, Default, Serialize)]
+/// A workspace edit represents changes to many resources managed in the workspace.
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     pub changes: HashMap<String, Vec<TextEdit>>,
@@ -353,7 +369,7 @@ pub struct WorkspaceEdit {
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct CompletionList {
     /// This list it not complete. Further typing should result in recomputing
     /// this list.
@@ -363,7 +379,7 @@ pub struct CompletionList {
     pub items: Vec<CompletionItem>,
 }
 
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct CompletionItem {
     /// The label of this completion item. By default
     /// also the text that is inserted when selecting
@@ -407,6 +423,7 @@ pub struct CompletionItem {
     pub data: Option<Value>,
 }
 
+enum_from_primitive!{
 /// The kind of a completion entry.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum CompletionItemKind {
@@ -428,6 +445,21 @@ pub enum CompletionItemKind {
     Color = 16,
     File = 17,
     Reference = 18,
+}
+}
+
+impl serde::Deserialize for CompletionItemKind {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: serde::Deserializer,
+    {
+        use enum_primitive::FromPrimitive;
+
+        let i = try!(u8::deserialize(deserializer));
+        CompletionItemKind::from_u8(i).ok_or_else(|| {
+            D::Error::invalid_value("Expected a value between 1 and 18 (inclusive) to deserialize \
+                                     to CompletionItemKind")
+        })
+    }
 }
 
 impl serde::Serialize for CompletionItemKind {
@@ -675,7 +707,7 @@ impl serde::Deserialize for SymbolKind {
         let i = try!(u8::deserialize(deserializer));
         SymbolKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value("Expected a value between 1 and 18 (inclusive) to deserialize \
-                                     to MessageType")
+                                     to SymbolKind")
         })
     }
 }
@@ -839,7 +871,7 @@ impl serde::Serialize for MessageType {
     }
 }
 
-#[derive(Debug, PartialEq, Default, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
     pub uri: String,
@@ -858,7 +890,8 @@ pub struct Diagnostic {
     pub severity: Option<DiagnosticSeverity>,
 
     /// The diagnostic's code. Can be omitted.
-    pub code: String, /// number | string;
+    pub code: String,
+    /// number | string;
 
     /// A human-readable string describing the source of this
     /// diagnostic, e.g. 'typescript' or 'super lint'.
@@ -905,7 +938,7 @@ impl serde::Serialize for DiagnosticSeverity {
     }
 }
 
-//// Represents a reference to a command. Provides a title which will be used to represent a command in the UI and, optionally, an array of arguments which will be passed to the command handler function when invoked.
+/// Represents a reference to a command. Provides a title which will be used to represent a command in the UI and, optionally, an array of arguments which will be passed to the command handler function when invoked.
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct Command {
     /// Title of the command, like `save`.
