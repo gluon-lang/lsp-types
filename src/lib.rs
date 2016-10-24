@@ -17,134 +17,7 @@ pub struct CancelParams {
     pub id: String,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidChangeTextDocumentParams {
-    /// The document that did change. The version number points
-    /// to the version after all provided content changes have
-    /// been applied.
-    #[serde(rename="textDocument")]
-    pub text_document: VersionedTextDocumentIdentifier,
-    /// The actual content changes.
-    #[serde(rename="contentChanges")]
-    pub content_changes: Vec<TextDocumentContentChangeEvent>,
-}
-
-/// Text documents are identified using a URI. On the protocol level, URIs are passed as strings. The corresponding JSON structure looks like this:
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct TextDocumentIdentifier {
-    /// The text document's URI.
-    pub uri: String,
-}
-
-/// An identifier to denote a specific version of a text document.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct VersionedTextDocumentIdentifier {
-    /// The text document's URI.
-    pub uri: String,
-    /// The version number of this document.
-    pub version: u64,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct TextDocumentItem {
-    /// The text document's URI.
-    pub uri: String,
-
-    /// The text document's language identifier.
-    #[serde(rename="languageId")]
-    pub language_id: String,
-
-    /// The version number of this document (it will strictly increase after each
-    /// change, including undo/redo).
-    pub version: u64,
-
-    /// The content of the opened text document.
-    pub text: String,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidOpenTextDocumentParams {
-    /// The document that was opened.
-    #[serde(rename="textDocument")]
-    pub text_document: TextDocumentItem,
-}
-
-/// An event describing a change to a text document. If range and rangeLength are omitted
-/// the new text is considered to be the full content of the document.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct TextDocumentContentChangeEvent {
-    /// The range of the document that changed.
-    pub range: Option<Range>,
-    /// The length of the range that got replaced.
-    #[serde(rename="rangeLength")]
-    pub range_length: Option<u64>,
-    /// The new text of the document.
-    pub text: String,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidCloseTextDocumentParams {
-    /// The document that was closed.
-    #[serde(rename="textDocument")]
-    pub text_document: TextDocumentIdentifier,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidSaveTextDocumentParams {
-    /// The document that was saved.
-    #[serde(rename="textDocument")]
-    pub text_document: TextDocumentIdentifier,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidChangeWatchedFilesParams {
-    /// The actual file events.
-    pub changes: Vec<FileEvent>,
-}
-
-/// The file event type.
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub enum FileChangeType {
-    /// The file got created.
-    Created = 1,
-    /// The file got changed.
-    Changed = 2,
-    /// The file got deleted.
-    Deleted = 3,
-}
-
-impl serde::Deserialize for FileChangeType {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        Ok(match try!(u8::deserialize(deserializer)) {
-            1 => FileChangeType::Created,
-            2 => FileChangeType::Changed,
-            3 => FileChangeType::Deleted,
-            _ => {
-                return Err(D::Error::invalid_value("Expected a value of 1, 2 or 3 to deserialze \
-                                                    to FileChangeType"))
-            }
-        })
-    }
-}
-
-impl serde::Serialize for FileChangeType {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: serde::Serializer
-    {
-        serializer.serialize_u8(*self as u8)
-    }
-}
-
-/// An event describing a file change.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct FileEvent {
-    /// The file's URI.
-    pub uri: String,
-    /// The change type.
-    pub typ: FileChangeType,
-}
+/* ----------------- Basic JSON Structures ----------------- */
 
 /// Position in a text document expressed as zero-based line and character offset.
 #[derive(Debug, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
@@ -170,6 +43,132 @@ pub struct Location {
     pub range: Range,
 }
 
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+pub struct Diagnostic {
+    /// The range at which the message applies
+    pub range: Range,
+
+    /// The diagnostic's severity. Can be omitted. If omitted it is up to the
+    /// client to interpret diagnostics as error, warning, info or hint.
+    pub severity: Option<DiagnosticSeverity>,
+
+    /// The diagnostic's code. Can be omitted.
+    pub code: String,
+    /// number | string;
+
+    /// A human-readable string describing the source of this
+    /// diagnostic, e.g. 'typescript' or 'super lint'.
+    pub source: Option<String>,
+
+    /// The diagnostic's message.
+    pub message: String,
+}
+
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum DiagnosticSeverity {
+    /// Reports an error.
+    Error = 1,
+    /// Reports a warning.
+    Warning = 2,
+    /// Reports an information.
+    Information = 3,
+    /// Reports a hint.
+    Hint = 4,
+}
+
+impl serde::Deserialize for DiagnosticSeverity {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match try!(u8::deserialize(deserializer)) {
+            1 => DiagnosticSeverity::Error,
+            2 => DiagnosticSeverity::Warning,
+            3 => DiagnosticSeverity::Information,
+            4 => DiagnosticSeverity::Hint,
+            _ => {
+                return Err(D::Error::invalid_value("Expected a value of 1, 2, 3 or 4 to \
+                                                    deserialze to DiagnosticSeverity"))
+            }
+        })
+    }
+}
+
+impl serde::Serialize for DiagnosticSeverity {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: serde::Serializer
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
+
+/// Represents a reference to a command. Provides a title which will be used to represent a command in the UI and, optionally, an array of arguments which will be passed to the command handler function when invoked.
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+pub struct Command {
+    /// Title of the command, like `save`.
+    pub title: String,
+    /// The identifier of the actual command handler.
+    pub command: String,
+    /// Arguments that the command handler should be
+    /// invoked with.
+    #[serde(skip_serializing_if="Vec::is_empty")]
+    pub arguments: Vec<Value>,
+}
+
+/// A textual edit applicable to a text document.
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+pub struct TextEdit {
+    /// The range of the text document to be manipulated. To insert
+    /// text into a document create a range where start === end.
+    pub range: Range,
+    /// The string to be inserted. For delete operations use an
+    /// empty string.
+    #[serde(rename="newText")]
+    pub new_text: String,
+}
+
+/// A workspace edit represents changes to many resources managed in the workspace.
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+pub struct WorkspaceEdit {
+    /// Holds changes to existing resources.
+    pub changes: HashMap<String, Vec<TextEdit>>,
+}
+
+/// Text documents are identified using a URI. On the protocol level, URIs are passed as strings. The corresponding JSON structure looks like this:
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct TextDocumentIdentifier {
+    /// The text document's URI.
+    pub uri: String,
+}
+
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct TextDocumentItem {
+    /// The text document's URI.
+    pub uri: String,
+
+    /// The text document's language identifier.
+    #[serde(rename="languageId")]
+    pub language_id: String,
+
+    /// The version number of this document (it will strictly increase after each
+    /// change, including undo/redo).
+    pub version: u64,
+
+    /// The content of the opened text document.
+    pub text: String,
+}
+
+/// An identifier to denote a specific version of a text document.
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct VersionedTextDocumentIdentifier {
+    /// The text document's URI.
+    pub uri: String,
+    /// The version number of this document.
+    pub version: u64,
+}
+
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentPositionParams {
@@ -179,6 +178,10 @@ pub struct TextDocumentPositionParams {
     /// The position inside the text document.
     pub position: Position,
 }
+
+
+/* ----------------- Actual Protocol ----------------- */
+
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializeParams {
@@ -212,70 +215,6 @@ pub struct InitializeError {
     /// initilize request after showing the message provided
     /// in the ResponseError.
     pub retry: bool,
-}
-
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
-pub struct ServerCapabilities {
-    /// Defines how text documents are synced.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="textDocumentSync")]
-    pub text_document_sync: Option<TextDocumentSyncKind>,
-    /// The server provides hover support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="hoverProvider")]
-    pub hover_provider: Option<bool>,
-    /// The server provides completion support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="completionProvider")]
-    pub completion_provider: Option<CompletionOptions>,
-    /// The server provides signature help support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="signatureHelpProvider")]
-    pub signature_help_provider: Option<SignatureHelpOptions>,
-    /// The server provides goto definition support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="definitionProvider")]
-    pub definition_provider: Option<bool>,
-    /// The server provides find references support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="referencesProvider")]
-    pub references_provider: Option<bool>,
-    /// The server provides document highlight support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentHighlightProvider")]
-    pub document_highlight_provider: Option<bool>,
-    /// The server provides document symbol support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentSymbolProvider")]
-    pub document_symbol_provider: Option<bool>,
-    /// The server provides workspace symbol support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="workspaceSymbolProvider")]
-    pub workspace_symbol_provider: Option<bool>,
-    /// The server provides code actions.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="codeActionProvider")]
-    pub code_action_provider: Option<bool>,
-    /// The server provides code lens.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="codeLensProvider")]
-    pub code_lens_provider: Option<CodeLensOptions>,
-    /// The server provides document formatting.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentFormattingProvider")]
-    pub document_formatting_provider: Option<bool>,
-    /// The server provides document range formatting.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentRangeFormattingProvider")]
-    pub document_range_formatting_provider: Option<bool>,
-    /// The server provides document formatting on typing.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentOnTypeFormattingProvider")]
-    pub document_on_type_formatting_provider: Option<DocumentOnTypeFormattingOptions>,
-    /// The server provides rename support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="renameProvider")]
-    pub rename_provider: Option<bool>,
 }
 
 /// Defines how the host (editor) should sync document changes to the language server.
@@ -356,24 +295,266 @@ pub struct DocumentOnTypeFormattingOptions {
     pub more_trigger_character: Vec<String>,
 }
 
-/// A textual edit applicable to a text document.
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
-pub struct TextEdit {
-    /// The range of the text document to be manipulated. To insert
-    /// text into a document create a range where start === end.
-    pub range: Range,
-    /// The string to be inserted. For delete operations use an
-    /// empty string.
-    #[serde(rename="newText")]
-    pub new_text: String,
+pub struct ServerCapabilities {
+    /// Defines how text documents are synced.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="textDocumentSync")]
+    pub text_document_sync: Option<TextDocumentSyncKind>,
+    /// The server provides hover support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="hoverProvider")]
+    pub hover_provider: Option<bool>,
+    /// The server provides completion support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="completionProvider")]
+    pub completion_provider: Option<CompletionOptions>,
+    /// The server provides signature help support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="signatureHelpProvider")]
+    pub signature_help_provider: Option<SignatureHelpOptions>,
+    /// The server provides goto definition support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="definitionProvider")]
+    pub definition_provider: Option<bool>,
+    /// The server provides find references support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="referencesProvider")]
+    pub references_provider: Option<bool>,
+    /// The server provides document highlight support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="documentHighlightProvider")]
+    pub document_highlight_provider: Option<bool>,
+    /// The server provides document symbol support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="documentSymbolProvider")]
+    pub document_symbol_provider: Option<bool>,
+    /// The server provides workspace symbol support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="workspaceSymbolProvider")]
+    pub workspace_symbol_provider: Option<bool>,
+    /// The server provides code actions.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="codeActionProvider")]
+    pub code_action_provider: Option<bool>,
+    /// The server provides code lens.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="codeLensProvider")]
+    pub code_lens_provider: Option<CodeLensOptions>,
+    /// The server provides document formatting.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="documentFormattingProvider")]
+    pub document_formatting_provider: Option<bool>,
+    /// The server provides document range formatting.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="documentRangeFormattingProvider")]
+    pub document_range_formatting_provider: Option<bool>,
+    /// The server provides document formatting on typing.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="documentOnTypeFormattingProvider")]
+    pub document_on_type_formatting_provider: Option<DocumentOnTypeFormattingOptions>,
+    /// The server provides rename support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="renameProvider")]
+    pub rename_provider: Option<bool>,
 }
 
-/// A workspace edit represents changes to many resources managed in the workspace.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
-pub struct WorkspaceEdit {
-    /// Holds changes to existing resources.
-    pub changes: HashMap<String, Vec<TextEdit>>,
+//Shutdown 
+
+//Exit
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ShowMessageParams {
+    /// The message type. See {@link MessageType}
+    #[serde(rename="type")]
+    pub typ: MessageType,
+
+    /// The actual message
+    pub message: String,
 }
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum MessageType {
+    /// An error message.
+    Error = 1,
+    /// A warning message.
+    Warning = 2,
+    /// An information message.
+    Info = 3,
+    /// A log message.
+    Log = 4,
+}
+
+impl serde::Deserialize for MessageType {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match try!(u8::deserialize(deserializer)) {
+            1 => MessageType::Error,
+            2 => MessageType::Warning,
+            3 => MessageType::Info,
+            4 => MessageType::Log,
+            _ => {
+                return Err(D::Error::invalid_value("Expected a value of 1, 2, 3 or 4 to \
+                                                    deserialze to MessageType"))
+            }
+        })
+    }
+}
+
+impl serde::Serialize for MessageType {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: serde::Serializer
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ShowMessageRequestParams {
+    /// The message type. See {@link MessageType}
+    #[serde(rename="type")]
+    pub typ: MessageType,
+
+    /// The actual message
+    pub message: String,
+
+    /// The message action items to present.
+    #[serde(skip_serializing_if="Vec::is_empty")]
+    pub actions: Vec<MessageActionItem>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct MessageActionItem {
+    /// A short title like 'Retry', 'Open Log' etc.
+    pub title: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct LogMessageParams {
+    /// The message type. See {@link MessageType}
+    #[serde(rename="type")]
+    pub typ: MessageType,
+
+    /// The actual message
+    pub message: String,
+}
+
+// telemetry
+
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidChangeConfigurationParams {
+    /// The actual changed settings
+    pub settings: Value,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidOpenTextDocumentParams {
+    /// The document that was opened.
+    #[serde(rename="textDocument")]
+    pub text_document: TextDocumentItem,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidChangeTextDocumentParams {
+    /// The document that did change. The version number points
+    /// to the version after all provided content changes have
+    /// been applied.
+    #[serde(rename="textDocument")]
+    pub text_document: VersionedTextDocumentIdentifier,
+    /// The actual content changes.
+    #[serde(rename="contentChanges")]
+    pub content_changes: Vec<TextDocumentContentChangeEvent>,
+}
+
+
+/// An event describing a change to a text document. If range and rangeLength are omitted
+/// the new text is considered to be the full content of the document.
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct TextDocumentContentChangeEvent {
+    /// The range of the document that changed.
+    pub range: Option<Range>,
+    /// The length of the range that got replaced.
+    #[serde(rename="rangeLength")]
+    pub range_length: Option<u64>,
+    /// The new text of the document.
+    pub text: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidCloseTextDocumentParams {
+    /// The document that was closed.
+    #[serde(rename="textDocument")]
+    pub text_document: TextDocumentIdentifier,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidSaveTextDocumentParams {
+    /// The document that was saved.
+    #[serde(rename="textDocument")]
+    pub text_document: TextDocumentIdentifier,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidChangeWatchedFilesParams {
+    /// The actual file events.
+    pub changes: Vec<FileEvent>,
+}
+
+/// The file event type.
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum FileChangeType {
+    /// The file got created.
+    Created = 1,
+    /// The file got changed.
+    Changed = 2,
+    /// The file got deleted.
+    Deleted = 3,
+}
+
+impl serde::Deserialize for FileChangeType {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: serde::Deserializer
+    {
+        Ok(match try!(u8::deserialize(deserializer)) {
+            1 => FileChangeType::Created,
+            2 => FileChangeType::Changed,
+            3 => FileChangeType::Deleted,
+            _ => {
+                return Err(D::Error::invalid_value("Expected a value of 1, 2 or 3 to deserialze \
+                                                    to FileChangeType"))
+            }
+        })
+    }
+}
+
+impl serde::Serialize for FileChangeType {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: serde::Serializer
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
+/// An event describing a file change.
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct FileEvent {
+    /// The file's URI.
+    pub uri: String,
+    /// The change type.
+    pub typ: FileChangeType,
+}
+
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+pub struct PublishDiagnosticsParams {
+    /// The URI for which diagnostic information is reported.
+    pub uri: String,
+
+    /// An array of diagnostic information items.
+    pub diagnostics: Vec<Diagnostic>,
+}
+
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
@@ -794,167 +975,4 @@ pub struct RenameParams {
     /// appropriate message set.
     #[serde(rename="newName")]
     pub new_name: String,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct ShowMessageParams {
-    /// The message type. See {@link MessageType}
-    #[serde(rename="type")]
-    pub typ: MessageType,
-
-    /// The actual message
-    pub message: String,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct ShowMessageRequestParams {
-    /// The message type. See {@link MessageType}
-    #[serde(rename="type")]
-    pub typ: MessageType,
-
-    /// The actual message
-    pub message: String,
-
-    /// The message action items to present.
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub actions: Vec<MessageActionItem>,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct MessageActionItem {
-    /// A short title like 'Retry', 'Open Log' etc.
-    pub title: String,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct LogMessageParams {
-    /// The message type. See {@link MessageType}
-    #[serde(rename="type")]
-    pub typ: MessageType,
-
-    /// The actual message
-    pub message: String,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidChangeConfigurationParams {
-    /// The actual changed settings
-    pub settings: Value,
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum MessageType {
-    /// An error message.
-    Error = 1,
-    /// A warning message.
-    Warning = 2,
-    /// An information message.
-    Info = 3,
-    /// A log message.
-    Log = 4,
-}
-
-impl serde::Deserialize for MessageType {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        Ok(match try!(u8::deserialize(deserializer)) {
-            1 => MessageType::Error,
-            2 => MessageType::Warning,
-            3 => MessageType::Info,
-            4 => MessageType::Log,
-            _ => {
-                return Err(D::Error::invalid_value("Expected a value of 1, 2, 3 or 4 to \
-                                                    deserialze to MessageType"))
-            }
-        })
-    }
-}
-
-impl serde::Serialize for MessageType {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: serde::Serializer
-    {
-        serializer.serialize_u8(*self as u8)
-    }
-}
-
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
-pub struct PublishDiagnosticsParams {
-    /// The URI for which diagnostic information is reported.
-    pub uri: String,
-
-    /// An array of diagnostic information items.
-    pub diagnostics: Vec<Diagnostic>,
-}
-
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
-pub struct Diagnostic {
-    /// The range at which the message applies
-    pub range: Range,
-
-    /// The diagnostic's severity. Can be omitted. If omitted it is up to the
-    /// client to interpret diagnostics as error, warning, info or hint.
-    pub severity: Option<DiagnosticSeverity>,
-
-    /// The diagnostic's code. Can be omitted.
-    pub code: String,
-    /// number | string;
-
-    /// A human-readable string describing the source of this
-    /// diagnostic, e.g. 'typescript' or 'super lint'.
-    pub source: Option<String>,
-
-    /// The diagnostic's message.
-    pub message: String,
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum DiagnosticSeverity {
-    /// Reports an error.
-    Error = 1,
-    /// Reports a warning.
-    Warning = 2,
-    /// Reports an information.
-    Information = 3,
-    /// Reports a hint.
-    Hint = 4,
-}
-
-impl serde::Deserialize for DiagnosticSeverity {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        Ok(match try!(u8::deserialize(deserializer)) {
-            1 => DiagnosticSeverity::Error,
-            2 => DiagnosticSeverity::Warning,
-            3 => DiagnosticSeverity::Information,
-            4 => DiagnosticSeverity::Hint,
-            _ => {
-                return Err(D::Error::invalid_value("Expected a value of 1, 2, 3 or 4 to \
-                                                    deserialze to DiagnosticSeverity"))
-            }
-        })
-    }
-}
-
-impl serde::Serialize for DiagnosticSeverity {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: serde::Serializer
-    {
-        serializer.serialize_u8(*self as u8)
-    }
-}
-
-/// Represents a reference to a command. Provides a title which will be used to represent a command in the UI and, optionally, an array of arguments which will be passed to the command handler function when invoked.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
-pub struct Command {
-    /// Title of the command, like `save`.
-    pub title: String,
-    /// The identifier of the actual command handler.
-    pub command: String,
-    /// Arguments that the command handler should be
-    /// invoked with.
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub arguments: Vec<Value>,
 }
