@@ -1,3 +1,9 @@
+//! Language Server Protocol types for Rust.
+//! Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+//! Last protocol update 14/Oct/2016 at commit: 
+//! https://github.com/Microsoft/language-server-protocol/commit/63f5d02d39d0135c234162a28d0523c9323ab3f7
+
+
 #![feature(proc_macro)]
 
 #![allow(non_upper_case_globals)]
