@@ -13,6 +13,14 @@ use std::collections::HashMap;
 use serde::de::Error;
 use serde_json::Value;
 
+/// The base protocol now offers support for request cancellation. To cancel a request, 
+/// a notification message with the following properties is sent:
+///
+/// A request that got canceled still needs to return from the server and send a response back. 
+/// It can not be left open / hanging. This is in line with the JSON RPC protocol that requires 
+/// that every request sends a response back. In addition it allows for returning partial results on cancel.
+pub const NOTIFICATION__Cancel: &'static str = "$/cancelRequest";
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CancelParams {
     /// The request id to cancel.
@@ -215,7 +223,7 @@ pub struct TextDocumentPositionParams {
 /**
  * The initialize request is sent as the first request from the client to the server.
  */
-pub const Request__Initialize: &'static str = "initialize";
+pub const REQUEST__Initialize: &'static str = "initialize";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)] 
 pub struct InitializeParams {
@@ -424,7 +432,7 @@ pub struct ServerCapabilities {
  * but to not exit (otherwise the response might not be delivered correctly to the client).
  * There is a separate exit notification that asks the server to exit.
  */
-pub const Request__Shutdown: &'static str = "shutdown";
+pub const REQUEST__Shutdown: &'static str = "shutdown";
 
 /**
  * A notification to ask the server to exit its process. 
@@ -491,7 +499,7 @@ impl serde::Serialize for MessageType {
  * in the user interface. In addition to the show message notification the request allows to pass actions and to
  * wait for an answer from the client.
  */
-pub const Request__ShowMessageRequest: &'static str = "window/showMessageRequest";
+pub const REQUEST__ShowMessageRequest: &'static str = "window/showMessageRequest";
 
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -623,7 +631,7 @@ pub struct DidSaveTextDocumentParams {
  * The watched files notification is sent from the client to the server when the client detects changes to files
  * watched by the language client.
  */
-pub const Notification__DidChangeWatchedFiles: &'static str = "workspace/didChangeWatchedFiles";
+pub const NOTIFICATION__DidChangeWatchedFiles: &'static str = "workspace/didChangeWatchedFiles";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
@@ -705,7 +713,7 @@ pub struct PublishDiagnosticsParams {
  documentation property filled in.
 */
 // result: CompletionItem[] | CompletionList FIXME
-pub const Request__Completion: &'static str = "textDocument/completion";
+pub const REQUEST__Completion: &'static str = "textDocument/completion";
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
@@ -835,12 +843,12 @@ impl serde::Serialize for CompletionItemKind {
 }
 
 /// The request is sent from the client to the server to resolve additional information for a given completion item. 
-pub const Request__ResolveCompletionItem: &'static str = "completionItem/resolve";
+pub const REQUEST__ResolveCompletionItem: &'static str = "completionItem/resolve";
 
 
 /// The hover request is sent from the client to the server to request hover information at a given text 
 /// document position.
-pub const Request__Hover: &'static str = "textDocument/hover";
+pub const REQUEST__Hover: &'static str = "textDocument/hover";
 
 /// The result of a hover request.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -921,7 +929,7 @@ impl serde::Serialize for MarkedString {
 
 /// The signature help request is sent from the client to the server to request signature information at 
 /// a given cursor position.
-pub const Request__SignatureHelp: &'static str = "textDocument/signatureHelp";
+pub const REQUEST__SignatureHelp: &'static str = "textDocument/signatureHelp";
 
 
 /// Signature help represents the signature of something
@@ -975,11 +983,11 @@ pub struct ParameterInformation {
 
 /// The goto definition request is sent from the client to the server to resolve the definition location of 
 /// a symbol at a given text document position.
-pub const Request__GotoDefinition: &'static str = "textDocument/definition";
+pub const REQUEST__GotoDefinition: &'static str = "textDocument/definition";
 
 /// The references request is sent from the client to the server to resolve project-wide references for the 
 /// symbol denoted by the given text document position.
-pub const Request__References: &'static str = "textDocument/references";
+pub const REQUEST__References: &'static str = "textDocument/references";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ReferenceParams 
@@ -1016,7 +1024,7 @@ pub struct ReferenceContext {
  Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches 
  use Textas the kind.
 */
-pub const Request__DocumentHighlight: &'static str = "textDocument/documentHighlight";
+pub const REQUEST__DocumentHighlight: &'static str = "textDocument/documentHighlight";
 
 /// A document highlight is a range inside a text document which deserves
 /// special attention. Usually a document highlight is visualized by changing
@@ -1071,7 +1079,7 @@ impl serde::Serialize for DocumentHighlightKind {
  * The document symbol request is sent from the client to the server to list all symbols found in a given 
  * text document.
  */
-pub const Request__DocumentSymbols: &'static str = "textDocument/documentSymbol";
+pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentSymbolParams {
@@ -1149,7 +1157,7 @@ impl serde::Serialize for SymbolKind {
  * The workspace symbol request is sent from the client to the server to list project-wide symbols 
  * matching the query string.
  */
-pub const Request__WorkspaceSymbols: &'static str = "workspace/symbol";
+pub const REQUEST__WorkspaceSymbols: &'static str = "workspace/symbol";
 
 /// The parameters of a Workspace Symbol Request.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -1163,7 +1171,7 @@ pub struct WorkspaceSymbolParams {
  * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or 
  * presses the lightbulb associated with a marker.
  */
-pub const Request__CodeAction: &'static str = "textDocument/codeAction";
+pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
 
 /// Params for the CodeActionRequest
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -1190,7 +1198,7 @@ pub struct CodeActionContext {
 /**
  * The code lens request is sent from the client to the server to compute code lenses for a given text document.
  */
-pub const Request__CodeLens: &'static str = "textDocument/codeLens";
+pub const REQUEST__CodeLens: &'static str = "textDocument/codeLens";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CodeLensParams {
@@ -1221,12 +1229,12 @@ pub struct CodeLens {
  * The code lens resolve request is sent from the client to the server to resolve the command for a 
  * given code lens item.
  */
-pub const Request__CodeLensResolve: &'static str = "codeLens/resolve";
+pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
 
 /**
  * The document formatting request is sent from the server to the client to format a whole document.
  */
-pub const Request__Formatting: &'static str = "textDocument/formatting";
+pub const REQUEST__Formatting: &'static str = "textDocument/formatting";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentFormattingParams {
@@ -1258,7 +1266,7 @@ pub struct FormattingOptions {
 }
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
-pub const Request__RangeFormatting: &'static str = "textDocument/rangeFormatting";
+pub const REQUEST__RangeFormatting: &'static str = "textDocument/rangeFormatting";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentRangeFormattingParams {
@@ -1279,7 +1287,7 @@ pub struct DocumentRangeFormattingParams {
  * The document on type formatting request is sent from the client to the server to format parts of 
  * the document during typing.
  */
-pub const Request__OnTypeFormatting: &'static str = "textDocument/onTypeFormatting";
+pub const REQUEST__OnTypeFormatting: &'static str = "textDocument/onTypeFormatting";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingParams {
@@ -1300,7 +1308,7 @@ pub struct DocumentOnTypeFormattingParams {
 /**
  * The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
  */
-pub const Request__Rename: &'static str = "textDocument/rename";
+pub const REQUEST__Rename: &'static str = "textDocument/rename";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct RenameParams {
