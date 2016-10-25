@@ -125,9 +125,8 @@ pub struct Command {
     pub command: String,
     /// Arguments that the command handler should be
     /// invoked with.
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub arguments: Vec<Value>,
-//    arguments?: any[];
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub arguments: Option<Vec<Value>>,
 }
 
 /// A textual edit applicable to a text document.
@@ -316,9 +315,9 @@ pub struct CompletionOptions {
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct SignatureHelpOptions {
     /// The characters that trigger signature help automatically.
-    #[serde(skip_serializing_if="Vec::is_empty")]
+    #[serde(skip_serializing_if="Option::is_none")]
     #[serde(rename="triggerCharacters")]
-    pub trigger_characters: Vec<String>,
+    pub trigger_characters: Option<Vec<String>>,
 }
 
 /// Code Lens options.
@@ -337,9 +336,9 @@ pub struct DocumentOnTypeFormattingOptions {
     pub first_trigger_character: String,
     
     /// More trigger characters.
-    #[serde(skip_serializing_if="Vec::is_empty")]
+    #[serde(skip_serializing_if="Option::is_none")]
     #[serde(rename="moreTriggerCharacter")]
-    pub more_trigger_character: Vec<String>,
+    pub more_trigger_character: Option<Vec<String>>,
 }
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
@@ -505,8 +504,8 @@ pub struct ShowMessageRequestParams {
     pub message: String,
 
     /// The message action items to present.
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub actions: Vec<MessageActionItem>,
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub actions: Option<Vec<MessageActionItem>>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -956,8 +955,8 @@ pub struct SignatureInformation {
     pub documentation: Option<String>,
 
     /// The parameters of this signature.
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub parameters: Vec<ParameterInformation>,
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub parameters: Option<Vec<ParameterInformation>>,
 }
 
 /// Represents a parameter of a callable-signature. A parameter can
@@ -970,8 +969,8 @@ pub struct ParameterInformation {
 
     /// The human-readable doc-comment of this signature. Will be shown
     /// in the UI but can be omitted.
-    #[serde(skip_serializing_if="String::is_empty")]
-    pub documentation: String,
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub documentation: Option<String>,
 }
 
 /// The goto definition request is sent from the client to the server to resolve the definition location of 
