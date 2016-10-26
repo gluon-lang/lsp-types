@@ -56,7 +56,7 @@ pub struct Range {
 }
 
 /// Represents a location inside a resource, such as a line inside a text file.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
     pub uri: String,
     pub range: Range,
@@ -64,7 +64,7 @@ pub struct Location {
 
 /// Represents a diagnostic, such as a compiler error or warning. 
 /// Diagnostic objects are only valid in the scope of a resource.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct Diagnostic {
     /// The range at which the message applies.
     pub range: Range,
@@ -131,7 +131,7 @@ impl serde::Serialize for DiagnosticSeverity {
  Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of 
  well known commands. So executing a command requires some tool extension code.
 */
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct Command {
     /// Title of the command, like `save`.
     pub title: String,
@@ -144,7 +144,7 @@ pub struct Command {
 }
 
 /// A textual edit applicable to a text document.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct TextEdit {
     /// The range of the text document to be manipulated. To insert
     /// text into a document create a range where start === end.
@@ -156,7 +156,7 @@ pub struct TextEdit {
 }
 
 /// A workspace edit represents changes to many resources managed in the workspace.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     pub changes: HashMap<String, Vec<TextEdit>>,
@@ -165,7 +165,7 @@ pub struct WorkspaceEdit {
 
 /// Text documents are identified using a URI. On the protocol level, URIs are passed as strings. 
 /// The corresponding JSON structure looks like this:
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentIdentifier {
 // !!!!!! Note: 
 // In the spec VersionedTextDocumentIdentifier extends TextDocumentIdentifier
@@ -178,7 +178,7 @@ pub struct TextDocumentIdentifier {
 }
 
 /// An item to transfer a text document from the client to the server. 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentItem {
     /// The text document's URI.
     pub uri: String,
@@ -196,7 +196,7 @@ pub struct TextDocumentItem {
 }
 
 /// An identifier to denote a specific version of a text document.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier 
 //extends TextDocumentIdentifier 
 {
@@ -209,7 +209,7 @@ pub struct VersionedTextDocumentIdentifier
 }
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentPositionParams {
 // !!!!!! Note: 
 // In the spec ReferenceParams extends TextDocumentPositionParams
