@@ -19,6 +19,12 @@ use std::collections::HashMap;
 use serde::de::Error;
 use serde_json::Value;
 
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub enum NumberOrString {
+	Number(u64),
+	String(String),
+}
+
 /// The base protocol now offers support for request cancellation. To cancel a request, 
 /// a notification message with the following properties is sent:
 ///
@@ -30,7 +36,7 @@ pub const NOTIFICATION__Cancel: &'static str = "$/cancelRequest";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CancelParams {
     /// The request id to cancel.
-    pub id: String,
+    pub id: NumberOrString,
 }
 
 /* ----------------- Basic JSON Structures ----------------- */
@@ -84,9 +90,6 @@ pub struct Diagnostic {
     /// The diagnostic's message.
     pub message: String,
 }
-
-pub type NumberOrString = String; /* FIXME: todo */
-
 
 /// The protocol currently supports the following diagnostic severities:
 #[derive(Debug, PartialEq, Clone, Copy)]
