@@ -21,8 +21,8 @@ use serde_json::Value;
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub enum NumberOrString {
-	Number(u64),
-	String(String),
+    Number(u64),
+    String(String),
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request, 
@@ -51,6 +51,12 @@ pub struct Position {
     pub character: u64,
 }
 
+impl Position {
+    pub fn new(line: u64, character: u64) -> Position {
+        Position { line : line, character : character }
+    }
+}
+
 /// A range in a text document expressed as (zero-based) start and end positions. 
 /// A range is comparable to a selection in an editor. Therefore the end position is exclusive.
 #[derive(Debug, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
@@ -61,11 +67,23 @@ pub struct Range {
     pub end: Position,
 }
 
+impl Range {
+    pub fn new(start: Position, end: Position) -> Range {
+        Range { start : start, end : end }
+    }
+}
+
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
     pub uri: String,
     pub range: Range,
+}
+
+impl Location {
+    pub fn new(uri: String, range: Range) -> Location {
+        Location { uri : uri, range : range }
+    }
 }
 
 /// Represents a diagnostic, such as a compiler error or warning. 
@@ -89,6 +107,43 @@ pub struct Diagnostic {
 
     /// The diagnostic's message.
     pub message: String,
+}
+
+impl Diagnostic {
+    
+    pub fn new(
+        range: Range, 
+        severity: Option<DiagnosticSeverity>, 
+        code: Option<NumberOrString>, 
+        source: Option<String>, 
+        message: String
+    ) -> Diagnostic 
+    {
+        Diagnostic { 
+            range : range,
+            severity : severity,
+            code : code,
+            source : source,  
+            message : message 
+        }
+    }
+    
+    pub fn new_simple(range: Range, message: String) -> Diagnostic {
+        Self::new(range, None, None, None, message)
+    }
+    
+    pub fn new_with_code_number(
+        range: Range, 
+        severity: DiagnosticSeverity, 
+        code_number: u64, 
+        source: Option<String>, 
+        message: String
+    ) -> Diagnostic 
+    {
+        let code = Some(NumberOrString::Number(code_number));
+        Self::new(range, Some(severity), code, source, message)
+    }
+    
 }
 
 /// The protocol currently supports the following diagnostic severities:
@@ -146,6 +201,12 @@ pub struct Command {
     pub arguments: Option<Vec<Value>>,
 }
 
+impl Command {
+    pub fn new(title: String, command: String, arguments: Option<Vec<Value>>) -> Command {
+        Command{ title : title, command : command, arguments : arguments } 
+    }
+}
+
 /// A textual edit applicable to a text document.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct TextEdit {
@@ -158,12 +219,24 @@ pub struct TextEdit {
     pub new_text: String,
 }
 
+impl TextEdit {
+    pub fn new(range: Range, new_text: String) -> TextEdit {
+        TextEdit{ range : range, new_text : new_text } 
+    }
+}
+
 /// A workspace edit represents changes to many resources managed in the workspace.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     pub changes: HashMap<String, Vec<TextEdit>>,
 //    changes: { [uri: string]: TextEdit[]; };
+}
+
+impl WorkspaceEdit {
+    pub fn new(changes: HashMap<String, Vec<TextEdit>>) -> WorkspaceEdit {
+        WorkspaceEdit{ changes : changes } 
+    }
 }
 
 /// Text documents are identified using a URI. On the protocol level, URIs are passed as strings. 
@@ -178,6 +251,12 @@ pub struct TextDocumentIdentifier {
 
     /// The text document's URI.
     pub uri: String,
+}
+
+impl TextDocumentIdentifier {
+    pub fn new(uri: String) -> TextDocumentIdentifier {
+        TextDocumentIdentifier{ uri : uri } 
+    }
 }
 
 /// An item to transfer a text document from the client to the server. 
@@ -198,18 +277,32 @@ pub struct TextDocumentItem {
     pub text: String,
 }
 
+impl TextDocumentItem {
+    pub fn new(uri: String, language_id: Option<String>, version: Option<u64>, text: String) -> TextDocumentItem {
+        TextDocumentItem{ uri : uri, language_id : language_id, version : version, text : text,} 
+    }
+}
+
 /// An identifier to denote a specific version of a text document.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier 
 //extends TextDocumentIdentifier 
 {
-	// This field was "mixed-in" from TextDocumentIdentifier
+    // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
     pub uri: String,
 
     /// The version number of this document.
     pub version: u64,
 }
+
+
+impl VersionedTextDocumentIdentifier {
+    pub fn new(uri: String, version: u64,) -> VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier{ uri : uri, version : version} 
+    }
+}
+
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -218,7 +311,7 @@ pub struct TextDocumentPositionParams {
 // In the spec ReferenceParams extends TextDocumentPositionParams
 // This modelled by "mixing-in" TextDocumentPositionParams in ReferenceParams,
 // so any changes to this type must be effected in sub-type as well.
-	
+    
     /// The text document.
     #[serde(rename="textDocument")]
     pub text_document: TextDocumentIdentifier,
@@ -226,6 +319,14 @@ pub struct TextDocumentPositionParams {
     /// The position inside the text document.
     pub position: Position,
 }
+
+
+impl TextDocumentPositionParams {
+    pub fn new(text_document: TextDocumentIdentifier, position: Position) -> TextDocumentPositionParams {
+        TextDocumentPositionParams{ text_document : text_document, position : position} 
+    }
+}
+
 
 /* ========================= Actual Protocol ========================= */
 
@@ -804,6 +905,25 @@ pub struct CompletionItem {
     pub data: Option<Value>,
 }
 
+impl CompletionItem {
+    /// Create a CompletionItem with the minimum possible info (label and detail).
+    pub fn new_simple(label: String, detail: String) -> CompletionItem {
+        CompletionItem {
+            label : label,
+            kind : None,
+            detail : Some(detail),
+            documentation : None,
+            sort_text : None,
+            filter_text : None,
+            insert_text : None,
+            text_edit : None,
+            additional_text_edits : None,
+            command : None,
+            data : None,
+        }
+    }
+}
+
 enum_from_primitive!{
 /// The kind of a completion entry.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -867,7 +987,7 @@ pub struct Hover {
     //contents: MarkedString | MarkedString[];
 
     /// An optional range is a range inside a text document 
-	/// that is used to visualize a hover, e.g. by changing the background color.
+    /// that is used to visualize a hover, e.g. by changing the background color.
     pub range: Option<Range>,
 }
 
@@ -889,15 +1009,15 @@ pub enum MarkedString {
 }
 
 impl MarkedString {
-	
-	pub fn from_markdown(markdown: String) -> MarkedString {
-		MarkedString::String(markdown)
-	}
-	
-	pub fn from_language_code(language: String, code_block: String) -> MarkedString {
-		MarkedString::LanguageString{ language: language, value: code_block }
-	}
-	
+    
+    pub fn from_markdown(markdown: String) -> MarkedString {
+        MarkedString::String(markdown)
+    }
+    
+    pub fn from_language_code(language: String, code_block: String) -> MarkedString {
+        MarkedString::LanguageString{ language: language, value: code_block }
+    }
+    
 }
 
 
@@ -1015,18 +1135,18 @@ pub const REQUEST__References: &'static str = "textDocument/references";
 pub struct ReferenceParams 
 //extends TextDocumentPositionParams 
 {
-	
-	// This field was "mixed-in" from TextDocumentPositionParams
+    
+    // This field was "mixed-in" from TextDocumentPositionParams
     /// The text document.
     #[serde(rename="textDocument")]
     pub text_document: TextDocumentIdentifier,
 
-	// This field was "mixed-in" from TextDocumentPositionParams
+    // This field was "mixed-in" from TextDocumentPositionParams
     /// The position inside the text document.
     pub position: Position,
 
-	// ReferenceParams properties:
-	
+    // ReferenceParams properties:
+    
     pub context: ReferenceContext,
 }
 
