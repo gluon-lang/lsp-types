@@ -7,6 +7,7 @@
 #![feature(proc_macro)]
 
 #![allow(non_upper_case_globals)]
+#![allow(non_snake_case)]
 
 #[macro_use]
 extern crate enum_primitive;
@@ -16,6 +17,10 @@ extern crate serde_json;
 extern crate serde_derive;
 
 use std::collections::HashMap;
+
+use serde::Serialize;
+use serde::Deserialize;
+use serde::de;
 use serde::de::Error;
 use serde_json::Value;
 
@@ -1005,7 +1010,13 @@ pub struct Hover {
 #[derive(Debug, PartialEq)]
 pub enum MarkedString {
     String(String),
-    LanguageString { language: String, value: String },
+    LanguageString(LanguageString),
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct LanguageString {
+    language: String,
+    value: String,
 }
 
 impl MarkedString {
@@ -1015,58 +1026,73 @@ impl MarkedString {
     }
     
     pub fn from_language_code(language: String, code_block: String) -> MarkedString {
-        MarkedString::LanguageString{ language: language, value: code_block }
+        MarkedString::LanguageString(LanguageString{ language: language, value: code_block })
     }
     
 }
 
-
-impl serde::Deserialize for MarkedString {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        String::deserialize(deserializer)
-            .map(MarkedString::String)
-            .or_else(|_| {
-                use std::borrow::Cow;
-
-                #[derive(Deserialize, Serialize)]
-                struct Variant<'s> {
-                    language: Cow<'s, str>,
-                    value: Cow<'s, str>,
-                }
-                Variant::deserialize(deserializer).map(|variant| {
-                    MarkedString::LanguageString {
-                        language: variant.language.into_owned(),
-                        value: variant.value.into_owned(),
-                    }
-                })
-            })
-    }
+#[test]
+fn test_LanguageString() {
+    test_serialization(
+        &LanguageString { language : "LL".into(), value : "VV".into() } ,
+        r#"{"language":"LL","value":"VV"}"#
+    );
 }
 
-impl serde::Serialize for MarkedString {
+impl Serialize for MarkedString {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
         where S: serde::Serializer
     {
         match *self {
-            MarkedString::String(ref s) => serializer.serialize_str(s),
-            MarkedString::LanguageString { ref language, ref value } => {
-                #[derive(Serialize)]
-                struct Variant<'s> {
-                    language: &'s str,
-                    value: &'s str,
-                }
-                Variant {
-                        language: language,
-                        value: value,
-                    }
-                    .serialize(serializer)
-            }
+            MarkedString::String(ref string) => serializer.serialize_str(string),
+            MarkedString::LanguageString(ref language_string) => language_string.serialize(serializer),
         }
     }
 }
-// FIXME review and test MarkedString serialization
+
+// See example from: https://serde.rs/string-or-struct.html
+impl Deserialize for MarkedString {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> 
+        where D: serde::Deserializer
+    {
+        #[allow(non_camel_case_types)]
+        struct MarkedString_Visitor;
+        impl de::Visitor for MarkedString_Visitor {
+            type Value = MarkedString;
+            
+            fn visit_str<E>(&mut self, value: &str) -> Result<MarkedString, E> where E: de::Error {
+                Ok(MarkedString::String(value.to_string()))
+            }
+            
+            fn visit_map<V>(&mut self, visitor: V) -> Result<MarkedString, V::Error> where V: de::MapVisitor {
+                // `MapVisitorDeserializer` is a wrapper that turns a `MapVisitor`
+                // into a `Deserializer`, allowing it to be used as the input to T's
+                // `Deserialize` implementation. T then deserializes itself using
+                // the entries from the map visitor.
+                let mut mvd = de::value::MapVisitorDeserializer::new(visitor);
+                let language_string = try!(LanguageString::deserialize(&mut mvd));
+                Ok(MarkedString::LanguageString(language_string))
+            }
+        }
+        
+        deserializer.deserialize(MarkedString_Visitor)
+    }
+}
+
+
+#[test]
+fn test_MarkedString() {
+    
+    test_serialization(
+        &MarkedString::from_markdown("xxx".into()),
+        r#""xxx""#
+    );
+    
+    test_serialization(
+        &MarkedString::from_language_code("lang".into(), "code".into()),
+        r#"{"language":"lang","value":"code"}"#
+    );
+}
 
 
 /// The signature help request is sent from the client to the server to request signature information at 
@@ -1466,4 +1492,17 @@ pub struct RenameParams {
     /// appropriate message set.
     #[serde(rename="newName")]
     pub new_name: String,
+}
+
+
+/* -----------------  ----------------- */
+
+#[cfg(test)]
+fn test_serialization<SER>(ms: &SER, expected: &str) 
+where SER : Serialize + Deserialize + PartialEq + std::fmt::Debug
+{
+    let json_str = serde_json::to_string(ms).unwrap();
+    assert_eq!(&json_str, expected);
+    let deserialized : SER = serde_json::from_str(&json_str).unwrap();
+    assert_eq!(&deserialized, ms);
 }
