@@ -24,10 +24,58 @@ use serde::de;
 use serde::de::Error;
 use serde_json::Value;
 
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum NumberOrString {
     Number(u64),
     String(String),
+}
+
+impl Serialize for NumberOrString {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: serde::Serializer
+    {
+        match *self {
+            NumberOrString::Number(number) => serializer.serialize_u64(number),
+            NumberOrString::String(ref string) => serializer.serialize_str(string),
+        }
+    }
+}
+
+impl Deserialize for NumberOrString {
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error> 
+        where D: serde::Deserializer
+    {
+        #[allow(non_camel_case_types)]
+        struct NumberOrString_Visitor;
+        impl de::Visitor for NumberOrString_Visitor {
+            type Value = NumberOrString;
+            
+            fn visit_u64<E>(&mut self, value: u64) -> Result<Self::Value, E> where E: de::Error {
+                Ok(NumberOrString::Number(value))
+            }
+
+            fn visit_str<E>(&mut self, value: &str) -> Result<Self::Value, E> where E: de::Error {
+                Ok(NumberOrString::String(value.to_string()))
+            }
+        }
+        
+        deserializer.deserialize(NumberOrString_Visitor)
+    }
+}
+
+
+#[test]
+fn test_NumberOrString() {
+    
+    test_serialization(
+        &NumberOrString::Number(123),
+        r#"123"#
+    );
+    
+    test_serialization(
+        &NumberOrString::String("abcd".into()),
+        r#""abcd""#
+    );
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request, 
@@ -1060,11 +1108,11 @@ impl Deserialize for MarkedString {
         impl de::Visitor for MarkedString_Visitor {
             type Value = MarkedString;
             
-            fn visit_str<E>(&mut self, value: &str) -> Result<MarkedString, E> where E: de::Error {
+            fn visit_str<E>(&mut self, value: &str) -> Result<Self::Value, E> where E: de::Error {
                 Ok(MarkedString::String(value.to_string()))
             }
             
-            fn visit_map<V>(&mut self, visitor: V) -> Result<MarkedString, V::Error> where V: de::MapVisitor {
+            fn visit_map<V>(&mut self, visitor: V) -> Result<Self::Value, V::Error> where V: de::MapVisitor {
                 // `MapVisitorDeserializer` is a wrapper that turns a `MapVisitor`
                 // into a `Deserializer`, allowing it to be used as the input to T's
                 // `Deserialize` implementation. T then deserializes itself using
