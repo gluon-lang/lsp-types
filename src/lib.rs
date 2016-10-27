@@ -888,6 +888,19 @@ pub enum MarkedString {
     LanguageString { language: String, value: String },
 }
 
+impl MarkedString {
+	
+	pub fn from_markdown(markdown: String) -> MarkedString {
+		MarkedString::String(markdown)
+	}
+	
+	pub fn from_language_code(language: String, code_block: String) -> MarkedString {
+		MarkedString::LanguageString{ language: language, value: code_block }
+	}
+	
+}
+
+
 impl serde::Deserialize for MarkedString {
     fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
         where D: serde::Deserializer

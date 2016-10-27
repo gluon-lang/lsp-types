@@ -1,6 +1,6 @@
 [package]
 name = "languageserver-types"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Markus Westerlind <marwes91@gmail.com>"]
 
 description = "Types for interaction with a language server"
