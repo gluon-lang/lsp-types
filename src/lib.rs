@@ -963,16 +963,8 @@ impl CompletionItem {
     pub fn new_simple(label: String, detail: String) -> CompletionItem {
         CompletionItem {
             label : label,
-            kind : None,
             detail : Some(detail),
-            documentation : None,
-            sort_text : None,
-            filter_text : None,
-            insert_text : None,
-            text_edit : None,
-            additional_text_edits : None,
-            command : None,
-            data : None,
+            .. Self::default()
         }
     }
 }
