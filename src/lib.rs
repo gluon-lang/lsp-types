@@ -32,7 +32,7 @@ extern crate serde_derive;
 
 extern crate url;
 
-use url::{Url, ParseError};
+use url::Url;
 
 use std::collections::HashMap;
 
@@ -104,10 +104,10 @@ fn test_NumberOrString() {
 
 
 pub trait UriSource {
-    fn parse_uri(&self) -> Result<Url, ParseError>;
+    fn get_uri(&self) -> &Url;
     
     fn parse_file_path(&self) -> Result<PathBuf, Box<Error>> {
-        let uri = try!(self.parse_uri());
+        let uri = self.get_uri();
         
         if uri.scheme() != "file" {
             return Err("URI scheme is not `file`".into());
@@ -170,19 +170,19 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    pub uri: String,
+    pub uri: Url,
     pub range: Range,
 }
 
 impl Location {
     pub fn new(uri: Url, range: Range) -> Location {
-        Location { uri : uri.to_string(), range : range }
+        Location { uri : uri, range : range }
     }
 }
 
 impl UriSource for Location {
-    fn parse_uri(&self) -> Result<Url, ParseError> {
-        Url::parse(&self.uri)
+    fn get_uri(&self) -> &Url {
+        &self.uri
     }
 }
 
@@ -329,12 +329,12 @@ impl TextEdit {
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
-    pub changes: HashMap<String, Vec<TextEdit>>,
+    pub changes: HashMap<Url, Vec<TextEdit>>,
 //    changes: { [uri: string]: TextEdit[]; };
 }
 
 impl WorkspaceEdit {
-    pub fn new(changes: HashMap<String, Vec<TextEdit>>) -> WorkspaceEdit {
+    pub fn new(changes: HashMap<Url, Vec<TextEdit>>) -> WorkspaceEdit {
         WorkspaceEdit{ changes : changes } 
     }
 }
@@ -350,18 +350,18 @@ pub struct TextDocumentIdentifier {
 
 
     /// The text document's URI.
-    pub uri: String,
+    pub uri: Url,
 }
 
 impl TextDocumentIdentifier {
     pub fn new(uri: Url) -> TextDocumentIdentifier {
-        TextDocumentIdentifier{ uri : uri.to_string() } 
+        TextDocumentIdentifier{ uri : uri } 
     }
 }
 
 impl UriSource for TextDocumentIdentifier {
-    fn parse_uri(&self) -> Result<Url, ParseError> {
-        Url::parse(&self.uri)
+    fn get_uri(&self) -> &Url {
+        &self.uri
     }
 }
 
@@ -369,7 +369,7 @@ impl UriSource for TextDocumentIdentifier {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentItem {
     /// The text document's URI.
-    pub uri: String,
+    pub uri: Url,
 
     /// The text document's language identifier.
     #[serde(rename="languageId")]
@@ -385,13 +385,13 @@ pub struct TextDocumentItem {
 
 impl TextDocumentItem {
     pub fn new(uri: Url, language_id: Option<String>, version: Option<u64>, text: String) -> TextDocumentItem {
-        TextDocumentItem{ uri : uri.to_string(), language_id : language_id, version : version, text : text,} 
+        TextDocumentItem{ uri : uri, language_id : language_id, version : version, text : text,} 
     }
 }
 
 impl UriSource for TextDocumentItem {
-    fn parse_uri(&self) -> Result<Url, ParseError> {
-        Url::parse(&self.uri)
+    fn get_uri(&self) -> &Url {
+        &self.uri
     }
 }
 
@@ -402,7 +402,7 @@ pub struct VersionedTextDocumentIdentifier
 {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
-    pub uri: String,
+    pub uri: Url,
 
     /// The version number of this document.
     pub version: u64,
@@ -411,13 +411,13 @@ pub struct VersionedTextDocumentIdentifier
 
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: u64,) -> VersionedTextDocumentIdentifier {
-        VersionedTextDocumentIdentifier{ uri : uri.to_string(), version : version}
+        VersionedTextDocumentIdentifier{ uri : uri, version : version}
     }
 }
 
 impl UriSource for VersionedTextDocumentIdentifier {
-    fn parse_uri(&self) -> Result<Url, ParseError> {
-        Url::parse(&self.uri)
+    fn get_uri(&self) -> &Url {
+        &self.uri
     }
 }
 
@@ -908,7 +908,7 @@ impl serde::Serialize for FileChangeType {
 pub struct FileEvent {
 
     /// The file's URI.
-    pub uri: String,
+    pub uri: Url,
 
     /// The change type.
     #[serde(rename="type")]
@@ -917,13 +917,13 @@ pub struct FileEvent {
 
 impl FileEvent {
     pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
-        FileEvent{ uri : uri.to_string(), typ: typ }
+        FileEvent{ uri : uri, typ: typ }
     }
 }
 
 impl UriSource for FileEvent {
-    fn parse_uri(&self) -> Result<Url, ParseError> {
-        Url::parse(&self.uri)
+    fn get_uri(&self) -> &Url {
+        &self.uri
     }
 }
 
@@ -932,10 +932,10 @@ impl UriSource for FileEvent {
  */
 pub const NOTIFICATION__PublishDiagnostics: &'static str = "textDocument/publishDiagnostics";
 
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
-    pub uri: String,
+    pub uri: Url,
 
     /// An array of diagnostic information items.
     pub diagnostics: Vec<Diagnostic>,
@@ -943,13 +943,13 @@ pub struct PublishDiagnosticsParams {
 
 impl PublishDiagnosticsParams {
     pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
-        PublishDiagnosticsParams{ uri : uri.to_string(), diagnostics: diagnostics }
+        PublishDiagnosticsParams{ uri : uri, diagnostics: diagnostics }
     }
 }
 
 impl UriSource for PublishDiagnosticsParams {
-    fn parse_uri(&self) -> Result<Url, ParseError> {
-        Url::parse(&self.uri)
+    fn get_uri(&self) -> &Url {
+        &self.uri
     }
 }
 
