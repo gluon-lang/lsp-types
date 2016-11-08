@@ -42,9 +42,6 @@ use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
 
-use std::path::PathBuf;
-use std::error::Error;
-
 
 /* ----------------- Auxiliary types ----------------- */
 
@@ -100,21 +97,6 @@ fn test_NumberOrString() {
         &NumberOrString::String("abcd".into()),
         r#""abcd""#
     );
-}
-
-
-pub trait UriSource {
-    fn get_uri(&self) -> &Url;
-    
-    fn parse_file_path(&self) -> Result<PathBuf, Box<Error>> {
-        let uri = self.get_uri();
-        
-        if uri.scheme() != "file" {
-            return Err("URI scheme is not `file`".into());
-        }
-        
-        uri.to_file_path().map_err(|_err| "Invalid file path in URI".into())
-    }
 }
 
 /* ----------------- Cancel support ----------------- */
@@ -177,12 +159,6 @@ pub struct Location {
 impl Location {
     pub fn new(uri: Url, range: Range) -> Location {
         Location { uri : uri, range : range }
-    }
-}
-
-impl UriSource for Location {
-    fn get_uri(&self) -> &Url {
-        &self.uri
     }
 }
 
@@ -359,12 +335,6 @@ impl TextDocumentIdentifier {
     }
 }
 
-impl UriSource for TextDocumentIdentifier {
-    fn get_uri(&self) -> &Url {
-        &self.uri
-    }
-}
-
 /// An item to transfer a text document from the client to the server. 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentItem {
@@ -389,12 +359,6 @@ impl TextDocumentItem {
     }
 }
 
-impl UriSource for TextDocumentItem {
-    fn get_uri(&self) -> &Url {
-        &self.uri
-    }
-}
-
 /// An identifier to denote a specific version of a text document.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier 
@@ -412,12 +376,6 @@ pub struct VersionedTextDocumentIdentifier
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: u64,) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier{ uri : uri, version : version}
-    }
-}
-
-impl UriSource for VersionedTextDocumentIdentifier {
-    fn get_uri(&self) -> &Url {
-        &self.uri
     }
 }
 
@@ -921,12 +879,6 @@ impl FileEvent {
     }
 }
 
-impl UriSource for FileEvent {
-    fn get_uri(&self) -> &Url {
-        &self.uri
-    }
-}
-
 /**
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
  */
@@ -944,12 +896,6 @@ pub struct PublishDiagnosticsParams {
 impl PublishDiagnosticsParams {
     pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams{ uri : uri, diagnostics: diagnostics }
-    }
-}
-
-impl UriSource for PublishDiagnosticsParams {
-    fn get_uri(&self) -> &Url {
-        &self.uri
     }
 }
 
