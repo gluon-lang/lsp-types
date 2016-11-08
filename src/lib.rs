@@ -1,8 +1,22 @@
-//! Language Server Protocol types for Rust.
-//! Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
-//! Last protocol update 14/Oct/2016 at commit: 
-//! https://github.com/Microsoft/language-server-protocol/commit/63f5d02d39d0135c234162a28d0523c9323ab3f7
+/*!
 
+Language Server Protocol types for Rust.
+
+Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+
+Last protocol update 14/Oct/2016 at commit: 
+https://github.com/Microsoft/language-server-protocol/commit/63f5d02d39d0135c234162a28d0523c9323ab3f7
+
+This library uses the URL crate for parsing URIs. 
+Note that there is some confusion on the meaning of URLs vs URIs:
+http://stackoverflow.com/a/28865728/393898 . 
+According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs, 
+But on the modern/new meaning of URLs, they are the same as URIs. 
+The important take-away aspect is that the URL crate should be able to parse any URI, 
+such as `urn:isbn:0451450523` 
+
+
+*/
 
 #![feature(proc_macro)]
 
@@ -16,13 +30,23 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
+extern crate url;
+
+use url::{Url, ParseError};
+
 use std::collections::HashMap;
 
 use serde::Serialize;
 use serde::Deserialize;
 use serde::de;
-use serde::de::Error;
+use serde::de::Error as Error_;
 use serde_json::Value;
+
+use std::path::PathBuf;
+use std::error::Error;
+
+
+/* ----------------- Auxiliary types ----------------- */
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum NumberOrString {
@@ -77,6 +101,23 @@ fn test_NumberOrString() {
         r#""abcd""#
     );
 }
+
+
+pub trait UriSource {
+    fn parse_uri(&self) -> Result<Url, ParseError>;
+    
+    fn parse_file_path(&self) -> Result<PathBuf, Box<Error>> {
+        let uri = try!(self.parse_uri());
+        
+        if uri.scheme() != "file" {
+            return Err("URI scheme is not `file`".into());
+        }
+        
+        uri.to_file_path().map_err(|_err| "Invalid file path in URI".into())
+    }
+}
+
+/* ----------------- Cancel support ----------------- */
 
 /// The base protocol now offers support for request cancellation. To cancel a request, 
 /// a notification message with the following properties is sent:
@@ -134,8 +175,14 @@ pub struct Location {
 }
 
 impl Location {
-    pub fn new(uri: String, range: Range) -> Location {
-        Location { uri : uri, range : range }
+    pub fn new(uri: Url, range: Range) -> Location {
+        Location { uri : uri.to_string(), range : range }
+    }
+}
+
+impl UriSource for Location {
+    fn parse_uri(&self) -> Result<Url, ParseError> {
+        Url::parse(&self.uri)
     }
 }
 
@@ -307,8 +354,14 @@ pub struct TextDocumentIdentifier {
 }
 
 impl TextDocumentIdentifier {
-    pub fn new(uri: String) -> TextDocumentIdentifier {
-        TextDocumentIdentifier{ uri : uri } 
+    pub fn new(uri: Url) -> TextDocumentIdentifier {
+        TextDocumentIdentifier{ uri : uri.to_string() } 
+    }
+}
+
+impl UriSource for TextDocumentIdentifier {
+    fn parse_uri(&self) -> Result<Url, ParseError> {
+        Url::parse(&self.uri)
     }
 }
 
@@ -331,8 +384,14 @@ pub struct TextDocumentItem {
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: String, language_id: Option<String>, version: Option<u64>, text: String) -> TextDocumentItem {
-        TextDocumentItem{ uri : uri, language_id : language_id, version : version, text : text,} 
+    pub fn new(uri: Url, language_id: Option<String>, version: Option<u64>, text: String) -> TextDocumentItem {
+        TextDocumentItem{ uri : uri.to_string(), language_id : language_id, version : version, text : text,} 
+    }
+}
+
+impl UriSource for TextDocumentItem {
+    fn parse_uri(&self) -> Result<Url, ParseError> {
+        Url::parse(&self.uri)
     }
 }
 
@@ -351,11 +410,16 @@ pub struct VersionedTextDocumentIdentifier
 
 
 impl VersionedTextDocumentIdentifier {
-    pub fn new(uri: String, version: u64,) -> VersionedTextDocumentIdentifier {
-        VersionedTextDocumentIdentifier{ uri : uri, version : version} 
+    pub fn new(uri: Url, version: u64,) -> VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier{ uri : uri.to_string(), version : version}
     }
 }
 
+impl UriSource for VersionedTextDocumentIdentifier {
+    fn parse_uri(&self) -> Result<Url, ParseError> {
+        Url::parse(&self.uri)
+    }
+}
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -851,6 +915,18 @@ pub struct FileEvent {
     pub typ: FileChangeType,
 }
 
+impl FileEvent {
+    pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
+        FileEvent{ uri : uri.to_string(), typ: typ }
+    }
+}
+
+impl UriSource for FileEvent {
+    fn parse_uri(&self) -> Result<Url, ParseError> {
+        Url::parse(&self.uri)
+    }
+}
+
 /**
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
  */
@@ -863,6 +939,18 @@ pub struct PublishDiagnosticsParams {
 
     /// An array of diagnostic information items.
     pub diagnostics: Vec<Diagnostic>,
+}
+
+impl PublishDiagnosticsParams {
+    pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
+        PublishDiagnosticsParams{ uri : uri.to_string(), diagnostics: diagnostics }
+    }
+}
+
+impl UriSource for PublishDiagnosticsParams {
+    fn parse_uri(&self) -> Result<Url, ParseError> {
+        Url::parse(&self.uri)
+    }
 }
 
 /**
