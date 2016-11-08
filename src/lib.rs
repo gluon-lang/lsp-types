@@ -1,8 +1,22 @@
-//! Language Server Protocol types for Rust.
-//! Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
-//! Last protocol update 14/Oct/2016 at commit: 
-//! https://github.com/Microsoft/language-server-protocol/commit/63f5d02d39d0135c234162a28d0523c9323ab3f7
+/*!
 
+Language Server Protocol types for Rust.
+
+Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+
+Last protocol update 14/Oct/2016 at commit: 
+https://github.com/Microsoft/language-server-protocol/commit/63f5d02d39d0135c234162a28d0523c9323ab3f7
+
+This library uses the URL crate for parsing URIs. 
+Note that there is some confusion on the meaning of URLs vs URIs:
+http://stackoverflow.com/a/28865728/393898 . 
+According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs, 
+But on the modern/new meaning of URLs, they are the same as URIs. 
+The important take-away aspect is that the URL crate should be able to parse any URI, 
+such as `urn:isbn:0451450523` 
+
+
+*/
 
 #![feature(proc_macro)]
 
@@ -16,13 +30,20 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
+extern crate url;
+
+use url::Url;
+
 use std::collections::HashMap;
 
 use serde::Serialize;
 use serde::Deserialize;
 use serde::de;
-use serde::de::Error;
+use serde::de::Error as Error_;
 use serde_json::Value;
+
+
+/* ----------------- Auxiliary types ----------------- */
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum NumberOrString {
@@ -78,6 +99,8 @@ fn test_NumberOrString() {
     );
 }
 
+/* ----------------- Cancel support ----------------- */
+
 /// The base protocol now offers support for request cancellation. To cancel a request, 
 /// a notification message with the following properties is sent:
 ///
@@ -129,12 +152,12 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    pub uri: String,
+    pub uri: Url,
     pub range: Range,
 }
 
 impl Location {
-    pub fn new(uri: String, range: Range) -> Location {
+    pub fn new(uri: Url, range: Range) -> Location {
         Location { uri : uri, range : range }
     }
 }
@@ -282,12 +305,12 @@ impl TextEdit {
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
-    pub changes: HashMap<String, Vec<TextEdit>>,
+    pub changes: HashMap<Url, Vec<TextEdit>>,
 //    changes: { [uri: string]: TextEdit[]; };
 }
 
 impl WorkspaceEdit {
-    pub fn new(changes: HashMap<String, Vec<TextEdit>>) -> WorkspaceEdit {
+    pub fn new(changes: HashMap<Url, Vec<TextEdit>>) -> WorkspaceEdit {
         WorkspaceEdit{ changes : changes } 
     }
 }
@@ -303,11 +326,11 @@ pub struct TextDocumentIdentifier {
 
 
     /// The text document's URI.
-    pub uri: String,
+    pub uri: Url,
 }
 
 impl TextDocumentIdentifier {
-    pub fn new(uri: String) -> TextDocumentIdentifier {
+    pub fn new(uri: Url) -> TextDocumentIdentifier {
         TextDocumentIdentifier{ uri : uri } 
     }
 }
@@ -316,7 +339,7 @@ impl TextDocumentIdentifier {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentItem {
     /// The text document's URI.
-    pub uri: String,
+    pub uri: Url,
 
     /// The text document's language identifier.
     #[serde(rename="languageId")]
@@ -331,7 +354,7 @@ pub struct TextDocumentItem {
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: String, language_id: Option<String>, version: Option<u64>, text: String) -> TextDocumentItem {
+    pub fn new(uri: Url, language_id: Option<String>, version: Option<u64>, text: String) -> TextDocumentItem {
         TextDocumentItem{ uri : uri, language_id : language_id, version : version, text : text,} 
     }
 }
@@ -343,7 +366,7 @@ pub struct VersionedTextDocumentIdentifier
 {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
-    pub uri: String,
+    pub uri: Url,
 
     /// The version number of this document.
     pub version: u64,
@@ -351,11 +374,10 @@ pub struct VersionedTextDocumentIdentifier
 
 
 impl VersionedTextDocumentIdentifier {
-    pub fn new(uri: String, version: u64,) -> VersionedTextDocumentIdentifier {
-        VersionedTextDocumentIdentifier{ uri : uri, version : version} 
+    pub fn new(uri: Url, version: u64,) -> VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier{ uri : uri, version : version}
     }
 }
-
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -844,11 +866,17 @@ impl serde::Serialize for FileChangeType {
 pub struct FileEvent {
 
     /// The file's URI.
-    pub uri: String,
+    pub uri: Url,
 
     /// The change type.
     #[serde(rename="type")]
     pub typ: FileChangeType,
+}
+
+impl FileEvent {
+    pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
+        FileEvent{ uri : uri, typ: typ }
+    }
 }
 
 /**
@@ -856,13 +884,19 @@ pub struct FileEvent {
  */
 pub const NOTIFICATION__PublishDiagnostics: &'static str = "textDocument/publishDiagnostics";
 
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
-    pub uri: String,
+    pub uri: Url,
 
     /// An array of diagnostic information items.
     pub diagnostics: Vec<Diagnostic>,
+}
+
+impl PublishDiagnosticsParams {
+    pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
+        PublishDiagnosticsParams{ uri : uri, diagnostics: diagnostics }
+    }
 }
 
 /**

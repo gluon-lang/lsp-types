@@ -1,6 +1,6 @@
 [package]
 name = "languageserver-types"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Markus Westerlind <marwes91@gmail.com>"]
 
 description = "Types for interaction with a language server"
@@ -16,7 +16,7 @@ license = "MIT"
 
 [dependencies]
 enum_primitive = "0.1.0"
-
 serde = "0.8.11"
 serde_json = "0.8.0"
 serde_derive = "0.8"
+url = { version = "1.1.0", features = ["serde"] }
