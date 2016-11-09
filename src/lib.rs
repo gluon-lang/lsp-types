@@ -13,7 +13,7 @@ http://stackoverflow.com/a/28865728/393898 .
 According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs, 
 But on the modern/new meaning of URLs, they are the same as URIs. 
 The important take-away aspect is that the URL crate should be able to parse any URI, 
-such as `urn:isbn:0451450523` 
+such as `urn:isbn:0451450523`.
 
 
 */
