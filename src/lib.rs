@@ -4,8 +4,9 @@ Language Server Protocol types for Rust.
 
 Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 
-Last protocol update 14/Oct/2016 at commit: 
-https://github.com/Microsoft/language-server-protocol/commit/63f5d02d39d0135c234162a28d0523c9323ab3f7
+Last protocol update:
+08/Dec/2016 at commit: 
+https://github.com/Microsoft/language-server-protocol/commit/00520823bd4c8060bb1963964615aa005594381b
 
 This library uses the URL crate for parsing URIs. 
 Note that there is some confusion on the meaning of URLs vs URIs:
@@ -284,6 +285,10 @@ impl Command {
 }
 
 /// A textual edit applicable to a text document.
+///
+/// If n `TextEdit`s are applied to a text document all text edits describe changes to the initial document version.
+/// Execution wise text edits should applied from the bottom to the top of the text document. Overlapping text edits 
+/// are not supported. 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct TextEdit {
     /// The range of the text document to be manipulated. To insert
@@ -406,8 +411,14 @@ impl TextDocumentPositionParams {
 /* ========================= Actual Protocol ========================= */
 
 /**
- * The initialize request is sent as the first request from the client to the server.
- */
+
+ The initialize request is sent as the first request from the client to the server. 
+ If the server receives request or notification before the `initialize` request it should act as follows:
+
+ * for a request the respond should be errored with `code: -32001`. The message can be picked by the server. 
+ * notifications should be dropped.
+ 
+*/
 pub const REQUEST__Initialize: &'static str = "initialize";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)] 
@@ -1213,11 +1224,11 @@ pub struct SignatureInformation {
 /// have a label and a doc-comment.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ParameterInformation {
-    /// The label of this signature. Will be shown in
+    /// The label of this parameter. Will be shown in
     /// the UI.
     pub label: String,
 
-    /// The human-readable doc-comment of this signature. Will be shown
+    /// The human-readable doc-comment of this parameter. Will be shown
     /// in the UI but can be omitted.
     #[serde(skip_serializing_if="Option::is_none")]
     pub documentation: Option<String>,
@@ -1472,6 +1483,47 @@ pub struct CodeLens {
  * given code lens item.
  */
 pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
+
+
+/**
+
+ The document links request is sent from the client to the server to request the location of links in a document.
+
+*/
+pub const REQUEST__DocumentLink: &'static str = "textDocument/documentLink";
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DocumentLinkParams {
+	/**
+	 * The document to provide document links for.
+	 */
+	pub textDocument: TextDocumentIdentifier,
+}
+
+/**
+ * A document link is a range in a text document that links to an internal or external resource, like another
+ * text document or a web site.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DocumentLink {
+	/**
+	 * The range this link applies to.
+	 */
+	pub range: Range,
+	/**
+	 * The uri this link points to.
+	 */
+	pub target: String,
+}
+
+/**
+
+ The document link resolve request is sent from the client to the server to resolve the target of 
+ a given document link.
+
+*/
+pub const REQUEST__DocumentLinkResolve: &'static str = "documentLink/resolve";
+
 
 /**
  * The document formatting request is sent from the server to the client to format a whole document.
