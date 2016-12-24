@@ -1497,7 +1497,8 @@ pub struct DocumentLinkParams {
 	/**
 	 * The document to provide document links for.
 	 */
-	pub textDocument: TextDocumentIdentifier,
+	#[serde(rename="textDocument")]
+	pub text_document: TextDocumentIdentifier,
 }
 
 /**
@@ -1513,7 +1514,7 @@ pub struct DocumentLink {
 	/**
 	 * The uri this link points to.
 	 */
-	pub target: String,
+	pub target: Url,
 }
 
 /**
