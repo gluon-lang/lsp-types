@@ -1,16 +1,16 @@
 [package]
 name = "languageserver-types"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Markus Westerlind <marwes91@gmail.com>", "Bruno Medeiros <bruno.do.medeiros@gmail.com>"]
 
-description = "Types for interaction with a language server"
+description = "Types for interaction with a language server, using VSCode's Language Server Protocol"
 
 repository = "https://github.com/gluon-lang/languageserver-types"
 documentation = "https://docs.rs/languageserver-types"
 
 readme = "README.md"
 
-keywords = ["language", "server", "lsp", "language-server-protocol", "vscode"]
+keywords = ["language", "server", "lsp", "vscode"]
 
 license = "MIT"
 
