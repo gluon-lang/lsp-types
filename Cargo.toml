@@ -10,7 +10,7 @@ documentation = "https://docs.rs/languageserver-types"
 
 readme = "README.md"
 
-keywords = ["language", "server", "vscode"]
+keywords = ["language", "server", "lsp", "language-server-protocol", "vscode"]
 
 license = "MIT"
 
