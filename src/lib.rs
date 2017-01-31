@@ -1716,3 +1716,21 @@ fn test_serialization<SER>(ms: &SER, expected: &str)
     let deserialized: SER = serde_json::from_str(&json_str).unwrap();
     assert_eq!(&deserialized, ms);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn workspace_edit() {
+        test_serialization(&WorkspaceEdit { changes: vec![].into_iter().collect() },
+                           r#"{"changes":{}}"#);
+
+        test_serialization(&WorkspaceEdit {
+                               changes: vec![(Url::parse("file://test").unwrap(), vec![])]
+                                   .into_iter()
+                                   .collect(),
+                           },
+                           r#"{"changes":{"file://test/":[]}}"#);
+    }
+}
