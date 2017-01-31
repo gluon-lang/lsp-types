@@ -99,14 +99,6 @@ impl Deserialize for NumberOrString {
 }
 
 
-#[test]
-fn test_NumberOrString() {
-
-    test_serialization(&NumberOrString::Number(123), r#"123"#);
-
-    test_serialization(&NumberOrString::String("abcd".into()), r#""abcd""#);
-}
-
 /* ----------------- Cancel support ----------------- */
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -1200,15 +1192,6 @@ impl MarkedString {
     }
 }
 
-#[test]
-fn test_LanguageString() {
-    test_serialization(&LanguageString {
-                           language: "LL".into(),
-                           value: "VV".into(),
-                       },
-                       r#"{"language":"LL","value":"VV"}"#);
-}
-
 impl Serialize for MarkedString {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: serde::Serializer
@@ -1256,16 +1239,6 @@ impl Deserialize for MarkedString {
 
         deserializer.deserialize(MarkedStringVisitor)
     }
-}
-
-
-#[test]
-fn test_MarkedString() {
-
-    test_serialization(&MarkedString::from_markdown("xxx".into()), r#""xxx""#);
-
-    test_serialization(&MarkedString::from_language_code("lang".into(), "code".into()),
-                       r#"{"language":"lang","value":"code"}"#);
 }
 
 
@@ -1704,22 +1677,45 @@ pub struct RenameParams {
     pub new_name: String,
 }
 
-
-/* -----------------  ----------------- */
-
-#[cfg(test)]
-fn test_serialization<SER>(ms: &SER, expected: &str)
-    where SER: Serialize + Deserialize + PartialEq + std::fmt::Debug
-{
-    let json_str = serde_json::to_string(ms).unwrap();
-    assert_eq!(&json_str, expected);
-    let deserialized: SER = serde_json::from_str(&json_str).unwrap();
-    assert_eq!(&deserialized, ms);
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn test_serialization<SER>(ms: &SER, expected: &str)
+        where SER: Serialize + Deserialize + PartialEq + std::fmt::Debug
+    {
+        let json_str = serde_json::to_string(ms).unwrap();
+        assert_eq!(&json_str, expected);
+        let deserialized: SER = serde_json::from_str(&json_str).unwrap();
+        assert_eq!(&deserialized, ms);
+    }
+
+    #[test]
+    fn number_or_string() {
+
+        test_serialization(&NumberOrString::Number(123), r#"123"#);
+
+        test_serialization(&NumberOrString::String("abcd".into()), r#""abcd""#);
+    }
+
+    #[test]
+    fn marked_string() {
+
+        test_serialization(&MarkedString::from_markdown("xxx".into()), r#""xxx""#);
+
+        test_serialization(&MarkedString::from_language_code("lang".into(), "code".into()),
+                           r#"{"language":"lang","value":"code"}"#);
+    }
+
+    #[test]
+    fn language_string() {
+        test_serialization(&LanguageString {
+                               language: "LL".into(),
+                               value: "VV".into(),
+                           },
+                           r#"{"language":"LL","value":"VV"}"#);
+    }
+
 
     #[test]
     fn workspace_edit() {
