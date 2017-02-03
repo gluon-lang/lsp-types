@@ -37,8 +37,6 @@ use url::Url;
 use std::collections::HashMap;
 use std::fmt;
 
-use serde::Serialize;
-use serde::Deserialize;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
@@ -46,58 +44,12 @@ use serde_json::Value;
 
 /* ----------------- Auxiliary types ----------------- */
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
 pub enum NumberOrString {
     Number(u64),
     String(String),
 }
-
-impl Serialize for NumberOrString {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
-    {
-        match *self {
-            NumberOrString::Number(number) => serializer.serialize_u64(number),
-            NumberOrString::String(ref string) => serializer.serialize_str(string),
-        }
-    }
-}
-
-impl Deserialize for NumberOrString {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        struct NumberOrStringVisitor;
-        impl de::Visitor for NumberOrStringVisitor {
-            type Value = NumberOrString;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("number or string")
-            }
-
-            fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
-                where E: de::Error
-            {
-                Ok(NumberOrString::Number(value))
-            }
-
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-                where E: de::Error
-            {
-                Ok(NumberOrString::String(value.to_string()))
-            }
-
-            fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
-                where E: de::Error
-            {
-                Ok(NumberOrString::String(value))
-            }
-        }
-
-        deserializer.deserialize(NumberOrStringVisitor)
-    }
-}
-
 
 /* ----------------- Cancel support ----------------- */
 
@@ -1167,7 +1119,8 @@ pub struct Hover {
  ```
  */
 //type MarkedString = string | { language: string; value: string };
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
 pub enum MarkedString {
     String(String),
     LanguageString(LanguageString),
@@ -1191,56 +1144,6 @@ impl MarkedString {
         })
     }
 }
-
-impl Serialize for MarkedString {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
-    {
-        match *self {
-            MarkedString::String(ref string) => serializer.serialize_str(string),
-            MarkedString::LanguageString(ref language_string) => {
-                language_string.serialize(serializer)
-            }
-        }
-    }
-}
-
-// See example from: https://serde.rs/string-or-struct.html
-impl Deserialize for MarkedString {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
-    {
-        struct MarkedStringVisitor;
-        impl de::Visitor for MarkedStringVisitor {
-            type Value = MarkedString;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("string or map")
-            }
-
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-                where E: de::Error
-            {
-                Ok(MarkedString::String(value.to_string()))
-            }
-
-            fn visit_map<V>(self, visitor: V) -> Result<Self::Value, V::Error>
-                where V: de::MapVisitor
-            {
-                // `MapVisitorDeserializer` is a wrapper that turns a `MapVisitor`
-                // into a `Deserializer`, allowing it to be used as the input to T's
-                // `Deserialize` implementation. T then deserializes itself using
-                // the entries from the map visitor.
-                let mvd = de::value::MapVisitorDeserializer::new(visitor);
-                let language_string = try!(LanguageString::deserialize(mvd));
-                Ok(MarkedString::LanguageString(language_string))
-            }
-        }
-
-        deserializer.deserialize(MarkedStringVisitor)
-    }
-}
-
 
 /// The signature help request is sent from the client to the server to request signature information at
 /// a given cursor position.
@@ -1680,6 +1583,7 @@ pub struct RenameParams {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde::{Deserialize, Serialize};
 
     fn test_serialization<SER>(ms: &SER, expected: &str)
         where SER: Serialize + Deserialize + PartialEq + std::fmt::Debug
