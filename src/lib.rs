@@ -5,15 +5,15 @@ Language Server Protocol types for Rust.
 Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 
 Last protocol update:
-08/Dec/2016 at commit: 
+08/Dec/2016 at commit:
 https://github.com/Microsoft/language-server-protocol/commit/00520823bd4c8060bb1963964615aa005594381b
 
-This library uses the URL crate for parsing URIs. 
+This library uses the URL crate for parsing URIs.
 Note that there is some confusion on the meaning of URLs vs URIs:
-http://stackoverflow.com/a/28865728/393898 . 
-According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs, 
-But on the modern/new meaning of URLs, they are the same as URIs. 
-The important take-away aspect is that the URL crate should be able to parse any URI, 
+http://stackoverflow.com/a/28865728/393898 .
+According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs,
+But on the modern/new meaning of URLs, they are the same as URIs.
+The important take-away aspect is that the URL crate should be able to parse any URI,
 such as `urn:isbn:0451450523`.
 
 
@@ -216,8 +216,8 @@ impl serde::Serialize for DiagnosticSeverity {
 }
 
 /**
- Represents a reference to a command. Provides a title which will be used to represent a command in the UI. 
- Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of 
+ Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
+ Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of
  well known commands. So executing a command requires some tool extension code.
 */
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -272,7 +272,7 @@ impl TextEdit {
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(deserialize_with = "deserialize_url_map", serialize_with = "serialize_url_map")]
-    pub changes: HashMap<Url, Vec<TextEdit>>, 
+    pub changes: HashMap<Url, Vec<TextEdit>>,
     //    changes: { [uri: string]: TextEdit[]; };
 }
 
@@ -431,17 +431,25 @@ impl TextDocumentPositionParams {
     }
 }
 
+/// An error occurred during processing a request
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub struct ResponseError {
+    /// A number indicating the error type that occurred.
+    pub code: i32,
+    /// A string providing a short description of the error.
+    pub message: String,
+}
 
 /* ========================= Actual Protocol ========================= */
 
 /**
 
- The initialize request is sent as the first request from the client to the server. 
+ The initialize request is sent as the first request from the client to the server.
  If the server receives request or notification before the `initialize` request it should act as follows:
 
- * for a request the respond should be errored with `code: -32001`. The message can be picked by the server. 
+ * for a request the respond should be errored with `code: -32001`. The message can be picked by the server.
  * notifications should be dropped.
- 
+
 */
 pub const REQUEST__Initialize: &'static str = "initialize";
 
@@ -653,9 +661,26 @@ pub struct ServerCapabilities {
  */
 pub const REQUEST__Shutdown: &'static str = "shutdown";
 
+/// The response for the shutdown request
+/// https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#shutdown-request
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ShutdownResponse {
+    /// According to the protocol it must be undefined.
+    /// This is why it is private
+    result: Option<()>,
+    /// An error occurred during processing a shutdown request
+    error: Option<ResponseError>,
+}
+
+impl ShutdownResponse {
+    pub fn new(error: Option<ResponseError>) -> Self {
+        ShutdownResponse { result: None, error: error }
+    }
+}
+
 /**
- * A notification to ask the server to exit its process. 
- * The server should exit with success code 0 if the shutdown request has been received before; 
+ * A notification to ask the server to exit its process.
+ * The server should exit with success code 0 if the shutdown request has been received before;
  * otherwise with error code 1.
  */
 pub const NOTIFICATION__Exit: &'static str = "exit";
@@ -941,13 +966,13 @@ impl PublishDiagnosticsParams {
 }
 
 /**
- The Completion request is sent from the client to the server to compute completion items at a given cursor position. 
- Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive, 
- servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve'). 
- This request is sent when a completion item is selected in the user interface. A typically use case is for example: 
- the 'textDocument/completion' request doesn't fill in the documentation property for returned completion items 
- since it is expensive to compute. When the item is selected in the user interface then a 'completionItem/resolve' 
- request is sent with the selected completion item as a param. The returned completion item should have the 
+ The Completion request is sent from the client to the server to compute completion items at a given cursor position.
+ Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive,
+ servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve').
+ This request is sent when a completion item is selected in the user interface. A typically use case is for example:
+ the 'textDocument/completion' request doesn't fill in the documentation property for returned completion items
+ since it is expensive to compute. When the item is selected in the user interface then a 'completionItem/resolve'
+ request is sent with the selected completion item as a param. The returned completion item should have the
  documentation property filled in.
 */
 // result: CompletionItem[] | CompletionList FIXME
@@ -1230,12 +1255,12 @@ pub struct ReferenceContext {
 }
 
 /**
- The document highlight request is sent from the client to the server to resolve a document highlights 
- for a given text document position. 
- For programming languages this usually highlights all references to the symbol scoped to this file. 
- However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since 
- the first one is allowed to be more fuzzy. 
- Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches 
+ The document highlight request is sent from the client to the server to resolve a document highlights
+ for a given text document position.
+ For programming languages this usually highlights all references to the symbol scoped to this file.
+ However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since
+ the first one is allowed to be more fuzzy.
+ Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
  use Textas the kind.
 */
 pub const REQUEST__DocumentHighlight: &'static str = "textDocument/documentHighlight";
@@ -1290,7 +1315,7 @@ impl serde::Serialize for DocumentHighlightKind {
 }
 
 /**
- * The document symbol request is sent from the client to the server to list all symbols found in a given 
+ * The document symbol request is sent from the client to the server to list all symbols found in a given
  * text document.
  */
 pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol";
@@ -1368,7 +1393,7 @@ impl serde::Serialize for SymbolKind {
 }
 
 /**
- * The workspace symbol request is sent from the client to the server to list project-wide symbols 
+ * The workspace symbol request is sent from the client to the server to list project-wide symbols
  * matching the query string.
  */
 pub const REQUEST__WorkspaceSymbols: &'static str = "workspace/symbol";
@@ -1382,7 +1407,7 @@ pub struct WorkspaceSymbolParams {
 
 /**
  * The code action request is sent from the client to the server to compute commands for a given text document
- * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or 
+ * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
  * presses the lightbulb associated with a marker.
  */
 pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
@@ -1440,7 +1465,7 @@ pub struct CodeLens {
 }
 
 /**
- * The code lens resolve request is sent from the client to the server to resolve the command for a 
+ * The code lens resolve request is sent from the client to the server to resolve the command for a
  * given code lens item.
  */
 pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
@@ -1481,7 +1506,7 @@ pub struct DocumentLink {
 
 /**
 
- The document link resolve request is sent from the client to the server to resolve the target of 
+ The document link resolve request is sent from the client to the server to resolve the target of
  a given document link.
 
 */
@@ -1512,7 +1537,7 @@ pub struct FormattingOptions {
 
     #[serde(rename="insertSpaces")]
     /// Prefer spaces over tabs.
-    pub insert_spaces: bool, 
+    pub insert_spaces: bool,
 
 //
 //    /// Signature for further properties.
@@ -1538,7 +1563,7 @@ pub struct DocumentRangeFormattingParams {
 }
 
 /**
- * The document on type formatting request is sent from the client to the server to format parts of 
+ * The document on type formatting request is sent from the client to the server to format parts of
  * the document during typing.
  */
 pub const REQUEST__OnTypeFormatting: &'static str = "textDocument/onTypeFormatting";
