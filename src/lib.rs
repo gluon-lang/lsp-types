@@ -34,6 +34,7 @@ extern crate url_serde;
 use url::Url;
 
 use std::collections::HashMap;
+use std::fmt;
 
 use serde::de;
 use serde::de::Error as Error_;
@@ -270,8 +271,7 @@ impl TextEdit {
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(with = "url_map")]
-    pub changes: HashMap<Url, Vec<TextEdit>>, 
-    //    changes: { [uri: string]: TextEdit[]; };
+    pub changes: HashMap<Url, Vec<TextEdit>>, //    changes: { [uri: string]: TextEdit[]; };
 }
 
 mod url_map {
@@ -461,7 +461,7 @@ pub struct DocumentFilter {
 /// A document selector is the combination of one or many document filters.
 pub type DocumentSelector = Vec<DocumentFilter>;
 
-/* ========================= Actual Protocol ========================= */
+// ========================= Actual Protocol =========================
 
 /**
 
@@ -1564,8 +1564,8 @@ pub const REQUEST__Hover: &'static str = "textDocument/hover";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Hover {
     /// The hover's content
-    pub contents: Vec<MarkedString>, /* FIXME: need to review if this is correct*/
-    //contents: MarkedString | MarkedString[];
+    pub contents: Vec<MarkedString>, // FIXME: need to review if this is correct
+    // contents: MarkedString | MarkedString[];
     /// An optional range is a range inside a text document
     /// that is used to visualize a hover, e.g. by changing the background color.
     pub range: Option<Range>,
@@ -1581,7 +1581,7 @@ pub struct Hover {
  ${value}
  ```
  */
-//type MarkedString = string | { language: string; value: string };
+// type MarkedString = string | { language: string; value: string };
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
@@ -2016,22 +2016,103 @@ pub struct DocumentFormattingParams {
 }
 
 /// Value-object describing what options formatting should use.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
 pub struct FormattingOptions {
     /// Size of a tab in spaces.
-    #[serde(rename="tabSize")]
     pub tab_size: u64,
 
-    #[serde(rename="insertSpaces")]
     /// Prefer spaces over tabs.
-    pub insert_spaces: bool, 
+    pub insert_spaces: bool,
 
-//
-//    /// Signature for further properties.
-//
-    //[key: string]: boolean | number | string;
-    // FIXME what is this, I don't quite get it
+    /// Signature for further properties.
+    pub properties: HashMap<String, FormattingProperty>,
 }
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum FormattingProperty {
+    Bool(bool),
+    Number(f64),
+    String(String),
+}
+
+impl<'de> serde::Deserialize<'de> for FormattingOptions {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: serde::Deserializer<'de>
+    {
+        use serde::de::{MapAccess, Visitor};
+
+        struct FormattingOptionsVisitor;
+
+        impl<'de> Visitor<'de> for FormattingOptionsVisitor {
+            type Value = FormattingOptions;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("struct FormattingOptions")
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<FormattingOptions, V::Error>
+                where V: MapAccess<'de>
+            {
+                use std::borrow::Cow;
+
+                let mut tab_size = None;
+                let mut insert_spaces = None;
+                let mut properties = HashMap::new();
+                while let Some(key) = map.next_key::<Cow<str>>()? {
+                    match &*key {
+                        "tabSize" => {
+                            if tab_size.is_some() {
+                                return Err(de::Error::duplicate_field("tab_size"));
+                            }
+                            tab_size = Some(map.next_value()?);
+                            continue;
+                        }
+                        "insertSpaces" => {
+                            if insert_spaces.is_some() {
+                                return Err(de::Error::duplicate_field("insert_spaces"));
+                            }
+                            insert_spaces = Some(map.next_value()?);
+                            continue;
+                        }
+                        _ => (),
+                    }
+                    properties.insert(key.into_owned(), map.next_value()?);
+                }
+                let tab_size = tab_size
+                    .ok_or_else(|| de::Error::missing_field("tab_size"))?;
+                let insert_spaces = insert_spaces
+                    .ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
+                Ok(FormattingOptions {
+                       tab_size: tab_size,
+                       insert_spaces: insert_spaces,
+                       properties: properties,
+                   })
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["tabSize", "insertSpaces"];
+        deserializer.deserialize_struct("FormattingOptions", FIELDS, FormattingOptionsVisitor)
+    }
+}
+
+impl serde::Serialize for FormattingOptions {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: serde::Serializer
+    {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer
+            .serialize_map(Some(self.properties.len() + 2))?;
+        map.serialize_entry("tabSize", &self.tab_size)?;
+        map.serialize_entry("insertSpaces", &self.insert_spaces)?;
+        for (k, v) in &self.properties {
+            map.serialize_entry(k, v)?;
+        }
+        map.end()
+    }
+}
+
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
 pub const REQUEST__RangeFormatting: &'static str = "textDocument/rangeFormatting";
@@ -2167,5 +2248,25 @@ mod tests {
                                     .collect(),
                             },
                            r#"{"changes":{"file://test/":[]}}"#);
+    }
+
+    #[test]
+    fn formatting_options() {
+        test_serialization(&FormattingOptions {
+                                tab_size: 123,
+                                insert_spaces: true,
+                                properties: HashMap::new(),
+                            },
+                           r#"{"tabSize":123,"insertSpaces":true}"#);
+
+        test_serialization(&FormattingOptions {
+                                tab_size: 123,
+                                insert_spaces: true,
+                                properties: vec![("prop".to_string(),
+                                                  FormattingProperty::Number(1.0))]
+                                        .into_iter()
+                                        .collect(),
+                            },
+                           r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#);
     }
 }
