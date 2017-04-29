@@ -35,7 +35,6 @@ extern crate url_serde;
 use url::Url;
 
 use std::collections::HashMap;
-use std::fmt;
 
 use serde::de;
 use serde::de::Error as Error_;
@@ -110,7 +109,7 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub uri: Url,
     pub range: Range,
 }
@@ -190,20 +189,20 @@ pub enum DiagnosticSeverity {
     Hint = 4,
 }
 
-impl serde::Deserialize for DiagnosticSeverity {
+impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-            1 => DiagnosticSeverity::Error,
-            2 => DiagnosticSeverity::Warning,
-            3 => DiagnosticSeverity::Information,
-            4 => DiagnosticSeverity::Hint,
-            i => {
-                return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                   &"value of 1, 2, 3 or 4"));
-            }
-        })
+               1 => DiagnosticSeverity::Error,
+               2 => DiagnosticSeverity::Warning,
+               3 => DiagnosticSeverity::Information,
+               4 => DiagnosticSeverity::Hint,
+               i => {
+            return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
+                                               &"value of 1, 2, 3 or 4"));
+        }
+           })
     }
 }
 
@@ -271,56 +270,61 @@ impl TextEdit {
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
-    #[serde(deserialize_with = "deserialize_url_map", serialize_with = "serialize_url_map")]
+    #[serde(with = "url_map")]
     pub changes: HashMap<Url, Vec<TextEdit>>, 
     //    changes: { [uri: string]: TextEdit[]; };
 }
 
-fn deserialize_url_map<D>(deserializer: D) -> Result<HashMap<Url, Vec<TextEdit>>, D::Error>
-    where D: serde::Deserializer
-{
-    struct UrlMapVisitor;
+mod url_map {
+    use super::*;
 
-    impl de::Visitor for UrlMapVisitor {
-        type Value = HashMap<Url, Vec<TextEdit>>;
+    use std::fmt;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            formatter.write_str("map")
-        }
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<HashMap<Url, Vec<TextEdit>>, D::Error>
+        where D: serde::Deserializer<'de>
+    {
+        struct UrlMapVisitor;
 
-        fn visit_map<M>(self, mut visitor: M) -> Result<Self::Value, M::Error>
-            where M: de::MapVisitor
-        {
-            let mut values = HashMap::with_capacity(visitor.size_hint().0);
+        impl<'de> de::Visitor<'de> for UrlMapVisitor {
+            type Value = HashMap<Url, Vec<TextEdit>>;
 
-            // While there are entries remaining in the input, add them
-            // into our map.
-            while let Some((key, value)) = visitor.visit::<url_serde::De<Url>, _>()? {
-                values.insert(key.into_inner(), value);
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("map")
             }
 
-            Ok(values)
+            fn visit_map<M>(self, mut visitor: M) -> Result<Self::Value, M::Error>
+                where M: de::MapAccess<'de>
+            {
+                let mut values = HashMap::with_capacity(visitor.size_hint().unwrap_or(0));
+
+                // While there are entries remaining in the input, add them
+                // into our map.
+                while let Some((key, value)) = visitor.next_entry::<url_serde::De<Url>, _>()? {
+                    values.insert(key.into_inner(), value);
+                }
+
+                Ok(values)
+            }
         }
+
+        // Instantiate our Visitor and ask the Deserializer to drive
+        // it over the input data, resulting in an instance of MyMap.
+        deserializer.deserialize_map(UrlMapVisitor)
     }
 
-    // Instantiate our Visitor and ask the Deserializer to drive
-    // it over the input data, resulting in an instance of MyMap.
-    deserializer.deserialize_map(UrlMapVisitor)
-}
-
-fn serialize_url_map<S>(changes: &HashMap<Url, Vec<TextEdit>>,
+    pub fn serialize<S>(changes: &HashMap<Url, Vec<TextEdit>>,
                         serializer: S)
                         -> Result<S::Ok, S::Error>
-    where S: serde::Serializer
-{
-    use serde::ser::SerializeMap;
+        where S: serde::Serializer
+    {
+        use serde::ser::SerializeMap;
 
-    let mut map = serializer.serialize_map(Some(changes.len()))?;
-    for (k, v) in changes {
-        map.serialize_key(k.as_str())?;
-        map.serialize_value(v)?;
+        let mut map = serializer.serialize_map(Some(changes.len()))?;
+        for (k, v) in changes {
+            map.serialize_entry(k.as_str(), v)?;
+        }
+        map.end()
     }
-    map.end()
 }
 
 impl WorkspaceEdit {
@@ -338,7 +342,7 @@ pub struct TextDocumentIdentifier {
     // This modelled by "mixing-in" TextDocumentIdentifier in VersionedTextDocumentIdentifier,
     // so any changes to this type must be effected in the sub-type as well.
     /// The text document's URI.
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub uri: Url,
 }
 
@@ -352,7 +356,7 @@ impl TextDocumentIdentifier {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentItem {
     /// The text document's URI.
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The text document's language identifier.
@@ -387,7 +391,7 @@ impl TextDocumentItem {
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The version number of this document.
@@ -501,19 +505,19 @@ pub enum TextDocumentSyncKind {
     Incremental = 2,
 }
 
-impl serde::Deserialize for TextDocumentSyncKind {
+impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-            0 => TextDocumentSyncKind::None,
-            1 => TextDocumentSyncKind::Full,
-            2 => TextDocumentSyncKind::Incremental,
-            i => {
-                return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                   &"value between 0 and 2 (inclusive)"));
-            }
-        })
+               0 => TextDocumentSyncKind::None,
+               1 => TextDocumentSyncKind::Full,
+               2 => TextDocumentSyncKind::Incremental,
+               i => {
+            return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
+                                               &"value between 0 and 2 (inclusive)"));
+        }
+           })
     }
 }
 
@@ -688,20 +692,20 @@ pub enum MessageType {
     Log = 4,
 }
 
-impl serde::Deserialize for MessageType {
+impl<'de> serde::Deserialize<'de> for MessageType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-            1 => MessageType::Error,
-            2 => MessageType::Warning,
-            3 => MessageType::Info,
-            4 => MessageType::Log,
-            i => {
-                return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                   &"value of 1, 2, 3 or 4"));
-            }
-        })
+               1 => MessageType::Error,
+               2 => MessageType::Warning,
+               3 => MessageType::Info,
+               4 => MessageType::Log,
+               i => {
+            return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
+                                               &"value of 1, 2, 3 or 4"));
+        }
+           })
     }
 }
 
@@ -871,19 +875,19 @@ pub enum FileChangeType {
     Deleted = 3,
 }
 
-impl serde::Deserialize for FileChangeType {
+impl<'de> serde::Deserialize<'de> for FileChangeType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-            1 => FileChangeType::Created,
-            2 => FileChangeType::Changed,
-            3 => FileChangeType::Deleted,
-            i => {
-                return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                   &"value of 1, 2 or 3"))
-            }
-        })
+               1 => FileChangeType::Created,
+               2 => FileChangeType::Changed,
+               3 => FileChangeType::Deleted,
+               i => {
+                   return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
+                                                      &"value of 1, 2 or 3"))
+               }
+           })
     }
 }
 
@@ -899,7 +903,7 @@ impl serde::Serialize for FileChangeType {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct FileEvent {
     /// The file's URI.
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The change type.
@@ -909,10 +913,7 @@ pub struct FileEvent {
 
 impl FileEvent {
     pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
-        FileEvent {
-            uri: uri,
-            typ: typ,
-        }
+        FileEvent { uri: uri, typ: typ }
     }
 }
 
@@ -924,7 +925,7 @@ pub const NOTIFICATION__PublishDiagnostics: &'static str = "textDocument/publish
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// An array of diagnostic information items.
@@ -1067,9 +1068,9 @@ pub enum CompletionItemKind {
 }
 }
 
-impl serde::Deserialize for CompletionItemKind {
+impl<'de> serde::Deserialize<'de> for CompletionItemKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         use enum_primitive::FromPrimitive;
 
@@ -1139,9 +1140,9 @@ impl MarkedString {
 
     pub fn from_language_code(language: String, code_block: String) -> MarkedString {
         MarkedString::LanguageString(LanguageString {
-            language: language,
-            value: code_block,
-        })
+                                         language: language,
+                                         value: code_block,
+                                     })
     }
 }
 
@@ -1265,19 +1266,19 @@ pub enum DocumentHighlightKind {
     Write = 3,
 }
 
-impl serde::Deserialize for DocumentHighlightKind {
+impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-            1 => DocumentHighlightKind::Text,
-            2 => DocumentHighlightKind::Read,
-            3 => DocumentHighlightKind::Write,
-            i => {
-                return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                   &"1, 2, or 3"))
-            }
-        })
+               1 => DocumentHighlightKind::Text,
+               2 => DocumentHighlightKind::Read,
+               3 => DocumentHighlightKind::Write,
+               i => {
+                   return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
+                                                      &"1, 2, or 3"))
+               }
+           })
     }
 }
 
@@ -1345,9 +1346,9 @@ pub enum SymbolKind {
 }
 }
 
-impl serde::Deserialize for SymbolKind {
+impl<'de> serde::Deserialize<'de> for SymbolKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer
+        where D: serde::Deserializer<'de>
     {
         use enum_primitive::FromPrimitive;
 
@@ -1475,7 +1476,7 @@ pub struct DocumentLink {
     /**
 	 * The uri this link points to.
 	 */
-    #[serde(deserialize_with = "url_serde::deserialize", serialize_with = "url_serde::serialize")]
+    #[serde(with = "url_serde")]
     pub target: Url,
 }
 
@@ -1586,7 +1587,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
 
     fn test_serialization<SER>(ms: &SER, expected: &str)
-        where SER: Serialize + Deserialize + PartialEq + std::fmt::Debug
+        where SER: Serialize + for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug
     {
         let json_str = serde_json::to_string(ms).unwrap();
         assert_eq!(&json_str, expected);
@@ -1614,9 +1615,9 @@ mod tests {
     #[test]
     fn language_string() {
         test_serialization(&LanguageString {
-                               language: "LL".into(),
-                               value: "VV".into(),
-                           },
+                                language: "LL".into(),
+                                value: "VV".into(),
+                            },
                            r#"{"language":"LL","value":"VV"}"#);
     }
 
@@ -1627,10 +1628,10 @@ mod tests {
                            r#"{"changes":{}}"#);
 
         test_serialization(&WorkspaceEdit {
-                               changes: vec![(Url::parse("file://test").unwrap(), vec![])]
-                                   .into_iter()
-                                   .collect(),
-                           },
+                                changes: vec![(Url::parse("file://test").unwrap(), vec![])]
+                                    .into_iter()
+                                    .collect(),
+                            },
                            r#"{"changes":{"file://test/":[]}}"#);
     }
 }
