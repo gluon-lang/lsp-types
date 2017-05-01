@@ -5,8 +5,8 @@ Language Server Protocol types for Rust.
 Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 
 Last protocol update:
-08/Dec/2016 at commit: 
-https://github.com/Microsoft/language-server-protocol/commit/00520823bd4c8060bb1963964615aa005594381b
+2017-04-29 at commit: 
+https://github.com/Microsoft/language-server-protocol/commit/20cf6216a7e30da2afcafea32e5e2593ebe7c65e
 
 This library uses the URL crate for parsing URIs. 
 Note that there is some confusion on the meaning of URLs vs URIs:
@@ -20,7 +20,6 @@ such as `urn:isbn:0451450523`.
 */
 
 #![allow(non_upper_case_globals)]
-#![allow(non_snake_case)]
 
 #[macro_use]
 extern crate enum_primitive;
@@ -35,6 +34,7 @@ extern crate url_serde;
 use url::Url;
 
 use std::collections::HashMap;
+use std::fmt;
 
 use serde::de;
 use serde::de::Error as Error_;
@@ -271,8 +271,7 @@ impl TextEdit {
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(with = "url_map")]
-    pub changes: HashMap<Url, Vec<TextEdit>>, 
-    //    changes: { [uri: string]: TextEdit[]; };
+    pub changes: HashMap<Url, Vec<TextEdit>>, //    changes: { [uri: string]: TextEdit[]; };
 }
 
 mod url_map {
@@ -423,7 +422,6 @@ pub struct TextDocumentPositionParams {
     pub position: Position,
 }
 
-
 impl TextDocumentPositionParams {
     pub fn new(text_document: TextDocumentIdentifier,
                position: Position)
@@ -436,7 +434,34 @@ impl TextDocumentPositionParams {
 }
 
 
-/* ========================= Actual Protocol ========================= */
+/// A document filter denotes a document through properties like language, schema or pattern.
+/// Examples are a filter that applies to TypeScript files on disk or a filter the applies to JSON
+/// files with name package.json:
+///
+/// { language: 'typescript', scheme: 'file' }
+/// { language: 'json', pattern: '**/package.json' }
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub struct DocumentFilter {
+    /**
+	 * A language id, like `typescript`.
+	 */
+    pub language: Option<String>,
+
+    /**
+	 * A Uri [scheme](#Uri.scheme), like `file` or `untitled`.
+	 */
+    pub scheme: Option<String>,
+
+    /**
+	 * A glob pattern, like `*.{ts,js}`.
+	 */
+    pub pattern: Option<String>,
+}
+
+/// A document selector is the combination of one or many document filters.
+pub type DocumentSelector = Vec<DocumentFilter>;
+
+// ========================= Actual Protocol =========================
 
 /**
 
@@ -448,6 +473,12 @@ impl TextDocumentPositionParams {
  
 */
 pub const REQUEST__Initialize: &'static str = "initialize";
+
+/// The initialized notification is sent from the client to the server after the client received
+/// the result of the initialize request but before the client is sending any other request or
+/// notification to the server. The server can use the initialized notification for example to
+/// dynamically register capabilities.
+pub const REQUEST__Initialized: &'static str = "initialized";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializeParams {
@@ -462,18 +493,286 @@ pub struct InitializeParams {
     #[serde(rename="rootPath")]
     pub root_path: Option<String>,
 
+    /// The rootUri of the workspace. Is null if no
+    /// folder is open. If both `rootPath` and `rootUri` are set
+    /// `rootUri` wins.
+    #[serde(with="option_url")]
+    #[serde(rename="rootUri")]
+    pub root_uri: Option<Url>,
+
     /// User provided initialization options.
     #[serde(rename="initializationOptions")]
     pub initialization_options: Option<Value>,
 
     /// The capabilities provided by the client (editor)
     pub capabilities: ClientCapabilities,
+
+    /// The initial trace setting. If omitted trace is disabled ('off').
+    #[serde(default)]
+    pub trace: TraceOption,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub enum TraceOption {
+    #[serde(rename="off")]
+    Off,
+    #[serde(rename="messages")]
+    Messages,
+    #[serde(rename="verbose")]
+    Verbose,
+}
+
+impl Default for TraceOption {
+    fn default() -> TraceOption {
+        TraceOption::Off
+    }
+}
+
+mod option_url {
+    use serde::{self, Serialize};
+    use url_serde::{De, Ser};
+    use url::Url;
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
+        where D: serde::Deserializer<'de>
+    {
+        serde::Deserialize::deserialize(deserializer).map(|x: Option<De<Url>>| {
+                                                              x.map(|url| url.into_inner())
+                                                          })
+    }
+
+    pub fn serialize<S>(self_: &Option<Url>, serializer: S) -> Result<S::Ok, S::Error>
+        where S: serde::Serializer
+    {
+        self_.as_ref().map(Ser::new).serialize(serializer)
+    }
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct GenericCapability {
+    /**
+    * This capability supports dynamic registration.
+    */
+    #[serde(rename="dynamicRegistration")]
+    pub dynamic_registration: Option<bool>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct WorkspaceEditCapability {
+    /**
+     * The client supports versioned document changes in `WorkspaceEdit`s
+     */
+    #[serde(rename="documentChanges")]
+    pub document_changes: Option<bool>,
+}
+
+/**
+ * Workspace specific client capabilities.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct WorkspaceClientCapabilites {
+    /**
+	 * The client supports applying batch edits to the workspace by supporting
+	 * the request 'workspace/applyEdit'
+	 */
+    #[serde(rename="applyEdit")]
+    pub apply_edit: Option<bool>,
+
+    /**
+	 * Capabilities specific to `WorkspaceEdit`s
+	 */
+    #[serde(rename="workspaceEdit")]
+    pub workspace_edit: Option<WorkspaceEditCapability>,
+
+    /**
+	 * Capabilities specific to the `workspace/didChangeConfiguration` notification.
+	 */
+    #[serde(rename="didChangeConfiguration")]
+    pub did_change_configuration: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
+	 */
+    #[serde(rename="didChangeWatchedFiles")]
+    pub did_change_watched_files: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `workspace/symbol` request.
+	 */
+    pub symbol: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `workspace/executeCommand` request.
+	 */
+    #[serde(rename="executeCommand")]
+    pub execute_command: Option<GenericCapability>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct SynchronizationCapability {
+    /**
+		 * Whether text document synchronization supports dynamic registration.
+		 */
+    #[serde(rename="dynamicRegistration")]
+    pub dynamic_registration: Option<bool>,
+
+    /**
+		 * The client supports sending will save notifications.
+		 */
+    #[serde(rename="willSave")]
+    pub will_save: Option<bool>,
+
+    /**
+		 * The client supports sending a will save request and
+		 * waits for a response providing text edits which will
+		 * be applied to the document before it is saved.
+		 */
+    #[serde(rename="willSaveWaitUntil")]
+    pub will_save_wait_until: Option<bool>,
+
+    /**
+		 * The client supports did save notifications.
+		 */
+    #[serde(rename="didSave")]
+    pub did_save: Option<bool>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct CompletionItemCapability {
+    /**
+			 * Client supports snippets as insert text.
+			 *
+			 * A snippet can define tab stops and placeholders with `$1`, `$2`
+			 * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+			 * the end of the snippet. Placeholders with equal identifiers are linked,
+			 * that is typing in one will update others too.
+			 */
+    #[serde(rename="snippetSupport")]
+    pub snippet_support: Option<bool>,
+}
+
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct CompletionCapability {
+    /**
+		 * Whether completion supports dynamic registration.
+		 */
+    #[serde(rename="dynamicRegistration")]
+    pub dynamic_registration: Option<bool>,
+
+    /**
+		 * The client supports the following `CompletionItem` specific
+		 * capabilities.
+		 */
+    #[serde(rename="completionItem")]
+    pub completion_item: Option<CompletionItemCapability>,
+}
+
+/**
+ * Text document specific client capabilities.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct TextDocumentClientCapabilities {
+    pub synchronization: Option<SynchronizationCapability>,
+    /**
+	 * Capabilities specific to the `textDocument/completion`
+	 */
+    pub completion: Option<CompletionCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/hover`
+	 */
+    pub hover: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/signatureHelp`
+	 */
+    #[serde(rename="signatureHelp")]
+    pub signature_help: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/references`
+	 */
+    pub references: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/documentHighlight`
+	 */
+    #[serde(rename="documentHighlight")]
+    pub document_highlight: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/documentSymbol`
+	 */
+    #[serde(rename="documentSymbol")]
+    pub document_symbol: Option<GenericCapability>,
+    /**
+	 * Capabilities specific to the `textDocument/formatting`
+	 */
+    pub formatting: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/rangeFormatting`
+	 */
+    #[serde(rename="rangeFormatting")]
+    pub range_formatting: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/onTypeFormatting`
+	 */
+    #[serde(rename="onTypeFormatting")]
+    pub on_type_formatting: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/definition`
+	 */
+    pub definition: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/codeAction`
+	 */
+    #[serde(rename="codeAction")]
+    pub code_action: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/codeLens`
+	 */
+    #[serde(rename="codeLens")]
+    pub code_lens: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/documentLink`
+	 */
+    #[serde(rename="documentLink")]
+    pub document_link: Option<GenericCapability>,
+
+    /**
+	 * Capabilities specific to the `textDocument/rename`
+	 */
+    pub rename: Option<GenericCapability>,
 }
 
 /**
  * Where ClientCapabilities are currently empty:
  */
-pub type ClientCapabilities = Value;
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ClientCapabilities {
+    /**
+	 * Workspace specific client capabilities.
+	 */
+    pub workspace: Option<WorkspaceClientCapabilites>,
+
+    /**
+	 * Text document specific client capabilities.
+	 */
+    #[serde(rename="textDocument")]
+    pub text_document: Option<TextDocumentClientCapabilities>,
+
+    /**
+	 * Experimental client capabilities.
+	 */
+    pub experimental: Value,
+}
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct InitializeResult {
@@ -765,6 +1064,78 @@ pub struct LogMessageParams {
  */
 pub const NOTIFICATION__TelemetryEvent: &'static str = "telemetry/event";
 
+
+/**
+ * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
+ */
+pub const NOTIFICATION__RegisterCapability: &'static str = "client/registerCapability";
+
+/**
+ * General paramters to to regsiter for a capability.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct Registration {
+    /**
+	 * The id used to register the request. The id can be used to deregister
+	 * the request again.
+	 */
+    pub id: String,
+
+    /**
+	 * The method / capability to register for.
+	 */
+    pub method: String,
+
+    /**
+	 * Options necessary for the registration.
+	 */
+    #[serde(rename="registerOptions")]
+    pub register_options: Value,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct RegistrationParams {
+    registrations: Vec<Registration>,
+}
+
+/// Since most of the registration options require to specify a document selector there is a base
+/// interface that can be used.
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct TextDocumentRegistrationOptions {
+    /**
+	 * A document selector to identify the scope of the registration. If set to null
+	 * the document selector provided on the client side will be used.
+	 */
+    #[serde(rename="documentSelector")]
+    pub document_selector: Option<DocumentSelector>,
+}
+
+/// The client/unregisterCapability request is sent from the server to the client to unregister a
+/// previously register capability.
+pub const NOTIFICATION__UnregisterCapability: &'static str = "client/unregisterCapability";
+
+/**
+ * General parameters to unregister a capability.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct Unregistration {
+    /**
+	 * The id used to unregister the request or notification. Usually an id
+	 * provided during the register request.
+	 */
+    pub id: String,
+
+    /**
+	 * The method / capability to unregister for.
+	 */
+    pub method: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct UnregistrationParams {
+    pub unregisterations: Vec<Unregistration>,
+}
+
 /**
  * A notification sent from the client to the server to signal the change of configuration settings.
  */
@@ -822,6 +1193,103 @@ pub struct TextDocumentContentChangeEvent {
 
     /// The new text of the document.
     pub text: String,
+}
+
+/**
+ * Descibe options to be used when registered for text document change events.
+ *
+ * Extends TextDocumentRegistrationOptions
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct TextDocumentChangeRegistrationOptions {
+    /**
+	 * A document selector to identify the scope of the registration. If set to null
+	 * the document selector provided on the client side will be used.
+	 */
+    #[serde(rename="documentSelector")]
+    pub document_selector: Option<DocumentSelector>,
+
+    /**
+	 * How documents are synced to the server. See TextDocumentSyncKind.Full
+	 * and TextDocumentSyncKindIncremental.
+	 */
+    #[serde(rename="syncKind")]
+    pub sync_kind: i32,
+}
+
+/// The document will save notification is sent from the client to the server before the document
+/// is actually saved.
+pub const NOTIFICATION__WillSave: &'static str = "textDocument/willSave";
+
+/// The document will save request is sent from the client to the server before the document is
+/// actually saved. The request can return an array of TextEdits which will be applied to the text
+/// document before it is saved. Please note that clients might drop results if computing the text
+/// edits took too long or if a server constantly fails on this request. This is done to keep the
+/// save fast and reliable.
+pub const NOTIFICATION__WillSaveWaitUntil: &'static str = "textDocument/willSaveWaitUntil";
+
+/**
+ * The parameters send in a will save text document notification.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct WillSaveTextDocumentParams {
+    /**
+	 * The document that will be saved.
+	 */
+    #[serde(rename="textDocument")]
+    pub text_document: TextDocumentIdentifier,
+
+    /**
+	 * The 'TextDocumentSaveReason'.
+	 */
+    pub reason: TextDocumentSaveReason,
+}
+
+/**
+ * Represents reasons why a text document is saved.
+ */
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum TextDocumentSaveReason {
+    /**
+	 * Manually triggered, e.g. by the user pressing save, by starting debugging,
+	 * or by an API call.
+	 */
+    Manual = 1,
+
+    /**
+	 * Automatic after a delay.
+	 */
+    AfterDelay = 2,
+
+    /**
+	 * When the editor lost focus.
+	 */
+    FocusOut = 3,
+}
+
+
+impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: serde::Deserializer<'de>
+    {
+        Ok(match try!(u8::deserialize(deserializer)) {
+               1 => TextDocumentSaveReason::Manual,
+               2 => TextDocumentSaveReason::AfterDelay,
+               3 => TextDocumentSaveReason::FocusOut,
+               i => {
+                   return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
+                                                      &"value of 1, 2 or 3"))
+               }
+           })
+    }
+}
+
+impl serde::Serialize for TextDocumentSaveReason {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: serde::Serializer
+    {
+        serializer.serialize_u8(*self as u8)
+    }
 }
 
 /**
@@ -1102,8 +1570,8 @@ pub const REQUEST__Hover: &'static str = "textDocument/hover";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Hover {
     /// The hover's content
-    pub contents: Vec<MarkedString>, /* FIXME: need to review if this is correct*/
-    //contents: MarkedString | MarkedString[];
+    pub contents: Vec<MarkedString>, // FIXME: need to review if this is correct
+    // contents: MarkedString | MarkedString[];
     /// An optional range is a range inside a text document
     /// that is used to visualize a hover, e.g. by changing the background color.
     pub range: Option<Range>,
@@ -1119,7 +1587,7 @@ pub struct Hover {
  ${value}
  ```
  */
-//type MarkedString = string | { language: string; value: string };
+// type MarkedString = string | { language: string; value: string };
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
@@ -1381,6 +1849,55 @@ pub struct WorkspaceSymbolParams {
     pub query: String,
 }
 
+/// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
+
+pub const REQUEST__ExecuteCommand: &'static str = "workspace/executeCommand";
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ExecuteCommandParams {
+    /**
+	 * The identifier of the actual command handler.
+	 */
+    pub command: String,
+    /**
+	 * Arguments that the command should be invoked with.
+	 */
+    #[serde(default)]
+    pub arguments: Vec<Value>,
+}
+
+/**
+ * Execute command registration options.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ExecuteCommandRegistrationOptions {
+    /**
+	 * The commands to be executed on the server
+	 */
+    pub commands: Vec<String>,
+}
+
+
+/// The workspace/applyEdit request is sent from the server to the client to modify resource on the
+/// client side.
+pub const REQUEST__ApplyEdit: &'static str = "textDocument/applyEdit";
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ApplyWorkspaceEditParams {
+    /**
+	 * The edits to apply.
+	 */
+    pub edit: WorkspaceEdit,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ApplyWorkspaceEditResponse {
+    /**
+	 * Indicates whether the edit was applied or not.
+	 */
+    pub applied: bool,
+}
+
 /**
  * The code action request is sent from the client to the server to compute commands for a given text document
  * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or 
@@ -1505,22 +2022,103 @@ pub struct DocumentFormattingParams {
 }
 
 /// Value-object describing what options formatting should use.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
 pub struct FormattingOptions {
     /// Size of a tab in spaces.
-    #[serde(rename="tabSize")]
     pub tab_size: u64,
 
-    #[serde(rename="insertSpaces")]
     /// Prefer spaces over tabs.
-    pub insert_spaces: bool, 
+    pub insert_spaces: bool,
 
-//
-//    /// Signature for further properties.
-//
-    //[key: string]: boolean | number | string;
-    // FIXME what is this, I don't quite get it
+    /// Signature for further properties.
+    pub properties: HashMap<String, FormattingProperty>,
 }
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum FormattingProperty {
+    Bool(bool),
+    Number(f64),
+    String(String),
+}
+
+impl<'de> serde::Deserialize<'de> for FormattingOptions {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: serde::Deserializer<'de>
+    {
+        use serde::de::{MapAccess, Visitor};
+
+        struct FormattingOptionsVisitor;
+
+        impl<'de> Visitor<'de> for FormattingOptionsVisitor {
+            type Value = FormattingOptions;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("struct FormattingOptions")
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<FormattingOptions, V::Error>
+                where V: MapAccess<'de>
+            {
+                use std::borrow::Cow;
+
+                let mut tab_size = None;
+                let mut insert_spaces = None;
+                let mut properties = HashMap::new();
+                while let Some(key) = map.next_key::<Cow<str>>()? {
+                    match &*key {
+                        "tabSize" => {
+                            if tab_size.is_some() {
+                                return Err(de::Error::duplicate_field("tab_size"));
+                            }
+                            tab_size = Some(map.next_value()?);
+                            continue;
+                        }
+                        "insertSpaces" => {
+                            if insert_spaces.is_some() {
+                                return Err(de::Error::duplicate_field("insert_spaces"));
+                            }
+                            insert_spaces = Some(map.next_value()?);
+                            continue;
+                        }
+                        _ => (),
+                    }
+                    properties.insert(key.into_owned(), map.next_value()?);
+                }
+                let tab_size = tab_size
+                    .ok_or_else(|| de::Error::missing_field("tab_size"))?;
+                let insert_spaces = insert_spaces
+                    .ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
+                Ok(FormattingOptions {
+                       tab_size: tab_size,
+                       insert_spaces: insert_spaces,
+                       properties: properties,
+                   })
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["tabSize", "insertSpaces"];
+        deserializer.deserialize_struct("FormattingOptions", FIELDS, FormattingOptionsVisitor)
+    }
+}
+
+impl serde::Serialize for FormattingOptions {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: serde::Serializer
+    {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer
+            .serialize_map(Some(self.properties.len() + 2))?;
+        map.serialize_entry("tabSize", &self.tab_size)?;
+        map.serialize_entry("insertSpaces", &self.insert_spaces)?;
+        for (k, v) in &self.properties {
+            map.serialize_entry(k, v)?;
+        }
+        map.end()
+    }
+}
+
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
 pub const REQUEST__RangeFormatting: &'static str = "textDocument/rangeFormatting";
@@ -1558,6 +2156,29 @@ pub struct DocumentOnTypeFormattingParams {
 
     /// The format options.
     pub options: FormattingOptions,
+}
+
+/// Extends TextDocumentRegistrationOptions
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DocumentOnTypeFormattingRegistrationOptions {
+    /**
+	 * A document selector to identify the scope of the registration. If set to null
+	 * the document selector provided on the client side will be used.
+	 */
+    #[serde(rename="documentSelector")]
+    pub document_selector: Option<DocumentSelector>,
+
+    /**
+	 * A character on which formatting should be triggered, like `}`.
+	 */
+    #[serde(rename="firstTriggerCharacter")]
+    pub first_trigger_character: String,
+
+    /**
+	 * More trigger characters.
+	 */
+    #[serde(rename="moreTriggerCharacter")]
+    pub more_trigger_character: Option<Vec<String>>,
 }
 
 /**
@@ -1633,5 +2254,25 @@ mod tests {
                                     .collect(),
                             },
                            r#"{"changes":{"file://test/":[]}}"#);
+    }
+
+    #[test]
+    fn formatting_options() {
+        test_serialization(&FormattingOptions {
+                                tab_size: 123,
+                                insert_spaces: true,
+                                properties: HashMap::new(),
+                            },
+                           r#"{"tabSize":123,"insertSpaces":true}"#);
+
+        test_serialization(&FormattingOptions {
+                                tab_size: 123,
+                                insert_spaces: true,
+                                properties: vec![("prop".to_string(),
+                                                  FormattingProperty::Number(1.0))]
+                                        .into_iter()
+                                        .collect(),
+                            },
+                           r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#);
     }
 }
