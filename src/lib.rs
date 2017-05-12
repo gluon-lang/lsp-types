@@ -771,7 +771,7 @@ pub struct ClientCapabilities {
     /**
 	 * Experimental client capabilities.
 	 */
-    pub experimental: Value,
+    pub experimental: Option<Value>,
 }
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
