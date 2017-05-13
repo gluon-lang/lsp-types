@@ -498,6 +498,7 @@ pub struct InitializeParams {
     /// `rootUri` wins.
     #[serde(with="option_url")]
     #[serde(rename="rootUri")]
+    #[serde(default)]
     pub root_uri: Option<Url>,
 
     /// User provided initialization options.
@@ -2274,5 +2275,10 @@ mod tests {
                                         .collect(),
                             },
                            r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#);
+    }
+
+    #[test]
+    fn root_uri_can_be_missing() {
+         serde_json::from_str::<InitializeParams>(r#"{ "capabilities": {} }"#).unwrap();
     }
 }
