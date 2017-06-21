@@ -872,6 +872,13 @@ pub struct DocumentOnTypeFormattingOptions {
     pub more_trigger_character: Option<Vec<String>>,
 }
 
+/// Execute command options.
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+pub struct ExecuteCommandOptions {
+    /// The commands to be executed on the server
+    pub commands: Vec<String>
+}
+
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
@@ -948,6 +955,11 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if="Option::is_none")]
     #[serde(rename="renameProvider")]
     pub rename_provider: Option<bool>,
+
+    /// The server provides execute command support.
+    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(rename="executeCommandProvider")]
+    pub execute_command_provider: Option<ExecuteCommandOptions>,
 }
 
 /**
