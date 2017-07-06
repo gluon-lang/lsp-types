@@ -1610,8 +1610,8 @@ pub enum MarkedString {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct LanguageString {
-    language: String,
-    value: String,
+    pub language: String,
+    pub value: String,
 }
 
 impl MarkedString {
