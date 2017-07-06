@@ -1108,7 +1108,7 @@ pub struct Registration {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct RegistrationParams {
-    registrations: Vec<Registration>,
+    pub registrations: Vec<Registration>,
 }
 
 /// Since most of the registration options require to specify a document selector there is a base
