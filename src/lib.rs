@@ -478,7 +478,7 @@ pub const REQUEST__Initialize: &'static str = "initialize";
 /// the result of the initialize request but before the client is sending any other request or
 /// notification to the server. The server can use the initialized notification for example to
 /// dynamically register capabilities.
-pub const REQUEST__Initialized: &'static str = "initialized";
+pub const NOTIFICATION__Initialized: &'static str = "initialized";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializeParams {
