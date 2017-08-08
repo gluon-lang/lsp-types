@@ -1058,7 +1058,7 @@ request!{REQUEST__Shutdown; struct Shutdown}
  */
 pub const NOTIFICATION__Exit: &'static str = "exit";
 
-request!{NOTIFICATION__Exit; struct Exit}
+notification!{NOTIFICATION__Exit; struct Exit}
 
 /**
  * The show message notification is sent from a server to a client to ask the client to display a particular message
