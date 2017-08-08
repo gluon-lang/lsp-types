@@ -35,18 +35,17 @@ use url::Url;
 use std::collections::HashMap;
 use std::fmt;
 
-use serde::de;
-use serde::de::Error as Error_;
+use serde::de::{self, Error as Error_};
 use serde_json::Value;
 
 pub trait Notification {
-    type Param;
+    type Param: serde::de::DeserializeOwned;
     fn method() -> &'static str;
 }
 
 pub trait Request {
-    type Param;
-    type Result;
+    type Param: serde::de::DeserializeOwned;
+    type Result: serde::Serialize;
     fn method() -> &'static str;
 }
 
