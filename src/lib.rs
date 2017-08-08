@@ -18,6 +18,7 @@ such as `urn:isbn:0451450523`.
 
 
 */
+#![cfg_attr(feature = "nightly", feature(associated_consts))]
 #![allow(non_upper_case_globals)]
 
 #[macro_use]
@@ -41,12 +42,16 @@ use serde_json::Value;
 pub trait Notification {
     type Param: serde::de::DeserializeOwned;
     fn method() -> &'static str;
+    #[cfg(feature = "nightly")]
+    const METHOD: &'static str;
 }
 
 pub trait Request {
     type Param: serde::de::DeserializeOwned;
     type Result: serde::Serialize;
     fn method() -> &'static str;
+    #[cfg(feature = "nightly")]
+    const METHOD: &'static str;
 }
 
 macro_rules! notification {
@@ -64,6 +69,8 @@ macro_rules! notification {
         impl Notification for $self_ {
             type Param = $param;
             fn method() -> &'static str { $name }
+            #[cfg(feature = "nightly")]
+            const METHOD: &'static str = $name;
         }
     }
 }
@@ -84,6 +91,8 @@ macro_rules! request {
             type Param = $param;
             type Result = $result;
             fn method() -> &'static str { $name }
+            #[cfg(feature = "nightly")]
+            const METHOD: &'static str = $name;
         }
     }
 }
