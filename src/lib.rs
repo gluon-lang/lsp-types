@@ -39,6 +39,56 @@ use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
 
+pub trait Notification {
+    type Param;
+    fn method() -> &'static str;
+}
+
+pub trait Request {
+    type Param;
+    type Result;
+    fn method() -> &'static str;
+}
+
+macro_rules! notification {
+    ($name: expr; struct $param: ident) => {
+        notification!($name; struct $param, ());
+    };
+    ($name: expr; struct $self_: ident, $param: ty) => {
+        pub struct $self_;
+        notification!($name; $self_, $param);
+    };
+    ($name: expr; $param: ty) => {
+        notification!($name; $param, $param);
+    };
+    ($name: expr; $self_: ty, $param: ty) => {
+        impl Notification for $self_ {
+            type Param = $param;
+            fn method() -> &'static str { $name }
+        }
+    }
+}
+
+macro_rules! request {
+    ($name: expr; struct $self_: ident) => {
+        request!($name; struct $self_, () => ());
+    };
+    ($name: expr; struct $self_: ident, $param: ty => $result: ty) => {
+        pub struct $self_;
+        request!($name; $self_, $param => $result);
+    };
+    ($name: expr; $param: ty => $result: ty) => {
+        request!($name; $param, $param => $result);
+    };
+    ($name: expr; $self_: ty, $param: ty => $result: ty) => {
+        impl Request for $self_ {
+            type Param = $param;
+            type Result = $result;
+            fn method() -> &'static str { $name }
+        }
+    }
+}
+
 
 /* ----------------- Auxiliary types ----------------- */
 
@@ -58,6 +108,8 @@ pub enum NumberOrString {
 /// It can not be left open / hanging. This is in line with the JSON RPC protocol that requires
 /// that every request sends a response back. In addition it allows for returning partial results on cancel.
 pub const NOTIFICATION__Cancel: &'static str = "$/cancelRequest";
+
+notification!{NOTIFICATION__Cancel; CancelParams}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CancelParams {
@@ -485,11 +537,15 @@ pub type DocumentSelector = Vec<DocumentFilter>;
 */
 pub const REQUEST__Initialize: &'static str = "initialize";
 
+request!{REQUEST__Initialize; InitializeParams => InitializeResult}
+
 /// The initialized notification is sent from the client to the server after the client received
 /// the result of the initialize request but before the client is sending any other request or
 /// notification to the server. The server can use the initialized notification for example to
 /// dynamically register capabilities.
 pub const NOTIFICATION__Initialized: &'static str = "initialized";
+
+notification!{NOTIFICATION__Initialized; struct Initialized}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializeParams {
@@ -985,6 +1041,8 @@ pub struct ServerCapabilities {
  */
 pub const REQUEST__Shutdown: &'static str = "shutdown";
 
+request!{REQUEST__Shutdown; struct Shutdown}
+
 /**
  * A notification to ask the server to exit its process.
  * The server should exit with success code 0 if the shutdown request has been received before;
@@ -992,11 +1050,15 @@ pub const REQUEST__Shutdown: &'static str = "shutdown";
  */
 pub const NOTIFICATION__Exit: &'static str = "exit";
 
+request!{NOTIFICATION__Exit; struct Exit}
+
 /**
  * The show message notification is sent from a server to a client to ask the client to display a particular message
  * in the user interface.
  */
 pub const NOTIFICATION__ShowMessage: &'static str = "window/showMessage";
+
+notification!{NOTIFICATION__ShowMessage; ShowMessageParams}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ShowMessageParams {
@@ -1056,6 +1118,7 @@ impl serde::Serialize for MessageType {
  */
 pub const REQUEST__ShowMessageRequest: &'static str = "window/showMessageRequest";
 
+request!{REQUEST__ShowMessageRequest; ShowMessageRequestParams => MessageActionItem}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ShowMessageRequestParams {
@@ -1082,6 +1145,8 @@ pub struct MessageActionItem {
  */
 pub const NOTIFICATION__LogMessage: &'static str = "window/logMessage";
 
+notification!{NOTIFICATION__LogMessage; LogMessageParams}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct LogMessageParams {
     /// The message type. See {@link MessageType}
@@ -1097,11 +1162,14 @@ pub struct LogMessageParams {
  */
 pub const NOTIFICATION__TelemetryEvent: &'static str = "telemetry/event";
 
+notification!{NOTIFICATION__TelemetryEvent; struct TelemetryEvent, Value}
 
 /**
  * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
  */
 pub const NOTIFICATION__RegisterCapability: &'static str = "client/registerCapability";
+
+notification!{NOTIFICATION__RegisterCapability; RegistrationParams}
 
 /**
  * General paramters to to regsiter for a capability.
@@ -1147,6 +1215,8 @@ pub struct TextDocumentRegistrationOptions {
 /// previously register capability.
 pub const NOTIFICATION__UnregisterCapability: &'static str = "client/unregisterCapability";
 
+notification!{NOTIFICATION__UnregisterCapability; UnregistrationParams}
+
 /**
  * General parameters to unregister a capability.
  */
@@ -1174,6 +1244,8 @@ pub struct UnregistrationParams {
  */
 pub const NOTIFICATION__WorkspaceChangeConfiguration: &'static str = "workspace/didChangeConfiguration";
 
+notification!{NOTIFICATION__WorkspaceChangeConfiguration; DidChangeConfigurationParams}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidChangeConfigurationParams {
     /// The actual changed settings
@@ -1187,6 +1259,8 @@ pub struct DidChangeConfigurationParams {
  */
 pub const NOTIFICATION__DidOpenTextDocument: &'static str = "textDocument/didOpen";
 
+notification!{NOTIFICATION__DidOpenTextDocument; DidOpenTextDocumentParams}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidOpenTextDocumentParams {
     /// The document that was opened.
@@ -1199,6 +1273,8 @@ pub struct DidOpenTextDocumentParams {
  * In 2.0 the shape of the params has changed to include proper version numbers and language ids.
  */
 pub const NOTIFICATION__DidChangeTextDocument: &'static str = "textDocument/didChange";
+
+notification!{NOTIFICATION__DidChangeTextDocument; DidChangeTextDocumentParams}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidChangeTextDocumentParams {
@@ -1254,12 +1330,16 @@ pub struct TextDocumentChangeRegistrationOptions {
 /// is actually saved.
 pub const NOTIFICATION__WillSave: &'static str = "textDocument/willSave";
 
+notification!{NOTIFICATION__WillSave; WillSaveTextDocumentParams}
+
 /// The document will save request is sent from the client to the server before the document is
 /// actually saved. The request can return an array of TextEdits which will be applied to the text
 /// document before it is saved. Please note that clients might drop results if computing the text
 /// edits took too long or if a server constantly fails on this request. This is done to keep the
 /// save fast and reliable.
 pub const NOTIFICATION__WillSaveWaitUntil: &'static str = "textDocument/willSaveWaitUntil";
+
+request!{NOTIFICATION__WillSaveWaitUntil; WillSaveTextDocumentParams => Vec<TextEdit>}
 
 /**
  * The parameters send in a will save text document notification.
@@ -1330,23 +1410,11 @@ impl serde::Serialize for TextDocumentSaveReason {
 }
 
 /**
- * The document close notification is sent from the client to the server when the document got closed in the client.
- * The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
- * the truth now exists on disk).
- */
-pub const NOTIFICATION__DidCloseTextDocument: &'static str = "textDocument/didClose";
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct DidCloseTextDocumentParams {
-    /// The document that was closed.
-    #[serde(rename = "textDocument")]
-    pub text_document: TextDocumentIdentifier,
-}
-
-/**
  * The document save notification is sent from the client to the server when the document was saved in the client.
  */
 pub const NOTIFICATION__DidSaveTextDocument: &'static str = "textDocument/didSave";
+
+notification!{NOTIFICATION__DidSaveTextDocument; DidSaveTextDocumentParams}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidSaveTextDocumentParams {
@@ -1356,10 +1424,28 @@ pub struct DidSaveTextDocumentParams {
 }
 
 /**
+ * The document close notification is sent from the client to the server when the document got closed in the client.
+ * The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
+ * the truth now exists on disk).
+ */
+pub const NOTIFICATION__DidCloseTextDocument: &'static str = "textDocument/didClose";
+
+notification!{NOTIFICATION__DidCloseTextDocument; DidCloseTextDocumentParams}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct DidCloseTextDocumentParams {
+    /// The document that was closed.
+    #[serde(rename = "textDocument")]
+    pub text_document: TextDocumentIdentifier,
+}
+
+/**
  * The watched files notification is sent from the client to the server when the client detects changes to files
  * watched by the language client.
  */
 pub const NOTIFICATION__DidChangeWatchedFiles: &'static str = "workspace/didChangeWatchedFiles";
+
+notification!{NOTIFICATION__DidChangeWatchedFiles; DidChangeWatchedFilesParams}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
@@ -1431,6 +1517,8 @@ impl FileEvent {
  */
 pub const NOTIFICATION__PublishDiagnostics: &'static str = "textDocument/publishDiagnostics";
 
+notification!{NOTIFICATION__PublishDiagnostics; PublishDiagnosticsParams}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
@@ -1462,6 +1550,12 @@ impl PublishDiagnosticsParams {
 */
 // result: CompletionItem[] | CompletionList FIXME
 pub const REQUEST__Completion: &'static str = "textDocument/completion";
+
+request!{REQUEST__Completion;
+    struct TextDocumentCompletion,
+    // TODO This could return `CompletionItem[] | CompletionList`
+    TextDocumentPositionParams => CompletionList
+}
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
@@ -1606,10 +1700,21 @@ impl serde::Serialize for CompletionItemKind {
 /// The request is sent from the client to the server to resolve additional information for a given completion item.
 pub const REQUEST__ResolveCompletionItem: &'static str = "completionItem/resolve";
 
+request!{
+    REQUEST__ResolveCompletionItem;
+    struct CompletionItemResolve,
+    CompletionItem => CompletionItem
+}
 
 /// The hover request is sent from the client to the server to request hover information at a given text
 /// document position.
 pub const REQUEST__Hover: &'static str = "textDocument/hover";
+
+request!{
+    REQUEST__Hover;
+    Hover,
+    TextDocumentPositionParams => Hover
+}
 
 /// The result of a hover request.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -1663,6 +1768,11 @@ impl MarkedString {
 /// a given cursor position.
 pub const REQUEST__SignatureHelp: &'static str = "textDocument/signatureHelp";
 
+request!{
+    REQUEST__SignatureHelp;
+    SignatureHelp,
+    TextDocumentPositionParams => SignatureHelp
+}
 
 /// Signature help represents the signature of something
 /// callable. There can be multiple signature but only one
@@ -1717,9 +1827,21 @@ pub struct ParameterInformation {
 /// a symbol at a given text document position.
 pub const REQUEST__GotoDefinition: &'static str = "textDocument/definition";
 
+request!{
+    REQUEST__SignatureHelp;
+    struct GotoDefinition,
+    // TODO Could return Location | Location[]
+    TextDocumentPositionParams => Vec<Location>
+}
+
 /// The references request is sent from the client to the server to resolve project-wide references for the
 /// symbol denoted by the given text document position.
 pub const REQUEST__References: &'static str = "textDocument/references";
+
+request!{
+    REQUEST__References;
+    ReferenceParams => Vec<Location>
+}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ReferenceParams {
@@ -1753,6 +1875,11 @@ pub struct ReferenceContext {
  use Textas the kind.
 */
 pub const REQUEST__DocumentHighlight: &'static str = "textDocument/documentHighlight";
+
+request!{
+    REQUEST__DocumentHighlight;
+    TextDocumentPositionParams => Vec<DocumentHighlight>
+}
 
 /// A document highlight is a range inside a text document which deserves
 /// special attention. Usually a document highlight is visualized by changing
@@ -1812,6 +1939,11 @@ impl serde::Serialize for DocumentHighlightKind {
  * text document.
  */
 pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol";
+
+request!{
+    REQUEST__DocumentSymbols;
+    DocumentSymbolParams => Vec<SymbolInformation>
+}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentSymbolParams {
@@ -1895,60 +2027,16 @@ impl serde::Serialize for SymbolKind {
  */
 pub const REQUEST__WorkspaceSymbols: &'static str = "workspace/symbol";
 
+request!{
+    REQUEST__WorkspaceSymbols;
+    WorkspaceSymbolParams => Vec<SymbolInformation>
+}
+
 /// The parameters of a Workspace Symbol Request.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct WorkspaceSymbolParams {
     /// A non-empty query string
     pub query: String,
-}
-
-/// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
-
-pub const REQUEST__ExecuteCommand: &'static str = "workspace/executeCommand";
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct ExecuteCommandParams {
-    /**
-     * The identifier of the actual command handler.
-     */
-    pub command: String,
-    /**
-     * Arguments that the command should be invoked with.
-     */
-    #[serde(default)]
-    pub arguments: Vec<Value>,
-}
-
-/**
- * Execute command registration options.
- */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct ExecuteCommandRegistrationOptions {
-    /**
-     * The commands to be executed on the server
-     */
-    pub commands: Vec<String>,
-}
-
-
-/// The workspace/applyEdit request is sent from the server to the client to modify resource on the
-/// client side.
-pub const REQUEST__ApplyEdit: &'static str = "textDocument/applyEdit";
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct ApplyWorkspaceEditParams {
-    /**
-     * The edits to apply.
-     */
-    pub edit: WorkspaceEdit,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct ApplyWorkspaceEditResponse {
-    /**
-     * Indicates whether the edit was applied or not.
-     */
-    pub applied: bool,
 }
 
 /**
@@ -1957,6 +2045,11 @@ pub struct ApplyWorkspaceEditResponse {
  * presses the lightbulb associated with a marker.
  */
 pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
+
+request!{
+    REQUEST__CodeAction;
+    CodeActionParams => Vec<Command>
+}
 
 /// Params for the CodeActionRequest
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -1984,6 +2077,11 @@ pub struct CodeActionContext {
  * The code lens request is sent from the client to the server to compute code lenses for a given text document.
  */
 pub const REQUEST__CodeLens: &'static str = "textDocument/codeLens";
+
+request!{
+    REQUEST__CodeLens;
+    CodeLensParams => Vec<CodeLens>
+}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CodeLensParams {
@@ -2016,6 +2114,11 @@ pub struct CodeLens {
  */
 pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
 
+request!{
+    REQUEST__CodeLens;
+    struct CodeLensResolve,
+    CodeLens => CodeLens
+}
 
 /**
 
@@ -2023,6 +2126,11 @@ pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
 
 */
 pub const REQUEST__DocumentLink: &'static str = "textDocument/documentLink";
+
+request!{
+    REQUEST__DocumentLink;
+    DocumentLinkParams => Vec<DocumentLink>
+}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentLinkParams {
@@ -2058,11 +2166,21 @@ pub struct DocumentLink {
 */
 pub const REQUEST__DocumentLinkResolve: &'static str = "documentLink/resolve";
 
+request!{
+    REQUEST__DocumentLinkResolve;
+    struct DocumentLinkResolve,
+    DocumentLink => DocumentLink
+}
 
 /**
  * The document formatting request is sent from the server to the client to format a whole document.
  */
 pub const REQUEST__Formatting: &'static str = "textDocument/formatting";
+
+request!{
+    REQUEST__Formatting;
+    DocumentFormattingParams => Vec<TextEdit>
+}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentFormattingParams {
@@ -2178,6 +2296,11 @@ impl serde::Serialize for FormattingOptions {
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
 pub const REQUEST__RangeFormatting: &'static str = "textDocument/rangeFormatting";
 
+request!{
+    REQUEST__RangeFormatting;
+    DocumentRangeFormattingParams => Vec<TextEdit>
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentRangeFormattingParams {
     /// The document to format.
@@ -2196,6 +2319,11 @@ pub struct DocumentRangeFormattingParams {
  * the document during typing.
  */
 pub const REQUEST__OnTypeFormatting: &'static str = "textDocument/onTypeFormatting";
+
+request!{
+    REQUEST__OnTypeFormatting;
+    DocumentOnTypeFormattingParams => Vec<TextEdit>
+}
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingParams {
@@ -2241,6 +2369,11 @@ pub struct DocumentOnTypeFormattingRegistrationOptions {
  */
 pub const REQUEST__Rename: &'static str = "textDocument/rename";
 
+request!{
+    REQUEST__Rename;
+    RenameParams => WorkspaceEdit
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct RenameParams {
     /// The document to format.
@@ -2255,6 +2388,65 @@ pub struct RenameParams {
     /// appropriate message set.
     #[serde(rename = "newName")]
     pub new_name: String,
+}
+
+/// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
+
+pub const REQUEST__ExecuteCommand: &'static str = "workspace/executeCommand";
+
+request!{
+    REQUEST__ExecuteCommand;
+    ExecuteCommandParams => Value
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ExecuteCommandParams {
+    /**
+     * The identifier of the actual command handler.
+     */
+    pub command: String,
+    /**
+     * Arguments that the command should be invoked with.
+     */
+    #[serde(default)]
+    pub arguments: Vec<Value>,
+}
+
+/**
+ * Execute command registration options.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ExecuteCommandRegistrationOptions {
+    /**
+     * The commands to be executed on the server
+     */
+    pub commands: Vec<String>,
+}
+
+
+/// The workspace/applyEdit request is sent from the server to the client to modify resource on the
+/// client side.
+pub const REQUEST__ApplyEdit: &'static str = "textDocument/applyEdit";
+
+request!{
+    REQUEST__ApplyEdit;
+    ApplyWorkspaceEditParams => ApplyWorkspaceEditResponse
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ApplyWorkspaceEditParams {
+    /**
+     * The edits to apply.
+     */
+    pub edit: WorkspaceEdit,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct ApplyWorkspaceEditResponse {
+    /**
+     * Indicates whether the edit was applied or not.
+     */
+    pub applied: bool,
 }
 
 #[cfg(test)]
