@@ -5,20 +5,19 @@ Language Server Protocol types for Rust.
 Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 
 Last protocol update:
-2017-04-29 at commit: 
+2017-04-29 at commit:
 https://github.com/Microsoft/language-server-protocol/commit/20cf6216a7e30da2afcafea32e5e2593ebe7c65e
 
-This library uses the URL crate for parsing URIs. 
+This library uses the URL crate for parsing URIs.
 Note that there is some confusion on the meaning of URLs vs URIs:
-http://stackoverflow.com/a/28865728/393898 . 
-According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs, 
-But on the modern/new meaning of URLs, they are the same as URIs. 
-The important take-away aspect is that the URL crate should be able to parse any URI, 
+http://stackoverflow.com/a/28865728/393898 .
+According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs,
+But on the modern/new meaning of URLs, they are the same as URIs.
+The important take-away aspect is that the URL crate should be able to parse any URI,
 such as `urn:isbn:0451450523`.
 
 
 */
-
 #![allow(non_upper_case_globals)]
 
 #[macro_use]
@@ -146,12 +145,13 @@ pub struct Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn new(range: Range,
-               severity: Option<DiagnosticSeverity>,
-               code: Option<NumberOrString>,
-               source: Option<String>,
-               message: String)
-               -> Diagnostic {
+    pub fn new(
+        range: Range,
+        severity: Option<DiagnosticSeverity>,
+        code: Option<NumberOrString>,
+        source: Option<String>,
+        message: String,
+    ) -> Diagnostic {
         Diagnostic {
             range: range,
             severity: severity,
@@ -165,12 +165,13 @@ impl Diagnostic {
         Self::new(range, None, None, None, message)
     }
 
-    pub fn new_with_code_number(range: Range,
-                                severity: DiagnosticSeverity,
-                                code_number: u64,
-                                source: Option<String>,
-                                message: String)
-                                -> Diagnostic {
+    pub fn new_with_code_number(
+        range: Range,
+        severity: DiagnosticSeverity,
+        code_number: u64,
+        source: Option<String>,
+        message: String,
+    ) -> Diagnostic {
         let code = Some(NumberOrString::Number(code_number));
         Self::new(range, Some(severity), code, source, message)
     }
@@ -191,32 +192,36 @@ pub enum DiagnosticSeverity {
 
 impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-               1 => DiagnosticSeverity::Error,
-               2 => DiagnosticSeverity::Warning,
-               3 => DiagnosticSeverity::Information,
-               4 => DiagnosticSeverity::Hint,
-               i => {
-            return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                               &"value of 1, 2, 3 or 4"));
-        }
-           })
+            1 => DiagnosticSeverity::Error,
+            2 => DiagnosticSeverity::Warning,
+            3 => DiagnosticSeverity::Information,
+            4 => DiagnosticSeverity::Hint,
+            i => {
+                return Err(D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"value of 1, 2, 3 or 4",
+                ));
+            }
+        })
     }
 }
 
 impl serde::Serialize for DiagnosticSeverity {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
 }
 
 /**
- Represents a reference to a command. Provides a title which will be used to represent a command in the UI. 
- Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of 
+ Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
+ Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of
  well known commands. So executing a command requires some tool extension code.
 */
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -227,7 +232,7 @@ pub struct Command {
     pub command: String,
     /// Arguments that the command handler should be
     /// invoked with.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub arguments: Option<Vec<Value>>,
 }
 
@@ -253,7 +258,7 @@ pub struct TextEdit {
     pub range: Range,
     /// The string to be inserted. For delete operations use an
     /// empty string.
-    #[serde(rename="newText")]
+    #[serde(rename = "newText")]
     pub new_text: String,
 }
 
@@ -280,7 +285,8 @@ mod url_map {
     use std::fmt;
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<HashMap<Url, Vec<TextEdit>>, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         struct UrlMapVisitor;
 
@@ -292,7 +298,8 @@ mod url_map {
             }
 
             fn visit_map<M>(self, mut visitor: M) -> Result<Self::Value, M::Error>
-                where M: de::MapAccess<'de>
+            where
+                M: de::MapAccess<'de>,
             {
                 let mut values = HashMap::with_capacity(visitor.size_hint().unwrap_or(0));
 
@@ -311,10 +318,12 @@ mod url_map {
         deserializer.deserialize_map(UrlMapVisitor)
     }
 
-    pub fn serialize<S>(changes: &HashMap<Url, Vec<TextEdit>>,
-                        serializer: S)
-                        -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    pub fn serialize<S>(
+        changes: &HashMap<Url, Vec<TextEdit>>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
     {
         use serde::ser::SerializeMap;
 
@@ -359,7 +368,7 @@ pub struct TextDocumentItem {
     pub uri: Url,
 
     /// The text document's language identifier.
-    #[serde(rename="languageId")]
+    #[serde(rename = "languageId")]
     pub language_id: Option<String>,
 
     /// The version number of this document (it will strictly increase after each
@@ -371,11 +380,12 @@ pub struct TextDocumentItem {
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: Url,
-               language_id: Option<String>,
-               version: Option<u64>,
-               text: String)
-               -> TextDocumentItem {
+    pub fn new(
+        uri: Url,
+        language_id: Option<String>,
+        version: Option<u64>,
+        text: String,
+    ) -> TextDocumentItem {
         TextDocumentItem {
             uri: uri,
             language_id: language_id,
@@ -415,7 +425,7 @@ pub struct TextDocumentPositionParams {
     // This modelled by "mixing-in" TextDocumentPositionParams in ReferenceParams,
     // so any changes to this type must be effected in sub-type as well.
     /// The text document.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The position inside the text document.
@@ -423,9 +433,10 @@ pub struct TextDocumentPositionParams {
 }
 
 impl TextDocumentPositionParams {
-    pub fn new(text_document: TextDocumentIdentifier,
-               position: Position)
-               -> TextDocumentPositionParams {
+    pub fn new(
+        text_document: TextDocumentIdentifier,
+        position: Position,
+    ) -> TextDocumentPositionParams {
         TextDocumentPositionParams {
             text_document: text_document,
             position: position,
@@ -443,18 +454,18 @@ impl TextDocumentPositionParams {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DocumentFilter {
     /**
-	 * A language id, like `typescript`.
-	 */
+     * A language id, like `typescript`.
+     */
     pub language: Option<String>,
 
     /**
-	 * A Uri [scheme](#Uri.scheme), like `file` or `untitled`.
-	 */
+     * A Uri [scheme](#Uri.scheme), like `file` or `untitled`.
+     */
     pub scheme: Option<String>,
 
     /**
-	 * A glob pattern, like `*.{ts,js}`.
-	 */
+     * A glob pattern, like `*.{ts,js}`.
+     */
     pub pattern: Option<String>,
 }
 
@@ -465,12 +476,12 @@ pub type DocumentSelector = Vec<DocumentFilter>;
 
 /**
 
- The initialize request is sent as the first request from the client to the server. 
+ The initialize request is sent as the first request from the client to the server.
  If the server receives request or notification before the `initialize` request it should act as follows:
 
- * for a request the respond should be errored with `code: -32001`. The message can be picked by the server. 
+ * for a request the respond should be errored with `code: -32001`. The message can be picked by the server.
  * notifications should be dropped.
- 
+
 */
 pub const REQUEST__Initialize: &'static str = "initialize";
 
@@ -485,24 +496,24 @@ pub struct InitializeParams {
     /// The process Id of the parent process that started
     /// the server. Is null if the process has not been started by another process.
     /// If the parent process is not alive then the server should exit (see exit notification) its process.
-    #[serde(rename="processId")]
+    #[serde(rename = "processId")]
     pub process_id: Option<u64>,
 
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
-    #[serde(rename="rootPath")]
+    #[serde(rename = "rootPath")]
     pub root_path: Option<String>,
 
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
-    #[serde(with="option_url")]
-    #[serde(rename="rootUri")]
+    #[serde(with = "option_url")]
+    #[serde(rename = "rootUri")]
     #[serde(default)]
     pub root_uri: Option<Url>,
 
     /// User provided initialization options.
-    #[serde(rename="initializationOptions")]
+    #[serde(rename = "initializationOptions")]
     pub initialization_options: Option<Value>,
 
     /// The capabilities provided by the client (editor)
@@ -515,11 +526,11 @@ pub struct InitializeParams {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub enum TraceOption {
-    #[serde(rename="off")]
+    #[serde(rename = "off")]
     Off,
-    #[serde(rename="messages")]
+    #[serde(rename = "messages")]
     Messages,
-    #[serde(rename="verbose")]
+    #[serde(rename = "verbose")]
     Verbose,
 }
 
@@ -535,15 +546,16 @@ mod option_url {
     use url::Url;
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
-        serde::Deserialize::deserialize(deserializer).map(|x: Option<De<Url>>| {
-                                                              x.map(|url| url.into_inner())
-                                                          })
+        serde::Deserialize::deserialize(deserializer)
+            .map(|x: Option<De<Url>>| x.map(|url| url.into_inner()))
     }
 
     pub fn serialize<S>(self_: &Option<Url>, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         self_.as_ref().map(Ser::new).serialize(serializer)
     }
@@ -552,9 +564,9 @@ mod option_url {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct GenericCapability {
     /**
-    * This capability supports dynamic registration.
-    */
-    #[serde(rename="dynamicRegistration")]
+     * This capability supports dynamic registration.
+     */
+    #[serde(rename = "dynamicRegistration")]
     pub dynamic_registration: Option<bool>,
 }
 
@@ -563,7 +575,7 @@ pub struct WorkspaceEditCapability {
     /**
      * The client supports versioned document changes in `WorkspaceEdit`s
      */
-    #[serde(rename="documentChanges")]
+    #[serde(rename = "documentChanges")]
     pub document_changes: Option<bool>,
 }
 
@@ -573,82 +585,82 @@ pub struct WorkspaceEditCapability {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct WorkspaceClientCapabilites {
     /**
-	 * The client supports applying batch edits to the workspace by supporting
-	 * the request 'workspace/applyEdit'
-	 */
-    #[serde(rename="applyEdit")]
+     * The client supports applying batch edits to the workspace by supporting
+     * the request 'workspace/applyEdit'
+     */
+    #[serde(rename = "applyEdit")]
     pub apply_edit: Option<bool>,
 
     /**
-	 * Capabilities specific to `WorkspaceEdit`s
-	 */
-    #[serde(rename="workspaceEdit")]
+     * Capabilities specific to `WorkspaceEdit`s
+     */
+    #[serde(rename = "workspaceEdit")]
     pub workspace_edit: Option<WorkspaceEditCapability>,
 
     /**
-	 * Capabilities specific to the `workspace/didChangeConfiguration` notification.
-	 */
-    #[serde(rename="didChangeConfiguration")]
+     * Capabilities specific to the `workspace/didChangeConfiguration` notification.
+     */
+    #[serde(rename = "didChangeConfiguration")]
     pub did_change_configuration: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
-	 */
-    #[serde(rename="didChangeWatchedFiles")]
+     * Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
+     */
+    #[serde(rename = "didChangeWatchedFiles")]
     pub did_change_watched_files: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `workspace/symbol` request.
-	 */
+     * Capabilities specific to the `workspace/symbol` request.
+     */
     pub symbol: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `workspace/executeCommand` request.
-	 */
-    #[serde(rename="executeCommand")]
+     * Capabilities specific to the `workspace/executeCommand` request.
+     */
+    #[serde(rename = "executeCommand")]
     pub execute_command: Option<GenericCapability>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct SynchronizationCapability {
     /**
-		 * Whether text document synchronization supports dynamic registration.
-		 */
-    #[serde(rename="dynamicRegistration")]
+     * Whether text document synchronization supports dynamic registration.
+     */
+    #[serde(rename = "dynamicRegistration")]
     pub dynamic_registration: Option<bool>,
 
     /**
-		 * The client supports sending will save notifications.
-		 */
-    #[serde(rename="willSave")]
+     * The client supports sending will save notifications.
+     */
+    #[serde(rename = "willSave")]
     pub will_save: Option<bool>,
 
     /**
-		 * The client supports sending a will save request and
-		 * waits for a response providing text edits which will
-		 * be applied to the document before it is saved.
-		 */
-    #[serde(rename="willSaveWaitUntil")]
+     * The client supports sending a will save request and
+     * waits for a response providing text edits which will
+     * be applied to the document before it is saved.
+     */
+    #[serde(rename = "willSaveWaitUntil")]
     pub will_save_wait_until: Option<bool>,
 
     /**
-		 * The client supports did save notifications.
-		 */
-    #[serde(rename="didSave")]
+     * The client supports did save notifications.
+     */
+    #[serde(rename = "didSave")]
     pub did_save: Option<bool>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CompletionItemCapability {
     /**
-			 * Client supports snippets as insert text.
-			 *
-			 * A snippet can define tab stops and placeholders with `$1`, `$2`
-			 * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
-			 * the end of the snippet. Placeholders with equal identifiers are linked,
-			 * that is typing in one will update others too.
-			 */
-    #[serde(rename="snippetSupport")]
+     * Client supports snippets as insert text.
+     *
+     * A snippet can define tab stops and placeholders with `$1`, `$2`
+     * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+     * the end of the snippet. Placeholders with equal identifiers are linked,
+     * that is typing in one will update others too.
+     */
+    #[serde(rename = "snippetSupport")]
     pub snippet_support: Option<bool>,
 }
 
@@ -656,16 +668,16 @@ pub struct CompletionItemCapability {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CompletionCapability {
     /**
-		 * Whether completion supports dynamic registration.
-		 */
-    #[serde(rename="dynamicRegistration")]
+     * Whether completion supports dynamic registration.
+     */
+    #[serde(rename = "dynamicRegistration")]
     pub dynamic_registration: Option<bool>,
 
     /**
-		 * The client supports the following `CompletionItem` specific
-		 * capabilities.
-		 */
-    #[serde(rename="completionItem")]
+     * The client supports the following `CompletionItem` specific
+     * capabilities.
+     */
+    #[serde(rename = "completionItem")]
     pub completion_item: Option<CompletionItemCapability>,
 }
 
@@ -676,80 +688,80 @@ pub struct CompletionCapability {
 pub struct TextDocumentClientCapabilities {
     pub synchronization: Option<SynchronizationCapability>,
     /**
-	 * Capabilities specific to the `textDocument/completion`
-	 */
+     * Capabilities specific to the `textDocument/completion`
+     */
     pub completion: Option<CompletionCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/hover`
-	 */
+     * Capabilities specific to the `textDocument/hover`
+     */
     pub hover: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/signatureHelp`
-	 */
-    #[serde(rename="signatureHelp")]
+     * Capabilities specific to the `textDocument/signatureHelp`
+     */
+    #[serde(rename = "signatureHelp")]
     pub signature_help: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/references`
-	 */
+     * Capabilities specific to the `textDocument/references`
+     */
     pub references: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/documentHighlight`
-	 */
-    #[serde(rename="documentHighlight")]
+     * Capabilities specific to the `textDocument/documentHighlight`
+     */
+    #[serde(rename = "documentHighlight")]
     pub document_highlight: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/documentSymbol`
-	 */
-    #[serde(rename="documentSymbol")]
+     * Capabilities specific to the `textDocument/documentSymbol`
+     */
+    #[serde(rename = "documentSymbol")]
     pub document_symbol: Option<GenericCapability>,
     /**
-	 * Capabilities specific to the `textDocument/formatting`
-	 */
+     * Capabilities specific to the `textDocument/formatting`
+     */
     pub formatting: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/rangeFormatting`
-	 */
-    #[serde(rename="rangeFormatting")]
+     * Capabilities specific to the `textDocument/rangeFormatting`
+     */
+    #[serde(rename = "rangeFormatting")]
     pub range_formatting: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/onTypeFormatting`
-	 */
-    #[serde(rename="onTypeFormatting")]
+     * Capabilities specific to the `textDocument/onTypeFormatting`
+     */
+    #[serde(rename = "onTypeFormatting")]
     pub on_type_formatting: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/definition`
-	 */
+     * Capabilities specific to the `textDocument/definition`
+     */
     pub definition: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/codeAction`
-	 */
-    #[serde(rename="codeAction")]
+     * Capabilities specific to the `textDocument/codeAction`
+     */
+    #[serde(rename = "codeAction")]
     pub code_action: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/codeLens`
-	 */
-    #[serde(rename="codeLens")]
+     * Capabilities specific to the `textDocument/codeLens`
+     */
+    #[serde(rename = "codeLens")]
     pub code_lens: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/documentLink`
-	 */
-    #[serde(rename="documentLink")]
+     * Capabilities specific to the `textDocument/documentLink`
+     */
+    #[serde(rename = "documentLink")]
     pub document_link: Option<GenericCapability>,
 
     /**
-	 * Capabilities specific to the `textDocument/rename`
-	 */
+     * Capabilities specific to the `textDocument/rename`
+     */
     pub rename: Option<GenericCapability>,
 }
 
@@ -759,19 +771,19 @@ pub struct TextDocumentClientCapabilities {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ClientCapabilities {
     /**
-	 * Workspace specific client capabilities.
-	 */
+     * Workspace specific client capabilities.
+     */
     pub workspace: Option<WorkspaceClientCapabilites>,
 
     /**
-	 * Text document specific client capabilities.
-	 */
-    #[serde(rename="textDocument")]
+     * Text document specific client capabilities.
+     */
+    #[serde(rename = "textDocument")]
     pub text_document: Option<TextDocumentClientCapabilities>,
 
     /**
-	 * Experimental client capabilities.
-	 */
+     * Experimental client capabilities.
+     */
     pub experimental: Option<Value>,
 }
 
@@ -807,23 +819,27 @@ pub enum TextDocumentSyncKind {
 
 impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-               0 => TextDocumentSyncKind::None,
-               1 => TextDocumentSyncKind::Full,
-               2 => TextDocumentSyncKind::Incremental,
-               i => {
-            return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                               &"value between 0 and 2 (inclusive)"));
-        }
-           })
+            0 => TextDocumentSyncKind::None,
+            1 => TextDocumentSyncKind::Full,
+            2 => TextDocumentSyncKind::Incremental,
+            i => {
+                return Err(D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"value between 0 and 2 (inclusive)",
+                ));
+            }
+        })
     }
 }
 
 impl serde::Serialize for TextDocumentSyncKind {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
@@ -833,12 +849,12 @@ impl serde::Serialize for TextDocumentSyncKind {
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct CompletionOptions {
     /// The server provides support to resolve additional information for a completion item.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="resolveProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "resolveProvider")]
     pub resolve_provider: Option<bool>,
 
     /// The characters that trigger completion automatically.
-    #[serde(rename="triggerCharacters")]
+    #[serde(rename = "triggerCharacters")]
     pub trigger_characters: Vec<String>,
 }
 
@@ -846,8 +862,8 @@ pub struct CompletionOptions {
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct SignatureHelpOptions {
     /// The characters that trigger signature help automatically.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="triggerCharacters")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "triggerCharacters")]
     pub trigger_characters: Option<Vec<String>>,
 }
 
@@ -855,7 +871,7 @@ pub struct SignatureHelpOptions {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CodeLensOptions {
     /// Code lens has a resolve provider as well.
-    #[serde(rename="resolveProvider")]
+    #[serde(rename = "resolveProvider")]
     pub resolve_provider: Option<bool>,
 }
 
@@ -863,12 +879,12 @@ pub struct CodeLensOptions {
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingOptions {
     /// A character on which formatting should be triggered, like `}`.
-    #[serde(rename="firstTriggerCharacter")]
+    #[serde(rename = "firstTriggerCharacter")]
     pub first_trigger_character: String,
 
     /// More trigger characters.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="moreTriggerCharacter")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "moreTriggerCharacter")]
     pub more_trigger_character: Option<Vec<String>>,
 }
 
@@ -876,89 +892,89 @@ pub struct DocumentOnTypeFormattingOptions {
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct ExecuteCommandOptions {
     /// The commands to be executed on the server
-    pub commands: Vec<String>
+    pub commands: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="textDocumentSync")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "textDocumentSync")]
     pub text_document_sync: Option<TextDocumentSyncKind>,
 
     /// The server provides hover support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="hoverProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "hoverProvider")]
     pub hover_provider: Option<bool>,
 
     /// The server provides completion support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="completionProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "completionProvider")]
     pub completion_provider: Option<CompletionOptions>,
 
     /// The server provides signature help support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="signatureHelpProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "signatureHelpProvider")]
     pub signature_help_provider: Option<SignatureHelpOptions>,
 
     /// The server provides goto definition support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="definitionProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "definitionProvider")]
     pub definition_provider: Option<bool>,
 
     /// The server provides find references support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="referencesProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "referencesProvider")]
     pub references_provider: Option<bool>,
 
     /// The server provides document highlight support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentHighlightProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "documentHighlightProvider")]
     pub document_highlight_provider: Option<bool>,
 
     /// The server provides document symbol support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentSymbolProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "documentSymbolProvider")]
     pub document_symbol_provider: Option<bool>,
 
     /// The server provides workspace symbol support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="workspaceSymbolProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "workspaceSymbolProvider")]
     pub workspace_symbol_provider: Option<bool>,
 
     /// The server provides code actions.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="codeActionProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "codeActionProvider")]
     pub code_action_provider: Option<bool>,
 
     /// The server provides code lens.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="codeLensProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "codeLensProvider")]
     pub code_lens_provider: Option<CodeLensOptions>,
 
     /// The server provides document formatting.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentFormattingProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "documentFormattingProvider")]
     pub document_formatting_provider: Option<bool>,
 
     /// The server provides document range formatting.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentRangeFormattingProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "documentRangeFormattingProvider")]
     pub document_range_formatting_provider: Option<bool>,
 
     /// The server provides document formatting on typing.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="documentOnTypeFormattingProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "documentOnTypeFormattingProvider")]
     pub document_on_type_formatting_provider: Option<DocumentOnTypeFormattingOptions>,
 
     /// The server provides rename support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="renameProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "renameProvider")]
     pub rename_provider: Option<bool>,
 
     /// The server provides execute command support.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="executeCommandProvider")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "executeCommandProvider")]
     pub execute_command_provider: Option<ExecuteCommandOptions>,
 }
 
@@ -970,8 +986,8 @@ pub struct ServerCapabilities {
 pub const REQUEST__Shutdown: &'static str = "shutdown";
 
 /**
- * A notification to ask the server to exit its process. 
- * The server should exit with success code 0 if the shutdown request has been received before; 
+ * A notification to ask the server to exit its process.
+ * The server should exit with success code 0 if the shutdown request has been received before;
  * otherwise with error code 1.
  */
 pub const NOTIFICATION__Exit: &'static str = "exit";
@@ -985,7 +1001,7 @@ pub const NOTIFICATION__ShowMessage: &'static str = "window/showMessage";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ShowMessageParams {
     /// The message type. See {@link MessageType}.
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub typ: MessageType,
 
     /// The actual message.
@@ -1006,24 +1022,28 @@ pub enum MessageType {
 
 impl<'de> serde::Deserialize<'de> for MessageType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-               1 => MessageType::Error,
-               2 => MessageType::Warning,
-               3 => MessageType::Info,
-               4 => MessageType::Log,
-               i => {
-            return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                               &"value of 1, 2, 3 or 4"));
-        }
-           })
+            1 => MessageType::Error,
+            2 => MessageType::Warning,
+            3 => MessageType::Info,
+            4 => MessageType::Log,
+            i => {
+                return Err(D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"value of 1, 2, 3 or 4",
+                ));
+            }
+        })
     }
 }
 
 impl serde::Serialize for MessageType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
@@ -1040,14 +1060,14 @@ pub const REQUEST__ShowMessageRequest: &'static str = "window/showMessageRequest
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ShowMessageRequestParams {
     /// The message type. See {@link MessageType}
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub typ: MessageType,
 
     /// The actual message
     pub message: String,
 
     /// The message action items to present.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub actions: Option<Vec<MessageActionItem>>,
 }
 
@@ -1065,7 +1085,7 @@ pub const NOTIFICATION__LogMessage: &'static str = "window/logMessage";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct LogMessageParams {
     /// The message type. See {@link MessageType}
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub typ: MessageType,
 
     /// The actual message
@@ -1089,20 +1109,20 @@ pub const NOTIFICATION__RegisterCapability: &'static str = "client/registerCapab
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Registration {
     /**
-	 * The id used to register the request. The id can be used to deregister
-	 * the request again.
-	 */
+     * The id used to register the request. The id can be used to deregister
+     * the request again.
+     */
     pub id: String,
 
     /**
-	 * The method / capability to register for.
-	 */
+     * The method / capability to register for.
+     */
     pub method: String,
 
     /**
-	 * Options necessary for the registration.
-	 */
-    #[serde(rename="registerOptions")]
+     * Options necessary for the registration.
+     */
+    #[serde(rename = "registerOptions")]
     pub register_options: Value,
 }
 
@@ -1116,10 +1136,10 @@ pub struct RegistrationParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentRegistrationOptions {
     /**
-	 * A document selector to identify the scope of the registration. If set to null
-	 * the document selector provided on the client side will be used.
-	 */
-    #[serde(rename="documentSelector")]
+     * A document selector to identify the scope of the registration. If set to null
+     * the document selector provided on the client side will be used.
+     */
+    #[serde(rename = "documentSelector")]
     pub document_selector: Option<DocumentSelector>,
 }
 
@@ -1133,14 +1153,14 @@ pub const NOTIFICATION__UnregisterCapability: &'static str = "client/unregisterC
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Unregistration {
     /**
-	 * The id used to unregister the request or notification. Usually an id
-	 * provided during the register request.
-	 */
+     * The id used to unregister the request or notification. Usually an id
+     * provided during the register request.
+     */
     pub id: String,
 
     /**
-	 * The method / capability to unregister for.
-	 */
+     * The method / capability to unregister for.
+     */
     pub method: String,
 }
 
@@ -1170,7 +1190,7 @@ pub const NOTIFICATION__DidOpenTextDocument: &'static str = "textDocument/didOpe
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidOpenTextDocumentParams {
     /// The document that was opened.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentItem,
 }
 
@@ -1185,10 +1205,10 @@ pub struct DidChangeTextDocumentParams {
     /// The document that did change. The version number points
     /// to the version after all provided content changes have
     /// been applied.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: VersionedTextDocumentIdentifier,
     /// The actual content changes.
-    #[serde(rename="contentChanges")]
+    #[serde(rename = "contentChanges")]
     pub content_changes: Vec<TextDocumentContentChangeEvent>,
 }
 
@@ -1201,7 +1221,7 @@ pub struct TextDocumentContentChangeEvent {
 
     /// The length of the range that got replaced.
     /// NOTE: seems redundant, see: https://github.com/Microsoft/language-server-protocol/issues/9
-    #[serde(rename="rangeLength")]
+    #[serde(rename = "rangeLength")]
     pub range_length: Option<u64>,
 
     /// The new text of the document.
@@ -1216,17 +1236,17 @@ pub struct TextDocumentContentChangeEvent {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentChangeRegistrationOptions {
     /**
-	 * A document selector to identify the scope of the registration. If set to null
-	 * the document selector provided on the client side will be used.
-	 */
-    #[serde(rename="documentSelector")]
+     * A document selector to identify the scope of the registration. If set to null
+     * the document selector provided on the client side will be used.
+     */
+    #[serde(rename = "documentSelector")]
     pub document_selector: Option<DocumentSelector>,
 
     /**
-	 * How documents are synced to the server. See TextDocumentSyncKind.Full
-	 * and TextDocumentSyncKindIncremental.
-	 */
-    #[serde(rename="syncKind")]
+     * How documents are synced to the server. See TextDocumentSyncKind.Full
+     * and TextDocumentSyncKindIncremental.
+     */
+    #[serde(rename = "syncKind")]
     pub sync_kind: i32,
 }
 
@@ -1247,14 +1267,14 @@ pub const NOTIFICATION__WillSaveWaitUntil: &'static str = "textDocument/willSave
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct WillSaveTextDocumentParams {
     /**
-	 * The document that will be saved.
-	 */
-    #[serde(rename="textDocument")]
+     * The document that will be saved.
+     */
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /**
-	 * The 'TextDocumentSaveReason'.
-	 */
+     * The 'TextDocumentSaveReason'.
+     */
     pub reason: TextDocumentSaveReason,
 }
 
@@ -1264,42 +1284,46 @@ pub struct WillSaveTextDocumentParams {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TextDocumentSaveReason {
     /**
-	 * Manually triggered, e.g. by the user pressing save, by starting debugging,
-	 * or by an API call.
-	 */
+     * Manually triggered, e.g. by the user pressing save, by starting debugging,
+     * or by an API call.
+     */
     Manual = 1,
 
     /**
-	 * Automatic after a delay.
-	 */
+     * Automatic after a delay.
+     */
     AfterDelay = 2,
 
     /**
-	 * When the editor lost focus.
-	 */
+     * When the editor lost focus.
+     */
     FocusOut = 3,
 }
 
 
 impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-               1 => TextDocumentSaveReason::Manual,
-               2 => TextDocumentSaveReason::AfterDelay,
-               3 => TextDocumentSaveReason::FocusOut,
-               i => {
-                   return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                      &"value of 1, 2 or 3"))
-               }
-           })
+            1 => TextDocumentSaveReason::Manual,
+            2 => TextDocumentSaveReason::AfterDelay,
+            3 => TextDocumentSaveReason::FocusOut,
+            i => {
+                return Err(D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"value of 1, 2 or 3",
+                ))
+            }
+        })
     }
 }
 
 impl serde::Serialize for TextDocumentSaveReason {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
@@ -1315,7 +1339,7 @@ pub const NOTIFICATION__DidCloseTextDocument: &'static str = "textDocument/didCl
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidCloseTextDocumentParams {
     /// The document that was closed.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -1327,7 +1351,7 @@ pub const NOTIFICATION__DidSaveTextDocument: &'static str = "textDocument/didSav
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -1358,23 +1382,27 @@ pub enum FileChangeType {
 
 impl<'de> serde::Deserialize<'de> for FileChangeType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-               1 => FileChangeType::Created,
-               2 => FileChangeType::Changed,
-               3 => FileChangeType::Deleted,
-               i => {
-                   return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                      &"value of 1, 2 or 3"))
-               }
-           })
+            1 => FileChangeType::Created,
+            2 => FileChangeType::Changed,
+            3 => FileChangeType::Deleted,
+            i => {
+                return Err(D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"value of 1, 2 or 3",
+                ))
+            }
+        })
     }
 }
 
 impl serde::Serialize for FileChangeType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
@@ -1388,7 +1416,7 @@ pub struct FileEvent {
     pub uri: Url,
 
     /// The change type.
-    #[serde(rename="type")]
+    #[serde(rename = "type")]
     pub typ: FileChangeType,
 }
 
@@ -1423,13 +1451,13 @@ impl PublishDiagnosticsParams {
 }
 
 /**
- The Completion request is sent from the client to the server to compute completion items at a given cursor position. 
- Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive, 
- servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve'). 
- This request is sent when a completion item is selected in the user interface. A typically use case is for example: 
- the 'textDocument/completion' request doesn't fill in the documentation property for returned completion items 
- since it is expensive to compute. When the item is selected in the user interface then a 'completionItem/resolve' 
- request is sent with the selected completion item as a param. The returned completion item should have the 
+ The Completion request is sent from the client to the server to compute completion items at a given cursor position.
+ Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive,
+ servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve').
+ This request is sent when a completion item is selected in the user interface. A typically use case is for example:
+ the 'textDocument/completion' request doesn't fill in the documentation property for returned completion items
+ since it is expensive to compute. When the item is selected in the user interface then a 'completionItem/resolve'
+ request is sent with the selected completion item as a param. The returned completion item should have the
  documentation property filled in.
 */
 // result: CompletionItem[] | CompletionList FIXME
@@ -1441,7 +1469,7 @@ pub const REQUEST__Completion: &'static str = "textDocument/completion";
 pub struct CompletionList {
     /// This list it not complete. Further typing should result in recomputing
     /// this list.
-    #[serde(rename="isIncomplete")]
+    #[serde(rename = "isIncomplete")]
     pub is_incomplete: bool,
 
     /// The completion items.
@@ -1457,59 +1485,59 @@ pub struct CompletionItem {
 
     /// The kind of this completion item. Based of the kind
     /// an icon is chosen by the editor.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<CompletionItemKind>,
 
     /// A human-readable string with additional information
     /// about this item, like type or symbol information.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
 
     /// A human-readable string that represents a doc-comment.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<String>,
 
     /// A string that shoud be used when comparing this item
     /// with other items. When `falsy` the label is used.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="sortText")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "sortText")]
     pub sort_text: Option<String>,
 
     /// A string that should be used when filtering a set of
     /// completion items. When `falsy` the label is used.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="filterText")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "filterText")]
     pub filter_text: Option<String>,
 
     /// A string that should be inserted a document when selecting
     /// this completion. When `falsy` the label is used.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="insertText")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "insertText")]
     pub insert_text: Option<String>,
 
     /// An edit which is applied to a document when selecting
     /// this completion. When an edit is provided the value of
     /// insertText is ignored.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="textEdit")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "textEdit")]
     pub text_edit: Option<TextEdit>,
 
     /// An optional array of additional text edits that are applied when
     /// selecting this completion. Edits must not overlap with the main edit
     /// nor with themselves.
-    #[serde(skip_serializing_if="Option::is_none")]
-    #[serde(rename="additionalTextEdits")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "additionalTextEdits")]
     pub additional_text_edits: Option<Vec<TextEdit>>,
 
     /// An optional command that is executed *after* inserting this completion. *Note* that
     /// additional modifications to the current document should be described with the
     /// additionalTextEdits-property.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub command: Option<Command>,
 
     /// An data entry field that is preserved on a completion item between
     /// a completion and a completion resolve request.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
 }
 
@@ -1551,21 +1579,25 @@ pub enum CompletionItemKind {
 
 impl<'de> serde::Deserialize<'de> for CompletionItemKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         use enum_primitive::FromPrimitive;
 
         let i = try!(u8::deserialize(deserializer));
         CompletionItemKind::from_u8(i).ok_or_else(|| {
-            D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                    &"value between 1 and 18 (inclusive)")
+            D::Error::invalid_value(
+                de::Unexpected::Unsigned(i as u64),
+                &"value between 1 and 18 (inclusive)",
+            )
         })
     }
 }
 
 impl serde::Serialize for CompletionItemKind {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
@@ -1621,9 +1653,9 @@ impl MarkedString {
 
     pub fn from_language_code(language: String, code_block: String) -> MarkedString {
         MarkedString::LanguageString(LanguageString {
-                                         language: language,
-                                         value: code_block,
-                                     })
+            language: language,
+            value: code_block,
+        })
     }
 }
 
@@ -1641,11 +1673,11 @@ pub struct SignatureHelp {
     pub signatures: Vec<SignatureInformation>,
 
     /// The active signature.
-    #[serde(rename="activeSignature")]
+    #[serde(rename = "activeSignature")]
     pub active_signature: Option<u64>,
 
     /// The active parameter of the active signature.
-    #[serde(rename="activeParameter")]
+    #[serde(rename = "activeParameter")]
     pub active_parameter: Option<u64>,
 }
 
@@ -1663,7 +1695,7 @@ pub struct SignatureInformation {
     pub documentation: Option<String>,
 
     /// The parameters of this signature.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<Vec<ParameterInformation>>,
 }
 
@@ -1677,7 +1709,7 @@ pub struct ParameterInformation {
 
     /// The human-readable doc-comment of this parameter. Will be shown
     /// in the UI but can be omitted.
-    #[serde(skip_serializing_if="Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<String>,
 }
 
@@ -1693,7 +1725,7 @@ pub const REQUEST__References: &'static str = "textDocument/references";
 pub struct ReferenceParams {
     // This field was "mixed-in" from TextDocumentPositionParams
     /// The text document.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     // This field was "mixed-in" from TextDocumentPositionParams
@@ -1707,17 +1739,17 @@ pub struct ReferenceParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ReferenceContext {
     /// Include the declaration of the current symbol.
-    #[serde(rename="includeDeclaration")]
+    #[serde(rename = "includeDeclaration")]
     pub include_declaration: bool,
 }
 
 /**
- The document highlight request is sent from the client to the server to resolve a document highlights 
- for a given text document position. 
- For programming languages this usually highlights all references to the symbol scoped to this file. 
- However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since 
- the first one is allowed to be more fuzzy. 
- Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches 
+ The document highlight request is sent from the client to the server to resolve a document highlights
+ for a given text document position.
+ For programming languages this usually highlights all references to the symbol scoped to this file.
+ However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since
+ the first one is allowed to be more fuzzy.
+ Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
  use Textas the kind.
 */
 pub const REQUEST__DocumentHighlight: &'static str = "textDocument/documentHighlight";
@@ -1749,30 +1781,34 @@ pub enum DocumentHighlightKind {
 
 impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         Ok(match try!(u8::deserialize(deserializer)) {
-               1 => DocumentHighlightKind::Text,
-               2 => DocumentHighlightKind::Read,
-               3 => DocumentHighlightKind::Write,
-               i => {
-                   return Err(D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                                      &"1, 2, or 3"))
-               }
-           })
+            1 => DocumentHighlightKind::Text,
+            2 => DocumentHighlightKind::Read,
+            3 => DocumentHighlightKind::Write,
+            i => {
+                return Err(D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"1, 2, or 3",
+                ))
+            }
+        })
     }
 }
 
 impl serde::Serialize for DocumentHighlightKind {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
 }
 
 /**
- * The document symbol request is sent from the client to the server to list all symbols found in a given 
+ * The document symbol request is sent from the client to the server to list all symbols found in a given
  * text document.
  */
 pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol";
@@ -1780,7 +1816,7 @@ pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol"
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentSymbolParams {
     /// The text document.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -1798,7 +1834,7 @@ pub struct SymbolInformation {
     pub location: Location,
 
     /// The name of the symbol containing this symbol.
-    #[serde(rename="containerName")]
+    #[serde(rename = "containerName")]
     pub container_name: Option<String>,
 }
 
@@ -1829,28 +1865,32 @@ pub enum SymbolKind {
 
 impl<'de> serde::Deserialize<'de> for SymbolKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         use enum_primitive::FromPrimitive;
 
         let i = try!(u8::deserialize(deserializer));
         SymbolKind::from_u8(i).ok_or_else(|| {
-            D::Error::invalid_value(de::Unexpected::Unsigned(i as u64),
-                                    &"value between 1 and 18 (inclusive)")
+            D::Error::invalid_value(
+                de::Unexpected::Unsigned(i as u64),
+                &"value between 1 and 18 (inclusive)",
+            )
         })
     }
 }
 
 impl serde::Serialize for SymbolKind {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_u8(*self as u8)
     }
 }
 
 /**
- * The workspace symbol request is sent from the client to the server to list project-wide symbols 
+ * The workspace symbol request is sent from the client to the server to list project-wide symbols
  * matching the query string.
  */
 pub const REQUEST__WorkspaceSymbols: &'static str = "workspace/symbol";
@@ -1869,12 +1909,12 @@ pub const REQUEST__ExecuteCommand: &'static str = "workspace/executeCommand";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ExecuteCommandParams {
     /**
-	 * The identifier of the actual command handler.
-	 */
+     * The identifier of the actual command handler.
+     */
     pub command: String,
     /**
-	 * Arguments that the command should be invoked with.
-	 */
+     * Arguments that the command should be invoked with.
+     */
     #[serde(default)]
     pub arguments: Vec<Value>,
 }
@@ -1885,8 +1925,8 @@ pub struct ExecuteCommandParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ExecuteCommandRegistrationOptions {
     /**
-	 * The commands to be executed on the server
-	 */
+     * The commands to be executed on the server
+     */
     pub commands: Vec<String>,
 }
 
@@ -1898,22 +1938,22 @@ pub const REQUEST__ApplyEdit: &'static str = "textDocument/applyEdit";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ApplyWorkspaceEditParams {
     /**
-	 * The edits to apply.
-	 */
+     * The edits to apply.
+     */
     pub edit: WorkspaceEdit,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ApplyWorkspaceEditResponse {
     /**
-	 * Indicates whether the edit was applied or not.
-	 */
+     * Indicates whether the edit was applied or not.
+     */
     pub applied: bool,
 }
 
 /**
  * The code action request is sent from the client to the server to compute commands for a given text document
- * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or 
+ * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
  * presses the lightbulb associated with a marker.
  */
 pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
@@ -1922,7 +1962,7 @@ pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CodeActionParams {
     /// The document in which the command was invoked.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The range for which the command was invoked.
@@ -1948,7 +1988,7 @@ pub const REQUEST__CodeLens: &'static str = "textDocument/codeLens";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CodeLensParams {
     /// The document to request code lens for.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -1971,7 +2011,7 @@ pub struct CodeLens {
 }
 
 /**
- * The code lens resolve request is sent from the client to the server to resolve the command for a 
+ * The code lens resolve request is sent from the client to the server to resolve the command for a
  * given code lens item.
  */
 pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
@@ -1987,9 +2027,9 @@ pub const REQUEST__DocumentLink: &'static str = "textDocument/documentLink";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentLinkParams {
     /**
-	 * The document to provide document links for.
-	 */
-    #[serde(rename="textDocument")]
+     * The document to provide document links for.
+     */
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -2000,19 +2040,19 @@ pub struct DocumentLinkParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentLink {
     /**
-	 * The range this link applies to.
-	 */
+     * The range this link applies to.
+     */
     pub range: Range,
     /**
-	 * The uri this link points to.
-	 */
+     * The uri this link points to.
+     */
     #[serde(with = "url_serde")]
     pub target: Url,
 }
 
 /**
 
- The document link resolve request is sent from the client to the server to resolve the target of 
+ The document link resolve request is sent from the client to the server to resolve the target of
  a given document link.
 
 */
@@ -2027,7 +2067,7 @@ pub const REQUEST__Formatting: &'static str = "textDocument/formatting";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentFormattingParams {
     /// The document to format.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The format options.
@@ -2057,7 +2097,8 @@ pub enum FormattingProperty {
 
 impl<'de> serde::Deserialize<'de> for FormattingOptions {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: serde::Deserializer<'de>
+    where
+        D: serde::Deserializer<'de>,
     {
         use serde::de::{MapAccess, Visitor};
 
@@ -2071,7 +2112,8 @@ impl<'de> serde::Deserialize<'de> for FormattingOptions {
             }
 
             fn visit_map<V>(self, mut map: V) -> Result<FormattingOptions, V::Error>
-                where V: MapAccess<'de>
+            where
+                V: MapAccess<'de>,
             {
                 use std::borrow::Cow;
 
@@ -2103,10 +2145,10 @@ impl<'de> serde::Deserialize<'de> for FormattingOptions {
                 let insert_spaces = insert_spaces
                     .ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
                 Ok(FormattingOptions {
-                       tab_size: tab_size,
-                       insert_spaces: insert_spaces,
-                       properties: properties,
-                   })
+                    tab_size: tab_size,
+                    insert_spaces: insert_spaces,
+                    properties: properties,
+                })
             }
         }
 
@@ -2117,12 +2159,12 @@ impl<'de> serde::Deserialize<'de> for FormattingOptions {
 
 impl serde::Serialize for FormattingOptions {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
+    where
+        S: serde::Serializer,
     {
         use serde::ser::SerializeMap;
 
-        let mut map = serializer
-            .serialize_map(Some(self.properties.len() + 2))?;
+        let mut map = serializer.serialize_map(Some(self.properties.len() + 2))?;
         map.serialize_entry("tabSize", &self.tab_size)?;
         map.serialize_entry("insertSpaces", &self.insert_spaces)?;
         for (k, v) in &self.properties {
@@ -2139,7 +2181,7 @@ pub const REQUEST__RangeFormatting: &'static str = "textDocument/rangeFormatting
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentRangeFormattingParams {
     /// The document to format.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The range to format
@@ -2150,7 +2192,7 @@ pub struct DocumentRangeFormattingParams {
 }
 
 /**
- * The document on type formatting request is sent from the client to the server to format parts of 
+ * The document on type formatting request is sent from the client to the server to format parts of
  * the document during typing.
  */
 pub const REQUEST__OnTypeFormatting: &'static str = "textDocument/onTypeFormatting";
@@ -2158,7 +2200,7 @@ pub const REQUEST__OnTypeFormatting: &'static str = "textDocument/onTypeFormatti
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingParams {
     /// The document to format.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The position at which this request was sent.
@@ -2175,22 +2217,22 @@ pub struct DocumentOnTypeFormattingParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingRegistrationOptions {
     /**
-	 * A document selector to identify the scope of the registration. If set to null
-	 * the document selector provided on the client side will be used.
-	 */
-    #[serde(rename="documentSelector")]
+     * A document selector to identify the scope of the registration. If set to null
+     * the document selector provided on the client side will be used.
+     */
+    #[serde(rename = "documentSelector")]
     pub document_selector: Option<DocumentSelector>,
 
     /**
-	 * A character on which formatting should be triggered, like `}`.
-	 */
-    #[serde(rename="firstTriggerCharacter")]
+     * A character on which formatting should be triggered, like `}`.
+     */
+    #[serde(rename = "firstTriggerCharacter")]
     pub first_trigger_character: String,
 
     /**
-	 * More trigger characters.
-	 */
-    #[serde(rename="moreTriggerCharacter")]
+     * More trigger characters.
+     */
+    #[serde(rename = "moreTriggerCharacter")]
     pub more_trigger_character: Option<Vec<String>>,
 }
 
@@ -2202,7 +2244,7 @@ pub const REQUEST__Rename: &'static str = "textDocument/rename";
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct RenameParams {
     /// The document to format.
-    #[serde(rename="textDocument")]
+    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The position at which this request was sent.
@@ -2211,7 +2253,7 @@ pub struct RenameParams {
     /// The new name of the symbol. If the given name is not valid the
     /// request must return a [ResponseError](#ResponseError) with an
     /// appropriate message set.
-    #[serde(rename="newName")]
+    #[serde(rename = "newName")]
     pub new_name: String,
 }
 
@@ -2221,7 +2263,8 @@ mod tests {
     use serde::{Deserialize, Serialize};
 
     fn test_serialization<SER>(ms: &SER, expected: &str)
-        where SER: Serialize + for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug
+    where
+        SER: Serialize + for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug,
     {
         let json_str = serde_json::to_string(ms).unwrap();
         assert_eq!(&json_str, expected);
@@ -2242,24 +2285,32 @@ mod tests {
 
         test_serialization(&MarkedString::from_markdown("xxx".into()), r#""xxx""#);
 
-        test_serialization(&MarkedString::from_language_code("lang".into(), "code".into()),
-                           r#"{"language":"lang","value":"code"}"#);
+        test_serialization(
+            &MarkedString::from_language_code("lang".into(), "code".into()),
+            r#"{"language":"lang","value":"code"}"#,
+        );
     }
 
     #[test]
     fn language_string() {
-        test_serialization(&LanguageString {
-                                language: "LL".into(),
-                                value: "VV".into(),
-                            },
-                           r#"{"language":"LL","value":"VV"}"#);
+        test_serialization(
+            &LanguageString {
+                language: "LL".into(),
+                value: "VV".into(),
+            },
+            r#"{"language":"LL","value":"VV"}"#,
+        );
     }
 
 
     #[test]
     fn workspace_edit() {
-        test_serialization(&WorkspaceEdit { changes: vec![].into_iter().collect() },
-                           r#"{"changes":{}}"#);
+        test_serialization(
+            &WorkspaceEdit {
+                changes: vec![].into_iter().collect(),
+            },
+            r#"{"changes":{}}"#,
+        );
 
         test_serialization(&WorkspaceEdit {
                                 changes: vec![(Url::parse("file://test").unwrap(), vec![])]
@@ -2271,26 +2322,29 @@ mod tests {
 
     #[test]
     fn formatting_options() {
-        test_serialization(&FormattingOptions {
-                                tab_size: 123,
-                                insert_spaces: true,
-                                properties: HashMap::new(),
-                            },
-                           r#"{"tabSize":123,"insertSpaces":true}"#);
+        test_serialization(
+            &FormattingOptions {
+                tab_size: 123,
+                insert_spaces: true,
+                properties: HashMap::new(),
+            },
+            r#"{"tabSize":123,"insertSpaces":true}"#,
+        );
 
-        test_serialization(&FormattingOptions {
-                                tab_size: 123,
-                                insert_spaces: true,
-                                properties: vec![("prop".to_string(),
-                                                  FormattingProperty::Number(1.0))]
-                                        .into_iter()
-                                        .collect(),
-                            },
-                           r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#);
+        test_serialization(
+            &FormattingOptions {
+                tab_size: 123,
+                insert_spaces: true,
+                properties: vec![("prop".to_string(), FormattingProperty::Number(1.0))]
+                    .into_iter()
+                    .collect(),
+            },
+            r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#,
+        );
     }
 
     #[test]
     fn root_uri_can_be_missing() {
-         serde_json::from_str::<InitializeParams>(r#"{ "capabilities": {} }"#).unwrap();
+        serde_json::from_str::<InitializeParams>(r#"{ "capabilities": {} }"#).unwrap();
     }
 }
