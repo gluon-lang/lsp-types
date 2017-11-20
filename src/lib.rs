@@ -1515,6 +1515,12 @@ pub struct CompletionItem {
     #[serde(rename = "insertText")]
     pub insert_text: Option<String>,
 
+    /// The format of the insert text. The format applies to both the `insertText` property
+    /// and the `newText` property of a provided `textEdit`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "insertTextFormat")]
+    pub insert_text_format: Option<InsertTextFormat>,
+
     /// An edit which is applied to a document when selecting
     /// this completion. When an edit is provided the value of
     /// insertText is ignored.
@@ -1595,6 +1601,41 @@ impl<'de> serde::Deserialize<'de> for CompletionItemKind {
 }
 
 impl serde::Serialize for CompletionItemKind {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
+enum_from_primitive!{
+/// Defines how to interpret the insert text in a completion item
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum InsertTextFormat {
+    PlainText = 1,
+    Snippet = 2,
+}
+}
+
+impl<'de> serde::Deserialize<'de> for InsertTextFormat {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use enum_primitive::FromPrimitive;
+
+        let i = try!(u8::deserialize(deserializer));
+        InsertTextFormat::from_u8(i).ok_or_else(|| {
+            D::Error::invalid_value(
+                de::Unexpected::Unsigned(i as u64),
+                &"value between 1 and 2 (inclusive)",
+            )
+        })
+    }
+}
+
+impl serde::Serialize for InsertTextFormat {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
