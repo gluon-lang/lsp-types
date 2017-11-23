@@ -1984,7 +1984,7 @@ pub struct ExecuteCommandRegistrationOptions {
 
 /// The workspace/applyEdit request is sent from the server to the client to modify resource on the
 /// client side.
-pub const REQUEST__ApplyEdit: &'static str = "textDocument/applyEdit";
+pub const REQUEST__ApplyEdit: &'static str = "workspace/applyEdit";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct ApplyWorkspaceEditParams {
