@@ -504,6 +504,15 @@ pub type DocumentSelector = Vec<DocumentFilter>;
  * notifications should be dropped.
 
 */
+#[derive(Debug)]
+pub struct Initialize;
+
+impl Request for Initialize {
+    type Params = InitializeParams;
+    type Result = InitializeResult;
+    const METHOD: &'static str = REQUEST__Initialize;
+}
+
 pub const REQUEST__Initialize: &'static str = "initialize";
 
 /// The initialized notification is sent from the client to the server after the client received
@@ -519,7 +528,6 @@ impl Notification for Initialized {
 }
 
 pub const NOTIFICATION__Initialized: &'static str = "initialized";
-
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializeParams {
@@ -1013,6 +1021,15 @@ pub struct ServerCapabilities {
  * but to not exit (otherwise the response might not be delivered correctly to the client).
  * There is a separate exit notification that asks the server to exit.
  */
+#[derive(Debug)]
+pub struct Shutdown;
+
+impl Request for Shutdown {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = REQUEST__Shutdown;
+}
+
 pub const REQUEST__Shutdown: &'static str = "shutdown";
 
 /**
@@ -1029,7 +1046,6 @@ impl Notification for Exit {
 }
 
 pub const NOTIFICATION__Exit: &'static str = "exit";
-
 
 /**
  * The show message notification is sent from a server to a client to ask the client to display a particular message
@@ -1101,6 +1117,15 @@ impl serde::Serialize for MessageType {
  * in the user interface. In addition to the show message notification the request allows to pass actions and to
  * wait for an answer from the client.
  */
+#[derive(Debug)]
+pub struct ShowMessageRequest;
+
+impl Request for ShowMessageRequest {
+    type Params = ShowMessageRequestParams;
+    type Result = Option<MessageActionItem>;
+    const METHOD: &'static str = REQUEST__ShowMessageRequest;
+}
+
 pub const REQUEST__ShowMessageRequest: &'static str = "window/showMessageRequest";
 
 
@@ -1611,8 +1636,23 @@ impl PublishDiagnosticsParams {
  request is sent with the selected completion item as a param. The returned completion item should have the
  documentation property filled in.
 */
-// result: CompletionItem[] | CompletionList FIXME
+#[derive(Debug)]
+pub struct Completion;
+
+impl Request for Completion {
+    type Params = TextDocumentPositionParams; // TODO: extend with CompletionContext as CompletionParams
+    type Result = CompletionResponse;
+    const METHOD: &'static str = REQUEST__Completion;
+}
+
 pub const REQUEST__Completion: &'static str = "textDocument/completion";
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CompletionResponse {
+    Array(Vec<CompletionItem>),
+    List(CompletionList),
+}
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
@@ -1796,11 +1836,28 @@ impl serde::Serialize for InsertTextFormat {
 }
 
 /// The request is sent from the client to the server to resolve additional information for a given completion item.
-pub const REQUEST__ResolveCompletionItem: &'static str = "completionItem/resolve";
+#[derive(Debug)]
+pub struct ResolveCompletionItem;
 
+impl Request for ResolveCompletionItem {
+    type Params = CompletionItem;
+    type Result = CompletionItem;
+    const METHOD: &'static str = REQUEST__ResolveCompletionItem;
+}
+
+pub const REQUEST__ResolveCompletionItem: &'static str = "completionItem/resolve";
 
 /// The hover request is sent from the client to the server to request hover information at a given text
 /// document position.
+#[derive(Debug)]
+pub struct HoverRequest;
+
+impl Request for HoverRequest {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<Hover>;
+    const METHOD: &'static str = REQUEST__Hover;
+}
+
 pub const REQUEST__Hover: &'static str = "textDocument/hover";
 
 /// The result of a hover request.
@@ -1863,6 +1920,15 @@ impl MarkedString {
 
 /// The signature help request is sent from the client to the server to request signature information at
 /// a given cursor position.
+#[derive(Debug)]
+pub struct SignatureHelpRequest;
+
+impl Request for SignatureHelpRequest {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<SignatureHelp>;
+    const METHOD: &'static str = REQUEST__SignatureHelp;
+}
+
 pub const REQUEST__SignatureHelp: &'static str = "textDocument/signatureHelp";
 
 
@@ -1917,6 +1983,25 @@ pub struct ParameterInformation {
 
 /// The goto definition request is sent from the client to the server to resolve the definition location of
 /// a symbol at a given text document position.
+#[derive(Debug)]
+pub struct GotoDefinition;
+
+impl Request for GotoDefinition {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<GotoDefinitionResponse>;
+    const METHOD: &'static str = REQUEST__GotoDefinition;
+}
+
+/**
+ * GotoDefinition response can be single location or multiple ones.
+ */
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GotoDefinitionResponse {
+    Scalar(Location),
+    Array(Vec<Location>),
+}
+
 pub const REQUEST__GotoDefinition: &'static str = "textDocument/definition";
 
 /// The references request is sent from the client to the server to resolve project-wide references for the
@@ -1954,6 +2039,15 @@ pub struct ReferenceContext {
  Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
  use Textas the kind.
 */
+#[derive(Debug)]
+pub struct DocumentHighlightRequest;
+
+impl Request for DocumentHighlightRequest {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<Vec<DocumentHighlight>>;
+    const METHOD: &'static str = REQUEST__DocumentHighlight;
+}
+
 pub const REQUEST__DocumentHighlight: &'static str = "textDocument/documentHighlight";
 
 /// A document highlight is a range inside a text document which deserves
@@ -2013,6 +2107,15 @@ impl serde::Serialize for DocumentHighlightKind {
  * The document symbol request is sent from the client to the server to list all symbols found in a given
  * text document.
  */
+#[derive(Debug)]
+pub struct DocumentSymbol;
+
+impl Request for DocumentSymbol {
+    type Params = DocumentSymbolParams;
+    type Result = Option<Vec<SymbolInformation>>;
+    const METHOD: &'static str = REQUEST__DocumentSymbols;
+}
+
 pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2095,6 +2198,15 @@ impl serde::Serialize for SymbolKind {
  * The workspace symbol request is sent from the client to the server to list project-wide symbols
  * matching the query string.
  */
+#[derive(Debug)]
+pub struct WorkspaceSymbol;
+
+impl Request for WorkspaceSymbol {
+    type Params = WorkspaceSymbolParams;
+    type Result = Option<Vec<SymbolInformation>>;
+    const METHOD: &'static str = REQUEST__WorkspaceSymbols;
+}
+
 pub const REQUEST__WorkspaceSymbols: &'static str = "workspace/symbol";
 
 /// The parameters of a Workspace Symbol Request.
@@ -2105,6 +2217,14 @@ pub struct WorkspaceSymbolParams {
 }
 
 /// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
+#[derive(Debug)]
+pub struct ExecuteCommand;
+
+impl Request for ExecuteCommand {
+    type Params = ExecuteCommandParams;
+    type Result = Option<Value>;
+    const METHOD: &'static str = REQUEST__ExecuteCommand;
+}
 
 pub const REQUEST__ExecuteCommand: &'static str = "workspace/executeCommand";
 
@@ -2135,6 +2255,15 @@ pub struct ExecuteCommandRegistrationOptions {
 
 /// The workspace/applyEdit request is sent from the server to the client to modify resource on the
 /// client side.
+#[derive(Debug)]
+pub struct ApplyWorkspaceEdit;
+
+impl Request for ApplyWorkspaceEdit {
+    type Params = ApplyWorkspaceEditParams;
+    type Result = ApplyWorkspaceEditResponse;
+    const METHOD: &'static str = REQUEST__ApplyEdit;
+}
+
 pub const REQUEST__ApplyEdit: &'static str = "workspace/applyEdit";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2158,6 +2287,15 @@ pub struct ApplyWorkspaceEditResponse {
  * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
  * presses the lightbulb associated with a marker.
  */
+#[derive(Debug)]
+pub struct CodeActionRequest;
+
+impl Request for CodeActionRequest {
+    type Params = CodeActionParams;
+    type Result = Option<Vec<Command>>;
+    const METHOD: &'static str = REQUEST__CodeAction;
+}
+
 pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
 
 /// Params for the CodeActionRequest
@@ -2185,6 +2323,15 @@ pub struct CodeActionContext {
 /**
  * The code lens request is sent from the client to the server to compute code lenses for a given text document.
  */
+#[derive(Debug)]
+pub struct CodeLensRequest;
+
+impl Request for CodeLensRequest {
+    type Params = CodeLensParams;
+    type Result = Option<Vec<CodeLens>>;
+    const METHOD: &'static str = REQUEST__CodeLens;
+}
+
 pub const REQUEST__CodeLens: &'static str = "textDocument/codeLens";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2216,14 +2363,31 @@ pub struct CodeLens {
  * The code lens resolve request is sent from the client to the server to resolve the command for a
  * given code lens item.
  */
-pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
+#[derive(Debug)]
+pub struct CodeLensResolve;
 
+impl Request for CodeLensResolve {
+    type Params = CodeLens;
+    type Result = CodeLens;
+    const METHOD: &'static str = REQUEST__CodeLensResolve;
+}
+
+pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
 
 /**
 
  The document links request is sent from the client to the server to request the location of links in a document.
 
 */
+#[derive(Debug)]
+pub struct DocumentLinkRequest;
+
+impl Request for DocumentLinkRequest {
+    type Params = DocumentLinkParams;
+    type Result = Option<Vec<DocumentLink>>;
+    const METHOD: &'static str = REQUEST__DocumentLink;
+}
+
 pub const REQUEST__DocumentLink: &'static str = "textDocument/documentLink";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2258,12 +2422,30 @@ pub struct DocumentLink {
  a given document link.
 
 */
+#[derive(Debug)]
+pub struct DocumentLinkResolve;
+
+impl Request for DocumentLinkResolve {
+    type Params = DocumentLink;
+    type Result = DocumentLink;
+    const METHOD: &'static str = REQUEST__DocumentLinkResolve;
+}
+
 pub const REQUEST__DocumentLinkResolve: &'static str = "documentLink/resolve";
 
 
 /**
  * The document formatting request is sent from the server to the client to format a whole document.
  */
+#[derive(Debug)]
+pub struct Formatting;
+
+impl Request for Formatting {
+    type Params = DocumentFormattingParams;
+    type Result = Option<Vec<TextEdit>>;
+    const METHOD: &'static str = REQUEST__Formatting;
+}
+
 pub const REQUEST__Formatting: &'static str = "textDocument/formatting";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -2378,6 +2560,15 @@ impl serde::Serialize for FormattingOptions {
 
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
+#[derive(Debug)]
+pub struct RangeFormatting;
+
+impl Request for RangeFormatting {
+    type Params = DocumentRangeFormattingParams;
+    type Result = Option<Vec<TextEdit>>;
+    const METHOD: &'static str = REQUEST__RangeFormatting;
+}
+
 pub const REQUEST__RangeFormatting: &'static str = "textDocument/rangeFormatting";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -2397,6 +2588,15 @@ pub struct DocumentRangeFormattingParams {
  * The document on type formatting request is sent from the client to the server to format parts of
  * the document during typing.
  */
+#[derive(Debug)]
+pub struct OnTypeFormatting;
+
+impl Request for OnTypeFormatting {
+    type Params = DocumentOnTypeFormattingParams;
+    type Result = Option<Vec<TextEdit>>;
+    const METHOD: &'static str = REQUEST__OnTypeFormatting;
+}
+
 pub const REQUEST__OnTypeFormatting: &'static str = "textDocument/onTypeFormatting";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -2441,6 +2641,15 @@ pub struct DocumentOnTypeFormattingRegistrationOptions {
 /**
  * The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
  */
+#[derive(Debug)]
+pub struct Rename;
+
+impl Request for Rename {
+    type Params = RenameParams;
+    type Result = Option<WorkspaceEdit>;
+    const METHOD: &'static str = REQUEST__Rename;
+}
+
 pub const REQUEST__Rename: &'static str = "textDocument/rename";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
