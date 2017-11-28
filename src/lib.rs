@@ -49,6 +49,19 @@ pub enum NumberOrString {
     String(String),
 }
 
+/* ----------------- Message typing ----------------- */
+
+pub trait Request {
+    type Params;
+    type Result;
+    const METHOD: &'static str;
+}
+
+pub trait Notification {
+    type Params;
+    const METHOD: &'static str;
+}
+
 /* ----------------- Cancel support ----------------- */
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -57,6 +70,14 @@ pub enum NumberOrString {
 /// A request that got canceled still needs to return from the server and send a response back.
 /// It can not be left open / hanging. This is in line with the JSON RPC protocol that requires
 /// that every request sends a response back. In addition it allows for returning partial results on cancel.
+#[derive(Debug)]
+pub struct Cancel;
+
+impl Notification for Cancel {
+    type Params = CancelParams;
+    const METHOD: &'static str = NOTIFICATION__Cancel;
+}
+
 pub const NOTIFICATION__Cancel: &'static str = "$/cancelRequest";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -489,7 +510,16 @@ pub const REQUEST__Initialize: &'static str = "initialize";
 /// the result of the initialize request but before the client is sending any other request or
 /// notification to the server. The server can use the initialized notification for example to
 /// dynamically register capabilities.
+#[derive(Debug)]
+pub struct Initialized;
+
+impl Notification for Initialized {
+    type Params = ();
+    const METHOD: &'static str = NOTIFICATION__Initialized;
+}
+
 pub const NOTIFICATION__Initialized: &'static str = "initialized";
+
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializeParams {
@@ -990,12 +1020,29 @@ pub const REQUEST__Shutdown: &'static str = "shutdown";
  * The server should exit with success code 0 if the shutdown request has been received before;
  * otherwise with error code 1.
  */
+#[derive(Debug)]
+pub struct Exit;
+
+impl Notification for Exit {
+    type Params = ();
+    const METHOD: &'static str = NOTIFICATION__Exit;
+}
+
 pub const NOTIFICATION__Exit: &'static str = "exit";
+
 
 /**
  * The show message notification is sent from a server to a client to ask the client to display a particular message
  * in the user interface.
  */
+#[derive(Debug)]
+pub struct ShowMessage;
+
+impl Notification for ShowMessage {
+    type Params = ShowMessageParams;
+    const METHOD: &'static str = NOTIFICATION__ShowMessage;
+}
+
 pub const NOTIFICATION__ShowMessage: &'static str = "window/showMessage";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1080,6 +1127,14 @@ pub struct MessageActionItem {
 /**
  * The log message notification is sent from the server to the client to ask the client to log a particular message.
  */
+#[derive(Debug)]
+pub struct LogMessage;
+
+impl Notification for LogMessage {
+    type Params = LogMessageParams;
+    const METHOD: &'static str = NOTIFICATION__LogMessage;
+}
+
 pub const NOTIFICATION__LogMessage: &'static str = "window/logMessage";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1095,16 +1150,32 @@ pub struct LogMessageParams {
 /**
  * The telemetry notification is sent from the server to the client to ask the client to log a telemetry event.
  */
+#[derive(Debug)]
+pub struct TelemetryEvent;
+
+impl Notification for TelemetryEvent {
+    type Params = ();
+    const METHOD: &'static str = NOTIFICATION__TelemetryEvent;
+}
+
 pub const NOTIFICATION__TelemetryEvent: &'static str = "telemetry/event";
 
 
 /**
  * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
  */
+#[derive(Debug)]
+pub struct RegisterCapability;
+
+impl Notification for RegisterCapability {
+    type Params = RegistrationParams;
+    const METHOD: &'static str = NOTIFICATION__RegisterCapability;
+}
+
 pub const NOTIFICATION__RegisterCapability: &'static str = "client/registerCapability";
 
 /**
- * General paramters to to regsiter for a capability.
+ * General parameters to to register for a capability.
  */
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Registration {
@@ -1145,6 +1216,14 @@ pub struct TextDocumentRegistrationOptions {
 
 /// The client/unregisterCapability request is sent from the server to the client to unregister a
 /// previously register capability.
+#[derive(Debug)]
+pub struct UnregisterCapability;
+
+impl Notification for UnregisterCapability {
+    type Params = UnregistrationParams;
+    const METHOD: &'static str = NOTIFICATION__UnregisterCapability;
+}
+
 pub const NOTIFICATION__UnregisterCapability: &'static str = "client/unregisterCapability";
 
 /**
@@ -1172,6 +1251,14 @@ pub struct UnregistrationParams {
 /**
  * A notification sent from the client to the server to signal the change of configuration settings.
  */
+#[derive(Debug)]
+pub struct DidChangeConfiguration;
+
+impl Notification for DidChangeConfiguration {
+    type Params = DidChangeConfigurationParams;
+    const METHOD: &'static str = NOTIFICATION__WorkspaceChangeConfiguration;
+}
+
 pub const NOTIFICATION__WorkspaceChangeConfiguration: &'static str = "workspace/didChangeConfiguration";
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -1185,6 +1272,14 @@ pub struct DidChangeConfigurationParams {
  * The document's truth is now managed by the client and the server must not try to read the document's truth
  * using the document's uri.
  */
+#[derive(Debug)]
+pub struct DidOpenTextDocument;
+
+impl Notification for DidOpenTextDocument {
+    type Params = DidOpenTextDocumentParams;
+    const METHOD: &'static str = NOTIFICATION__DidOpenTextDocument;
+}
+
 pub const NOTIFICATION__DidOpenTextDocument: &'static str = "textDocument/didOpen";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1198,6 +1293,14 @@ pub struct DidOpenTextDocumentParams {
  * The document change notification is sent from the client to the server to signal changes to a text document.
  * In 2.0 the shape of the params has changed to include proper version numbers and language ids.
  */
+#[derive(Debug)]
+pub struct DidChangeTextDocument;
+
+impl Notification for DidChangeTextDocument {
+    type Params = DidChangeTextDocumentParams;
+    const METHOD: &'static str = NOTIFICATION__DidChangeTextDocument;
+}
+
 pub const NOTIFICATION__DidChangeTextDocument: &'static str = "textDocument/didChange";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1252,6 +1355,14 @@ pub struct TextDocumentChangeRegistrationOptions {
 
 /// The document will save notification is sent from the client to the server before the document
 /// is actually saved.
+#[derive(Debug)]
+pub struct WillSave;
+
+impl Notification for WillSave {
+    type Params = ();
+    const METHOD: &'static str = NOTIFICATION__WillSave;
+}
+
 pub const NOTIFICATION__WillSave: &'static str = "textDocument/willSave";
 
 /// The document will save request is sent from the client to the server before the document is
@@ -1259,6 +1370,14 @@ pub const NOTIFICATION__WillSave: &'static str = "textDocument/willSave";
 /// document before it is saved. Please note that clients might drop results if computing the text
 /// edits took too long or if a server constantly fails on this request. This is done to keep the
 /// save fast and reliable.
+#[derive(Debug)]
+pub struct WillSaveWaitUntil;
+
+impl Notification for WillSaveWaitUntil {
+    type Params = ();
+    const METHOD: &'static str = NOTIFICATION__WillSaveWaitUntil;
+}
+
 pub const NOTIFICATION__WillSaveWaitUntil: &'static str = "textDocument/willSaveWaitUntil";
 
 /**
@@ -1334,6 +1453,14 @@ impl serde::Serialize for TextDocumentSaveReason {
  * The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
  * the truth now exists on disk).
  */
+#[derive(Debug)]
+pub struct DidCloseTextDocument;
+
+impl Notification for DidCloseTextDocument {
+    type Params = DidCloseTextDocumentParams;
+    const METHOD: &'static str = NOTIFICATION__DidCloseTextDocument;
+}
+
 pub const NOTIFICATION__DidCloseTextDocument: &'static str = "textDocument/didClose";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1346,6 +1473,14 @@ pub struct DidCloseTextDocumentParams {
 /**
  * The document save notification is sent from the client to the server when the document was saved in the client.
  */
+#[derive(Debug)]
+pub struct DidSaveTextDocument;
+
+impl Notification for DidSaveTextDocument {
+    type Params = DidSaveTextDocumentParams;
+    const METHOD: &'static str = NOTIFICATION__DidSaveTextDocument;
+}
+
 pub const NOTIFICATION__DidSaveTextDocument: &'static str = "textDocument/didSave";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1359,6 +1494,14 @@ pub struct DidSaveTextDocumentParams {
  * The watched files notification is sent from the client to the server when the client detects changes to files
  * watched by the language client.
  */
+#[derive(Debug)]
+pub struct DidChangeWatchedFiles;
+
+impl Notification for DidChangeWatchedFiles {
+    type Params = DidChangeWatchedFilesParams;
+    const METHOD: &'static str = NOTIFICATION__DidChangeWatchedFiles;
+}
+
 pub const NOTIFICATION__DidChangeWatchedFiles: &'static str = "workspace/didChangeWatchedFiles";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1429,6 +1572,14 @@ impl FileEvent {
 /**
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
  */
+#[derive(Debug)]
+pub struct PublishDiagnostics;
+
+impl Notification for PublishDiagnostics {
+    type Params = PublishDiagnosticsParams;
+    const METHOD: &'static str = NOTIFICATION__PublishDiagnostics;
+}
+
 pub const NOTIFICATION__PublishDiagnostics: &'static str = "textDocument/publishDiagnostics";
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
