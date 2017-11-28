@@ -42,7 +42,7 @@ use serde_json::Value;
 
 /* ----------------- Auxiliary types ----------------- */
 
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum NumberOrString {
     Number(u64),
@@ -59,7 +59,7 @@ pub enum NumberOrString {
 /// that every request sends a response back. In addition it allows for returning partial results on cancel.
 pub const NOTIFICATION__Cancel: &'static str = "$/cancelRequest";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CancelParams {
     /// The request id to cancel.
     pub id: NumberOrString,
@@ -69,7 +69,7 @@ pub struct CancelParams {
 
 /// Position in a text document expressed as zero-based line and character offset.
 /// A position is between two characters like an 'insert' cursor in a editor.
-#[derive(Debug, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
 pub struct Position {
     /// Line position in a document (zero-based).
     pub line: u64,
@@ -88,7 +88,7 @@ impl Position {
 
 /// A range in a text document expressed as (zero-based) start and end positions.
 /// A range is comparable to a selection in an editor. Therefore the end position is exclusive.
-#[derive(Debug, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
 pub struct Range {
     /// The range's start position.
     pub start: Position,
@@ -106,7 +106,7 @@ impl Range {
 }
 
 /// Represents a location inside a resource, such as a line inside a text file.
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
     #[serde(with = "url_serde")]
     pub uri: Url,
@@ -124,7 +124,7 @@ impl Location {
 
 /// Represents a diagnostic, such as a compiler error or warning.
 /// Diagnostic objects are only valid in the scope of a resource.
-#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct Diagnostic {
     /// The range at which the message applies.
     pub range: Range,
@@ -178,7 +178,7 @@ impl Diagnostic {
 }
 
 /// The protocol currently supports the following diagnostic severities:
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum DiagnosticSeverity {
     /// Reports an error.
     Error = 1,
@@ -251,7 +251,7 @@ impl Command {
 /// If n `TextEdit`s are applied to a text document all text edits describe changes to the initial document version.
 /// Execution wise text edits should applied from the bottom to the top of the text document. Overlapping text edits
 /// are not supported.
-#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct TextEdit {
     /// The range of the text document to be manipulated. To insert
     /// text into a document create a range where start === end.
@@ -272,7 +272,7 @@ impl TextEdit {
 }
 
 /// A workspace edit represents changes to many resources managed in the workspace.
-#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(with = "url_map")]
@@ -343,7 +343,7 @@ impl WorkspaceEdit {
 
 /// Text documents are identified using a URI. On the protocol level, URIs are passed as strings.
 /// The corresponding JSON structure looks like this:
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentIdentifier {
     // !!!!!! Note:
     // In the spec VersionedTextDocumentIdentifier extends TextDocumentIdentifier
@@ -361,7 +361,7 @@ impl TextDocumentIdentifier {
 }
 
 /// An item to transfer a text document from the client to the server.
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentItem {
     /// The text document's URI.
     #[serde(with = "url_serde")]
@@ -396,7 +396,7 @@ impl TextDocumentItem {
 }
 
 /// An identifier to denote a specific version of a text document.
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
@@ -418,7 +418,7 @@ impl VersionedTextDocumentIdentifier {
 }
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentPositionParams {
     // !!!!!! Note:
     // In the spec ReferenceParams extends TextDocumentPositionParams
@@ -451,7 +451,7 @@ impl TextDocumentPositionParams {
 ///
 /// { language: 'typescript', scheme: 'file' }
 /// { language: 'json', pattern: '**/package.json' }
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DocumentFilter {
     /**
      * A language id, like `typescript`.
@@ -524,7 +524,7 @@ pub struct InitializeParams {
     pub trace: TraceOption,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub enum TraceOption {
     #[serde(rename = "off")]
     Off,
@@ -561,7 +561,7 @@ mod option_url {
     }
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct GenericCapability {
     /**
      * This capability supports dynamic registration.
@@ -570,7 +570,7 @@ pub struct GenericCapability {
     pub dynamic_registration: Option<bool>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct WorkspaceEditCapability {
     /**
      * The client supports versioned document changes in `WorkspaceEdit`s
@@ -582,7 +582,7 @@ pub struct WorkspaceEditCapability {
 /**
  * Workspace specific client capabilities.
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct WorkspaceClientCapabilites {
     /**
      * The client supports applying batch edits to the workspace by supporting
@@ -621,7 +621,7 @@ pub struct WorkspaceClientCapabilites {
     pub execute_command: Option<GenericCapability>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct SynchronizationCapability {
     /**
      * Whether text document synchronization supports dynamic registration.
@@ -650,7 +650,7 @@ pub struct SynchronizationCapability {
     pub did_save: Option<bool>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CompletionItemCapability {
     /**
      * Client supports snippets as insert text.
@@ -665,7 +665,7 @@ pub struct CompletionItemCapability {
 }
 
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CompletionCapability {
     /**
      * Whether completion supports dynamic registration.
@@ -684,7 +684,7 @@ pub struct CompletionCapability {
 /**
  * Text document specific client capabilities.
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentClientCapabilities {
     pub synchronization: Option<SynchronizationCapability>,
     /**
@@ -787,13 +787,13 @@ pub struct ClientCapabilities {
     pub experimental: Option<Value>,
 }
 
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct InitializeResult {
     /// The capabilities the language server provides.
     pub capabilities: ServerCapabilities,
 }
 
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct InitializeError {
     /// Indicates whether the client should retry to send the
     /// initilize request after showing the message provided
@@ -804,7 +804,7 @@ pub struct InitializeError {
 // The server can signal the following capabilities:
 
 /// Defines how the host (editor) should sync document changes to the language server.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum TextDocumentSyncKind {
     /// Documents should not be synced at all.
     None = 0,
@@ -846,7 +846,7 @@ impl serde::Serialize for TextDocumentSyncKind {
 }
 
 /// Completion options.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct CompletionOptions {
     /// The server provides support to resolve additional information for a completion item.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -859,7 +859,7 @@ pub struct CompletionOptions {
 }
 
 /// Signature help options.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct SignatureHelpOptions {
     /// The characters that trigger signature help automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -868,7 +868,7 @@ pub struct SignatureHelpOptions {
 }
 
 /// Code Lens options.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CodeLensOptions {
     /// Code lens has a resolve provider as well.
     #[serde(rename = "resolveProvider")]
@@ -876,7 +876,7 @@ pub struct CodeLensOptions {
 }
 
 /// Format document on type options
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingOptions {
     /// A character on which formatting should be triggered, like `}`.
     #[serde(rename = "firstTriggerCharacter")]
@@ -889,13 +889,13 @@ pub struct DocumentOnTypeFormattingOptions {
 }
 
 /// Execute command options.
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct ExecuteCommandOptions {
     /// The commands to be executed on the server
     pub commands: Vec<String>,
 }
 
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -998,7 +998,7 @@ pub const NOTIFICATION__Exit: &'static str = "exit";
  */
 pub const NOTIFICATION__ShowMessage: &'static str = "window/showMessage";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ShowMessageParams {
     /// The message type. See {@link MessageType}.
     #[serde(rename = "type")]
@@ -1008,7 +1008,7 @@ pub struct ShowMessageParams {
     pub message: String,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum MessageType {
     /// An error message.
     Error = 1,
@@ -1057,7 +1057,7 @@ impl serde::Serialize for MessageType {
 pub const REQUEST__ShowMessageRequest: &'static str = "window/showMessageRequest";
 
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ShowMessageRequestParams {
     /// The message type. See {@link MessageType}
     #[serde(rename = "type")]
@@ -1071,7 +1071,7 @@ pub struct ShowMessageRequestParams {
     pub actions: Option<Vec<MessageActionItem>>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct MessageActionItem {
     /// A short title like 'Retry', 'Open Log' etc.
     pub title: String,
@@ -1082,7 +1082,7 @@ pub struct MessageActionItem {
  */
 pub const NOTIFICATION__LogMessage: &'static str = "window/logMessage";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct LogMessageParams {
     /// The message type. See {@link MessageType}
     #[serde(rename = "type")]
@@ -1133,7 +1133,7 @@ pub struct RegistrationParams {
 
 /// Since most of the registration options require to specify a document selector there is a base
 /// interface that can be used.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentRegistrationOptions {
     /**
      * A document selector to identify the scope of the registration. If set to null
@@ -1150,7 +1150,7 @@ pub const NOTIFICATION__UnregisterCapability: &'static str = "client/unregisterC
 /**
  * General parameters to unregister a capability.
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct Unregistration {
     /**
      * The id used to unregister the request or notification. Usually an id
@@ -1164,7 +1164,7 @@ pub struct Unregistration {
     pub method: String,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct UnregistrationParams {
     pub unregisterations: Vec<Unregistration>,
 }
@@ -1187,7 +1187,7 @@ pub struct DidChangeConfigurationParams {
  */
 pub const NOTIFICATION__DidOpenTextDocument: &'static str = "textDocument/didOpen";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DidOpenTextDocumentParams {
     /// The document that was opened.
     #[serde(rename = "textDocument")]
@@ -1200,7 +1200,7 @@ pub struct DidOpenTextDocumentParams {
  */
 pub const NOTIFICATION__DidChangeTextDocument: &'static str = "textDocument/didChange";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DidChangeTextDocumentParams {
     /// The document that did change. The version number points
     /// to the version after all provided content changes have
@@ -1214,7 +1214,7 @@ pub struct DidChangeTextDocumentParams {
 
 /// An event describing a change to a text document. If range and rangeLength are omitted
 /// the new text is considered to be the full content of the document.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentContentChangeEvent {
     /// The range of the document that changed.
     pub range: Option<Range>,
@@ -1233,7 +1233,7 @@ pub struct TextDocumentContentChangeEvent {
  *
  * Extends TextDocumentRegistrationOptions
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct TextDocumentChangeRegistrationOptions {
     /**
      * A document selector to identify the scope of the registration. If set to null
@@ -1264,7 +1264,7 @@ pub const NOTIFICATION__WillSaveWaitUntil: &'static str = "textDocument/willSave
 /**
  * The parameters send in a will save text document notification.
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct WillSaveTextDocumentParams {
     /**
      * The document that will be saved.
@@ -1281,7 +1281,7 @@ pub struct WillSaveTextDocumentParams {
 /**
  * Represents reasons why a text document is saved.
  */
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TextDocumentSaveReason {
     /**
      * Manually triggered, e.g. by the user pressing save, by starting debugging,
@@ -1336,7 +1336,7 @@ impl serde::Serialize for TextDocumentSaveReason {
  */
 pub const NOTIFICATION__DidCloseTextDocument: &'static str = "textDocument/didClose";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DidCloseTextDocumentParams {
     /// The document that was closed.
     #[serde(rename = "textDocument")]
@@ -1348,7 +1348,7 @@ pub struct DidCloseTextDocumentParams {
  */
 pub const NOTIFICATION__DidSaveTextDocument: &'static str = "textDocument/didSave";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
     #[serde(rename = "textDocument")]
@@ -1361,14 +1361,14 @@ pub struct DidSaveTextDocumentParams {
  */
 pub const NOTIFICATION__DidChangeWatchedFiles: &'static str = "workspace/didChangeWatchedFiles";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
     /// The actual file events.
     pub changes: Vec<FileEvent>,
 }
 
 /// The file event type.
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum FileChangeType {
     /// The file got created.
     Created = 1,
@@ -1409,7 +1409,7 @@ impl serde::Serialize for FileChangeType {
 }
 
 /// An event describing a file change.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct FileEvent {
     /// The file's URI.
     #[serde(with = "url_serde")]
@@ -1431,7 +1431,7 @@ impl FileEvent {
  */
 pub const NOTIFICATION__PublishDiagnostics: &'static str = "textDocument/publishDiagnostics";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
     #[serde(with = "url_serde")]
@@ -1560,7 +1560,7 @@ impl CompletionItem {
 
 enum_from_primitive!{
 /// The kind of a completion entry.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum CompletionItemKind {
     Text = 1,
     Method = 2,
@@ -1611,7 +1611,7 @@ impl serde::Serialize for CompletionItemKind {
 
 enum_from_primitive!{
 /// Defines how to interpret the insert text in a completion item
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum InsertTextFormat {
     PlainText = 1,
     Snippet = 2,
@@ -1653,7 +1653,7 @@ pub const REQUEST__ResolveCompletionItem: &'static str = "completionItem/resolve
 pub const REQUEST__Hover: &'static str = "textDocument/hover";
 
 /// The result of a hover request.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct Hover {
     /// The hover's content
     pub contents: HoverContents,
@@ -1666,7 +1666,7 @@ pub struct Hover {
 /**
  * Hover contents could be single entry or multiple entries.
  */
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum HoverContents {
     Scalar(MarkedString),
@@ -1684,14 +1684,14 @@ pub enum HoverContents {
  ```
  */
 // type MarkedString = string | { language: string; value: string };
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
     String(String),
     LanguageString(LanguageString),
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct LanguageString {
     pub language: String,
     pub value: String,
@@ -1718,7 +1718,7 @@ pub const REQUEST__SignatureHelp: &'static str = "textDocument/signatureHelp";
 /// Signature help represents the signature of something
 /// callable. There can be multiple signature but only one
 /// active and only one active parameter.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct SignatureHelp {
     /// One or more signatures.
     pub signatures: Vec<SignatureInformation>,
@@ -1735,7 +1735,7 @@ pub struct SignatureHelp {
 /// Represents the signature of something callable. A signature
 /// can have a label, like a function-name, a doc-comment, and
 /// a set of parameters.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct SignatureInformation {
     /// The label of this signature. Will be shown in
     /// the UI.
@@ -1752,7 +1752,7 @@ pub struct SignatureInformation {
 
 /// Represents a parameter of a callable-signature. A parameter can
 /// have a label and a doc-comment.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ParameterInformation {
     /// The label of this parameter. Will be shown in
     /// the UI.
@@ -1772,7 +1772,7 @@ pub const REQUEST__GotoDefinition: &'static str = "textDocument/definition";
 /// symbol denoted by the given text document position.
 pub const REQUEST__References: &'static str = "textDocument/references";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ReferenceParams {
     // This field was "mixed-in" from TextDocumentPositionParams
     /// The text document.
@@ -1787,7 +1787,7 @@ pub struct ReferenceParams {
     pub context: ReferenceContext,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ReferenceContext {
     /// Include the declaration of the current symbol.
     #[serde(rename = "includeDeclaration")]
@@ -1808,7 +1808,7 @@ pub const REQUEST__DocumentHighlight: &'static str = "textDocument/documentHighl
 /// A document highlight is a range inside a text document which deserves
 /// special attention. Usually a document highlight is visualized by changing
 /// the background color of its range.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DocumentHighlight {
     /// The range this highlight applies to.
     pub range: Range,
@@ -1818,7 +1818,7 @@ pub struct DocumentHighlight {
 }
 
 /// A document highlight kind.
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum DocumentHighlightKind {
     /// A textual occurrance.
     Text = 1,
@@ -1864,7 +1864,7 @@ impl serde::Serialize for DocumentHighlightKind {
  */
 pub const REQUEST__DocumentSymbols: &'static str = "textDocument/documentSymbol";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DocumentSymbolParams {
     /// The text document.
     #[serde(rename = "textDocument")]
@@ -1873,7 +1873,7 @@ pub struct DocumentSymbolParams {
 
 /// Represents information about programming constructs like variables, classes,
 /// interfaces etc.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct SymbolInformation {
     /// The name of this symbol.
     pub name: String,
@@ -1891,7 +1891,7 @@ pub struct SymbolInformation {
 
 /// A symbol kind.
 enum_from_primitive!{
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum SymbolKind {
     File = 1,
     Module = 2,
@@ -1947,7 +1947,7 @@ impl serde::Serialize for SymbolKind {
 pub const REQUEST__WorkspaceSymbols: &'static str = "workspace/symbol";
 
 /// The parameters of a Workspace Symbol Request.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct WorkspaceSymbolParams {
     /// A non-empty query string
     pub query: String,
@@ -1973,7 +1973,7 @@ pub struct ExecuteCommandParams {
 /**
  * Execute command registration options.
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ExecuteCommandRegistrationOptions {
     /**
      * The commands to be executed on the server
@@ -1986,7 +1986,7 @@ pub struct ExecuteCommandRegistrationOptions {
 /// client side.
 pub const REQUEST__ApplyEdit: &'static str = "workspace/applyEdit";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ApplyWorkspaceEditParams {
     /**
      * The edits to apply.
@@ -1994,7 +1994,7 @@ pub struct ApplyWorkspaceEditParams {
     pub edit: WorkspaceEdit,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ApplyWorkspaceEditResponse {
     /**
      * Indicates whether the edit was applied or not.
@@ -2010,7 +2010,7 @@ pub struct ApplyWorkspaceEditResponse {
 pub const REQUEST__CodeAction: &'static str = "textDocument/codeAction";
 
 /// Params for the CodeActionRequest
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CodeActionParams {
     /// The document in which the command was invoked.
     #[serde(rename = "textDocument")]
@@ -2025,7 +2025,7 @@ pub struct CodeActionParams {
 
 /// Contains additional diagnostic information about the context in which
 /// a code action is run.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CodeActionContext {
     /// An array of diagnostics.
     pub diagnostics: Vec<Diagnostic>,
@@ -2036,7 +2036,7 @@ pub struct CodeActionContext {
  */
 pub const REQUEST__CodeLens: &'static str = "textDocument/codeLens";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CodeLensParams {
     /// The document to request code lens for.
     #[serde(rename = "textDocument")]
@@ -2075,7 +2075,7 @@ pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
 */
 pub const REQUEST__DocumentLink: &'static str = "textDocument/documentLink";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DocumentLinkParams {
     /**
      * The document to provide document links for.
@@ -2088,7 +2088,7 @@ pub struct DocumentLinkParams {
  * A document link is a range in a text document that links to an internal or external resource, like another
  * text document or a web site.
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DocumentLink {
     /**
      * The range this link applies to.
@@ -2265,7 +2265,7 @@ pub struct DocumentOnTypeFormattingParams {
 }
 
 /// Extends TextDocumentRegistrationOptions
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct DocumentOnTypeFormattingRegistrationOptions {
     /**
      * A document selector to identify the scope of the registration. If set to null
@@ -2292,7 +2292,7 @@ pub struct DocumentOnTypeFormattingRegistrationOptions {
  */
 pub const REQUEST__Rename: &'static str = "textDocument/rename";
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct RenameParams {
     /// The document to format.
     #[serde(rename = "textDocument")]
