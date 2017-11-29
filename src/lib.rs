@@ -71,7 +71,7 @@ pub trait Notification {
 /// It can not be left open / hanging. This is in line with the JSON RPC protocol that requires
 /// that every request sends a response back. In addition it allows for returning partial results on cancel.
 #[derive(Debug)]
-pub struct Cancel;
+pub enum Cancel { }
 
 impl Notification for Cancel {
     type Params = CancelParams;
@@ -505,7 +505,7 @@ pub type DocumentSelector = Vec<DocumentFilter>;
 
 */
 #[derive(Debug)]
-pub struct Initialize;
+pub enum Initialize { }
 
 impl Request for Initialize {
     type Params = InitializeParams;
@@ -520,7 +520,7 @@ pub const REQUEST__Initialize: &'static str = "initialize";
 /// notification to the server. The server can use the initialized notification for example to
 /// dynamically register capabilities.
 #[derive(Debug)]
-pub struct Initialized;
+pub enum Initialized { }
 
 impl Notification for Initialized {
     type Params = ();
@@ -1022,7 +1022,7 @@ pub struct ServerCapabilities {
  * There is a separate exit notification that asks the server to exit.
  */
 #[derive(Debug)]
-pub struct Shutdown;
+pub enum Shutdown { }
 
 impl Request for Shutdown {
     type Params = ();
@@ -1038,7 +1038,7 @@ pub const REQUEST__Shutdown: &'static str = "shutdown";
  * otherwise with error code 1.
  */
 #[derive(Debug)]
-pub struct Exit;
+pub enum Exit { }
 
 impl Notification for Exit {
     type Params = ();
@@ -1052,7 +1052,7 @@ pub const NOTIFICATION__Exit: &'static str = "exit";
  * in the user interface.
  */
 #[derive(Debug)]
-pub struct ShowMessage;
+pub enum ShowMessage { }
 
 impl Notification for ShowMessage {
     type Params = ShowMessageParams;
@@ -1118,7 +1118,7 @@ impl serde::Serialize for MessageType {
  * wait for an answer from the client.
  */
 #[derive(Debug)]
-pub struct ShowMessageRequest;
+pub enum ShowMessageRequest { }
 
 impl Request for ShowMessageRequest {
     type Params = ShowMessageRequestParams;
@@ -1153,7 +1153,7 @@ pub struct MessageActionItem {
  * The log message notification is sent from the server to the client to ask the client to log a particular message.
  */
 #[derive(Debug)]
-pub struct LogMessage;
+pub enum LogMessage { }
 
 impl Notification for LogMessage {
     type Params = LogMessageParams;
@@ -1176,7 +1176,7 @@ pub struct LogMessageParams {
  * The telemetry notification is sent from the server to the client to ask the client to log a telemetry event.
  */
 #[derive(Debug)]
-pub struct TelemetryEvent;
+pub enum TelemetryEvent { }
 
 impl Notification for TelemetryEvent {
     type Params = ();
@@ -1190,7 +1190,7 @@ pub const NOTIFICATION__TelemetryEvent: &'static str = "telemetry/event";
  * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
  */
 #[derive(Debug)]
-pub struct RegisterCapability;
+pub enum RegisterCapability { }
 
 impl Notification for RegisterCapability {
     type Params = RegistrationParams;
@@ -1242,7 +1242,7 @@ pub struct TextDocumentRegistrationOptions {
 /// The client/unregisterCapability request is sent from the server to the client to unregister a
 /// previously register capability.
 #[derive(Debug)]
-pub struct UnregisterCapability;
+pub enum UnregisterCapability { }
 
 impl Notification for UnregisterCapability {
     type Params = UnregistrationParams;
@@ -1277,7 +1277,7 @@ pub struct UnregistrationParams {
  * A notification sent from the client to the server to signal the change of configuration settings.
  */
 #[derive(Debug)]
-pub struct DidChangeConfiguration;
+pub enum DidChangeConfiguration { }
 
 impl Notification for DidChangeConfiguration {
     type Params = DidChangeConfigurationParams;
@@ -1298,7 +1298,7 @@ pub struct DidChangeConfigurationParams {
  * using the document's uri.
  */
 #[derive(Debug)]
-pub struct DidOpenTextDocument;
+pub enum DidOpenTextDocument { }
 
 impl Notification for DidOpenTextDocument {
     type Params = DidOpenTextDocumentParams;
@@ -1319,7 +1319,7 @@ pub struct DidOpenTextDocumentParams {
  * In 2.0 the shape of the params has changed to include proper version numbers and language ids.
  */
 #[derive(Debug)]
-pub struct DidChangeTextDocument;
+pub enum DidChangeTextDocument { }
 
 impl Notification for DidChangeTextDocument {
     type Params = DidChangeTextDocumentParams;
@@ -1381,7 +1381,7 @@ pub struct TextDocumentChangeRegistrationOptions {
 /// The document will save notification is sent from the client to the server before the document
 /// is actually saved.
 #[derive(Debug)]
-pub struct WillSave;
+pub enum WillSave { }
 
 impl Notification for WillSave {
     type Params = ();
@@ -1396,7 +1396,7 @@ pub const NOTIFICATION__WillSave: &'static str = "textDocument/willSave";
 /// edits took too long or if a server constantly fails on this request. This is done to keep the
 /// save fast and reliable.
 #[derive(Debug)]
-pub struct WillSaveWaitUntil;
+pub enum WillSaveWaitUntil { }
 
 impl Notification for WillSaveWaitUntil {
     type Params = ();
@@ -1479,7 +1479,7 @@ impl serde::Serialize for TextDocumentSaveReason {
  * the truth now exists on disk).
  */
 #[derive(Debug)]
-pub struct DidCloseTextDocument;
+pub enum DidCloseTextDocument { }
 
 impl Notification for DidCloseTextDocument {
     type Params = DidCloseTextDocumentParams;
@@ -1499,7 +1499,7 @@ pub struct DidCloseTextDocumentParams {
  * The document save notification is sent from the client to the server when the document was saved in the client.
  */
 #[derive(Debug)]
-pub struct DidSaveTextDocument;
+pub enum DidSaveTextDocument { }
 
 impl Notification for DidSaveTextDocument {
     type Params = DidSaveTextDocumentParams;
@@ -1520,7 +1520,7 @@ pub struct DidSaveTextDocumentParams {
  * watched by the language client.
  */
 #[derive(Debug)]
-pub struct DidChangeWatchedFiles;
+pub enum DidChangeWatchedFiles { }
 
 impl Notification for DidChangeWatchedFiles {
     type Params = DidChangeWatchedFilesParams;
@@ -1598,7 +1598,7 @@ impl FileEvent {
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
  */
 #[derive(Debug)]
-pub struct PublishDiagnostics;
+pub enum PublishDiagnostics { }
 
 impl Notification for PublishDiagnostics {
     type Params = PublishDiagnosticsParams;
@@ -1637,7 +1637,7 @@ impl PublishDiagnosticsParams {
  documentation property filled in.
 */
 #[derive(Debug)]
-pub struct Completion;
+pub enum Completion { }
 
 impl Request for Completion {
     type Params = TextDocumentPositionParams; // TODO: extend with CompletionContext as CompletionParams
@@ -1837,7 +1837,7 @@ impl serde::Serialize for InsertTextFormat {
 
 /// The request is sent from the client to the server to resolve additional information for a given completion item.
 #[derive(Debug)]
-pub struct ResolveCompletionItem;
+pub enum ResolveCompletionItem { }
 
 impl Request for ResolveCompletionItem {
     type Params = CompletionItem;
@@ -1850,7 +1850,7 @@ pub const REQUEST__ResolveCompletionItem: &'static str = "completionItem/resolve
 /// The hover request is sent from the client to the server to request hover information at a given text
 /// document position.
 #[derive(Debug)]
-pub struct HoverRequest;
+pub enum HoverRequest { }
 
 impl Request for HoverRequest {
     type Params = TextDocumentPositionParams;
@@ -1921,7 +1921,7 @@ impl MarkedString {
 /// The signature help request is sent from the client to the server to request signature information at
 /// a given cursor position.
 #[derive(Debug)]
-pub struct SignatureHelpRequest;
+pub enum SignatureHelpRequest { }
 
 impl Request for SignatureHelpRequest {
     type Params = TextDocumentPositionParams;
@@ -1984,7 +1984,7 @@ pub struct ParameterInformation {
 /// The goto definition request is sent from the client to the server to resolve the definition location of
 /// a symbol at a given text document position.
 #[derive(Debug)]
-pub struct GotoDefinition;
+pub enum GotoDefinition { }
 
 impl Request for GotoDefinition {
     type Params = TextDocumentPositionParams;
@@ -2040,7 +2040,7 @@ pub struct ReferenceContext {
  use Textas the kind.
 */
 #[derive(Debug)]
-pub struct DocumentHighlightRequest;
+pub enum DocumentHighlightRequest { }
 
 impl Request for DocumentHighlightRequest {
     type Params = TextDocumentPositionParams;
@@ -2108,7 +2108,7 @@ impl serde::Serialize for DocumentHighlightKind {
  * text document.
  */
 #[derive(Debug)]
-pub struct DocumentSymbol;
+pub enum DocumentSymbol { }
 
 impl Request for DocumentSymbol {
     type Params = DocumentSymbolParams;
@@ -2199,7 +2199,7 @@ impl serde::Serialize for SymbolKind {
  * matching the query string.
  */
 #[derive(Debug)]
-pub struct WorkspaceSymbol;
+pub enum WorkspaceSymbol { }
 
 impl Request for WorkspaceSymbol {
     type Params = WorkspaceSymbolParams;
@@ -2218,7 +2218,7 @@ pub struct WorkspaceSymbolParams {
 
 /// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
 #[derive(Debug)]
-pub struct ExecuteCommand;
+pub enum ExecuteCommand { }
 
 impl Request for ExecuteCommand {
     type Params = ExecuteCommandParams;
@@ -2256,7 +2256,7 @@ pub struct ExecuteCommandRegistrationOptions {
 /// The workspace/applyEdit request is sent from the server to the client to modify resource on the
 /// client side.
 #[derive(Debug)]
-pub struct ApplyWorkspaceEdit;
+pub enum ApplyWorkspaceEdit { }
 
 impl Request for ApplyWorkspaceEdit {
     type Params = ApplyWorkspaceEditParams;
@@ -2288,7 +2288,7 @@ pub struct ApplyWorkspaceEditResponse {
  * presses the lightbulb associated with a marker.
  */
 #[derive(Debug)]
-pub struct CodeActionRequest;
+pub enum CodeActionRequest { }
 
 impl Request for CodeActionRequest {
     type Params = CodeActionParams;
@@ -2324,7 +2324,7 @@ pub struct CodeActionContext {
  * The code lens request is sent from the client to the server to compute code lenses for a given text document.
  */
 #[derive(Debug)]
-pub struct CodeLensRequest;
+pub enum CodeLensRequest { }
 
 impl Request for CodeLensRequest {
     type Params = CodeLensParams;
@@ -2364,7 +2364,7 @@ pub struct CodeLens {
  * given code lens item.
  */
 #[derive(Debug)]
-pub struct CodeLensResolve;
+pub enum CodeLensResolve { }
 
 impl Request for CodeLensResolve {
     type Params = CodeLens;
@@ -2380,7 +2380,7 @@ pub const REQUEST__CodeLensResolve: &'static str = "codeLens/resolve";
 
 */
 #[derive(Debug)]
-pub struct DocumentLinkRequest;
+pub enum DocumentLinkRequest { }
 
 impl Request for DocumentLinkRequest {
     type Params = DocumentLinkParams;
@@ -2423,7 +2423,7 @@ pub struct DocumentLink {
 
 */
 #[derive(Debug)]
-pub struct DocumentLinkResolve;
+pub enum DocumentLinkResolve { }
 
 impl Request for DocumentLinkResolve {
     type Params = DocumentLink;
@@ -2438,7 +2438,7 @@ pub const REQUEST__DocumentLinkResolve: &'static str = "documentLink/resolve";
  * The document formatting request is sent from the server to the client to format a whole document.
  */
 #[derive(Debug)]
-pub struct Formatting;
+pub enum Formatting { }
 
 impl Request for Formatting {
     type Params = DocumentFormattingParams;
@@ -2561,7 +2561,7 @@ impl serde::Serialize for FormattingOptions {
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
 #[derive(Debug)]
-pub struct RangeFormatting;
+pub enum RangeFormatting { }
 
 impl Request for RangeFormatting {
     type Params = DocumentRangeFormattingParams;
@@ -2589,7 +2589,7 @@ pub struct DocumentRangeFormattingParams {
  * the document during typing.
  */
 #[derive(Debug)]
-pub struct OnTypeFormatting;
+pub enum OnTypeFormatting { }
 
 impl Request for OnTypeFormatting {
     type Params = DocumentOnTypeFormattingParams;
@@ -2642,7 +2642,7 @@ pub struct DocumentOnTypeFormattingRegistrationOptions {
  * The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
  */
 #[derive(Debug)]
-pub struct Rename;
+pub enum Rename { }
 
 impl Request for Rename {
     type Params = RenameParams;
