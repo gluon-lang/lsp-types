@@ -1334,6 +1334,74 @@ pub enum CompletionResponse {
     List(CompletionList),
 }
 
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct CompletionParams {
+    // This field was "mixed-in" from TextDocumentPositionParams
+    /// The text document.
+    #[serde(rename = "textDocument")]
+    pub text_document: TextDocumentIdentifier,
+
+    // This field was "mixed-in" from TextDocumentPositionParams
+    /// The position inside the text document.
+    pub position: Position,
+
+    // CompletionParams properties:
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<CompletionContext>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct CompletionContext {
+	/**
+	 * How the completion was triggered.
+	 */
+     #[serde(rename = "triggerKind")]
+	pub trigger_kind: CompletionTriggerKind,
+
+	/**
+	 * The trigger character (a single character) that has trigger code complete.
+	 * Is undefined if `triggerKind !== CompletionTriggerKind.TriggerCharacter`
+	 */
+     #[serde(rename = "triggerCharacter")]
+     #[serde(skip_serializing_if = "Option::is_none")]
+	pub trigger_character: Option<String>,
+}
+
+enum_from_primitive!{
+/// How a completion was triggered.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum CompletionTriggerKind {
+    Invoked = 1,
+    TriggerCharacter = 2,
+}
+}
+
+impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use enum_primitive::FromPrimitive;
+
+        let i = try!(u8::deserialize(deserializer));
+        CompletionTriggerKind::from_u8(i).ok_or_else(|| {
+            D::Error::invalid_value(
+                de::Unexpected::Unsigned(i as u64),
+                &"value between 1 and 2 (inclusive)",
+            )
+        })
+    }
+}
+
+impl serde::Serialize for CompletionTriggerKind {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]

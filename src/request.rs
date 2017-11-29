@@ -66,7 +66,7 @@ impl Request for ShowMessageRequest {
 pub enum Completion { }
 
 impl Request for Completion {
-    type Params = TextDocumentPositionParams; // TODO: extend with CompletionContext as CompletionParams
+    type Params = CompletionParams;
     type Result = CompletionResponse;
     const METHOD: &'static str = "textDocument/completion";
 }
