@@ -16,7 +16,7 @@ pub trait Request {
 
 */
 #[derive(Debug)]
-pub enum Initialize { }
+pub enum Initialize {}
 
 impl Request for Initialize {
     type Params = InitializeParams;
@@ -30,7 +30,7 @@ impl Request for Initialize {
  * There is a separate exit notification that asks the server to exit.
  */
 #[derive(Debug)]
-pub enum Shutdown { }
+pub enum Shutdown {}
 
 impl Request for Shutdown {
     type Params = ();
@@ -44,7 +44,7 @@ impl Request for Shutdown {
  * wait for an answer from the client.
  */
 #[derive(Debug)]
-pub enum ShowMessageRequest { }
+pub enum ShowMessageRequest {}
 
 impl Request for ShowMessageRequest {
     type Params = ShowMessageRequestParams;
@@ -63,7 +63,7 @@ impl Request for ShowMessageRequest {
  documentation property filled in.
 */
 #[derive(Debug)]
-pub enum Completion { }
+pub enum Completion {}
 
 impl Request for Completion {
     type Params = CompletionParams;
@@ -73,7 +73,7 @@ impl Request for Completion {
 
 /// The request is sent from the client to the server to resolve additional information for a given completion item.
 #[derive(Debug)]
-pub enum ResolveCompletionItem { }
+pub enum ResolveCompletionItem {}
 
 impl Request for ResolveCompletionItem {
     type Params = CompletionItem;
@@ -84,7 +84,7 @@ impl Request for ResolveCompletionItem {
 /// The hover request is sent from the client to the server to request hover information at a given text
 /// document position.
 #[derive(Debug)]
-pub enum HoverRequest { }
+pub enum HoverRequest {}
 
 impl Request for HoverRequest {
     type Params = TextDocumentPositionParams;
@@ -95,7 +95,7 @@ impl Request for HoverRequest {
 /// The signature help request is sent from the client to the server to request signature information at
 /// a given cursor position.
 #[derive(Debug)]
-pub enum SignatureHelpRequest { }
+pub enum SignatureHelpRequest {}
 
 impl Request for SignatureHelpRequest {
     type Params = TextDocumentPositionParams;
@@ -106,7 +106,7 @@ impl Request for SignatureHelpRequest {
 /// The goto definition request is sent from the client to the server to resolve the definition location of
 /// a symbol at a given text document position.
 #[derive(Debug)]
-pub enum GotoDefinition { }
+pub enum GotoDefinition {}
 
 impl Request for GotoDefinition {
     type Params = TextDocumentPositionParams;
@@ -126,7 +126,7 @@ pub enum GotoDefinitionResponse {
 
 /// The references request is sent from the client to the server to resolve project-wide references for the
 /// symbol denoted by the given text document position.
-pub enum References { }
+pub enum References {}
 
 impl Request for References {
     type Params = ReferenceParams;
@@ -144,7 +144,7 @@ impl Request for References {
  use Textas the kind.
 */
 #[derive(Debug)]
-pub enum DocumentHighlightRequest { }
+pub enum DocumentHighlightRequest {}
 
 impl Request for DocumentHighlightRequest {
     type Params = TextDocumentPositionParams;
@@ -157,7 +157,7 @@ impl Request for DocumentHighlightRequest {
  * text document.
  */
 #[derive(Debug)]
-pub enum DocumentSymbol { }
+pub enum DocumentSymbol {}
 
 impl Request for DocumentSymbol {
     type Params = DocumentSymbolParams;
@@ -170,7 +170,7 @@ impl Request for DocumentSymbol {
  * matching the query string.
  */
 #[derive(Debug)]
-pub enum WorkspaceSymbol { }
+pub enum WorkspaceSymbol {}
 
 impl Request for WorkspaceSymbol {
     type Params = WorkspaceSymbolParams;
@@ -180,7 +180,7 @@ impl Request for WorkspaceSymbol {
 
 /// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
 #[derive(Debug)]
-pub enum ExecuteCommand { }
+pub enum ExecuteCommand {}
 
 impl Request for ExecuteCommand {
     type Params = ExecuteCommandParams;
@@ -191,7 +191,7 @@ impl Request for ExecuteCommand {
 /// The workspace/applyEdit request is sent from the server to the client to modify resource on the
 /// client side.
 #[derive(Debug)]
-pub enum ApplyWorkspaceEdit { }
+pub enum ApplyWorkspaceEdit {}
 
 impl Request for ApplyWorkspaceEdit {
     type Params = ApplyWorkspaceEditParams;
@@ -205,7 +205,7 @@ impl Request for ApplyWorkspaceEdit {
  * presses the lightbulb associated with a marker.
  */
 #[derive(Debug)]
-pub enum CodeActionRequest { }
+pub enum CodeActionRequest {}
 
 impl Request for CodeActionRequest {
     type Params = CodeActionParams;
@@ -217,7 +217,7 @@ impl Request for CodeActionRequest {
  * The code lens request is sent from the client to the server to compute code lenses for a given text document.
  */
 #[derive(Debug)]
-pub enum CodeLensRequest { }
+pub enum CodeLensRequest {}
 
 impl Request for CodeLensRequest {
     type Params = CodeLensParams;
@@ -230,7 +230,7 @@ impl Request for CodeLensRequest {
  * given code lens item.
  */
 #[derive(Debug)]
-pub enum CodeLensResolve { }
+pub enum CodeLensResolve {}
 
 impl Request for CodeLensResolve {
     type Params = CodeLens;
@@ -240,7 +240,7 @@ impl Request for CodeLensResolve {
 
 /// The document links request is sent from the client to the server to request the location of links in a document.
 #[derive(Debug)]
-pub enum DocumentLinkRequest { }
+pub enum DocumentLinkRequest {}
 
 impl Request for DocumentLinkRequest {
     type Params = DocumentLinkParams;
@@ -255,7 +255,7 @@ impl Request for DocumentLinkRequest {
 
 */
 #[derive(Debug)]
-pub enum DocumentLinkResolve { }
+pub enum DocumentLinkResolve {}
 
 impl Request for DocumentLinkResolve {
     type Params = DocumentLink;
@@ -267,7 +267,7 @@ impl Request for DocumentLinkResolve {
  * The document formatting request is sent from the server to the client to format a whole document.
  */
 #[derive(Debug)]
-pub enum Formatting { }
+pub enum Formatting {}
 
 impl Request for Formatting {
     type Params = DocumentFormattingParams;
@@ -277,7 +277,7 @@ impl Request for Formatting {
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
 #[derive(Debug)]
-pub enum RangeFormatting { }
+pub enum RangeFormatting {}
 
 impl Request for RangeFormatting {
     type Params = DocumentRangeFormattingParams;
@@ -290,7 +290,7 @@ impl Request for RangeFormatting {
  * the document during typing.
  */
 #[derive(Debug)]
-pub enum OnTypeFormatting { }
+pub enum OnTypeFormatting {}
 
 impl Request for OnTypeFormatting {
     type Params = DocumentOnTypeFormattingParams;
@@ -302,7 +302,7 @@ impl Request for OnTypeFormatting {
  * The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
  */
 #[derive(Debug)]
-pub enum Rename { }
+pub enum Rename {}
 
 impl Request for Rename {
     type Params = RenameParams;

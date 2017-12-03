@@ -23,9 +23,9 @@ such as `urn:isbn:0451450523`.
 #[macro_use]
 extern crate enum_primitive;
 extern crate serde;
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 
 extern crate url;
 extern crate url_serde;
@@ -102,8 +102,7 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    #[serde(with = "url_serde")]
-    pub uri: Url,
+    #[serde(with = "url_serde")] pub uri: Url,
     pub range: Range,
 }
 
@@ -503,12 +502,9 @@ pub struct InitializeParams {
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub enum TraceOption {
-    #[serde(rename = "off")]
-    Off,
-    #[serde(rename = "messages")]
-    Messages,
-    #[serde(rename = "verbose")]
-    Verbose,
+    #[serde(rename = "off")] Off,
+    #[serde(rename = "messages")] Messages,
+    #[serde(rename = "verbose")] Verbose,
 }
 
 impl Default for TraceOption {
@@ -1346,25 +1342,24 @@ pub struct CompletionParams {
     pub position: Position,
 
     // CompletionParams properties:
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub context: Option<CompletionContext>,
+    #[serde(skip_serializing_if = "Option::is_none")] pub context: Option<CompletionContext>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CompletionContext {
-	/**
-	 * How the completion was triggered.
-	 */
-     #[serde(rename = "triggerKind")]
-	pub trigger_kind: CompletionTriggerKind,
+    /**
+     * How the completion was triggered.
+     */
+    #[serde(rename = "triggerKind")]
+    pub trigger_kind: CompletionTriggerKind,
 
-	/**
-	 * The trigger character (a single character) that has trigger code complete.
-	 * Is undefined if `triggerKind !== CompletionTriggerKind.TriggerCharacter`
-	 */
-     #[serde(rename = "triggerCharacter")]
-     #[serde(skip_serializing_if = "Option::is_none")]
-	pub trigger_character: Option<String>,
+    /**
+     * The trigger character (a single character) that has trigger code complete.
+     * Is undefined if `triggerKind !== CompletionTriggerKind.TriggerCharacter`
+     */
+    #[serde(rename = "triggerCharacter")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trigger_character: Option<String>,
 }
 
 enum_from_primitive!{
@@ -2037,10 +2032,9 @@ impl<'de> serde::Deserialize<'de> for FormattingOptions {
                     }
                     properties.insert(key.into_owned(), map.next_value()?);
                 }
-                let tab_size = tab_size
-                    .ok_or_else(|| de::Error::missing_field("tab_size"))?;
-                let insert_spaces = insert_spaces
-                    .ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
+                let tab_size = tab_size.ok_or_else(|| de::Error::missing_field("tab_size"))?;
+                let insert_spaces =
+                    insert_spaces.ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
                 Ok(FormattingOptions {
                     tab_size: tab_size,
                     insert_spaces: insert_spaces,
@@ -2156,7 +2150,6 @@ mod tests {
 
     #[test]
     fn number_or_string() {
-
         test_serialization(&NumberOrString::Number(123), r#"123"#);
 
         test_serialization(&NumberOrString::String("abcd".into()), r#""abcd""#);
@@ -2164,7 +2157,6 @@ mod tests {
 
     #[test]
     fn marked_string() {
-
         test_serialization(&MarkedString::from_markdown("xxx".into()), r#""xxx""#);
 
         test_serialization(
