@@ -12,7 +12,7 @@ pub trait Notification {
 /// It can not be left open / hanging. This is in line with the JSON RPC protocol that requires
 /// that every request sends a response back. In addition it allows for returning partial results on cancel.
 #[derive(Debug)]
-pub enum Cancel { }
+pub enum Cancel {}
 
 impl Notification for Cancel {
     type Params = CancelParams;
@@ -24,7 +24,7 @@ impl Notification for Cancel {
 /// notification to the server. The server can use the initialized notification for example to
 /// dynamically register capabilities.
 #[derive(Debug)]
-pub enum Initialized { }
+pub enum Initialized {}
 
 impl Notification for Initialized {
     type Params = ();
@@ -37,7 +37,7 @@ impl Notification for Initialized {
  * otherwise with error code 1.
  */
 #[derive(Debug)]
-pub enum Exit { }
+pub enum Exit {}
 
 impl Notification for Exit {
     type Params = ();
@@ -49,7 +49,7 @@ impl Notification for Exit {
  * in the user interface.
  */
 #[derive(Debug)]
-pub enum ShowMessage { }
+pub enum ShowMessage {}
 
 impl Notification for ShowMessage {
     type Params = ShowMessageParams;
@@ -60,7 +60,7 @@ impl Notification for ShowMessage {
  * The log message notification is sent from the server to the client to ask the client to log a particular message.
  */
 #[derive(Debug)]
-pub enum LogMessage { }
+pub enum LogMessage {}
 
 impl Notification for LogMessage {
     type Params = LogMessageParams;
@@ -71,7 +71,7 @@ impl Notification for LogMessage {
  * The telemetry notification is sent from the server to the client to ask the client to log a telemetry event.
  */
 #[derive(Debug)]
-pub enum TelemetryEvent { }
+pub enum TelemetryEvent {}
 
 impl Notification for TelemetryEvent {
     type Params = ();
@@ -82,7 +82,7 @@ impl Notification for TelemetryEvent {
  * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
  */
 #[derive(Debug)]
-pub enum RegisterCapability { }
+pub enum RegisterCapability {}
 
 impl Notification for RegisterCapability {
     type Params = RegistrationParams;
@@ -93,7 +93,7 @@ impl Notification for RegisterCapability {
 /// The client/unregisterCapability request is sent from the server to the client to unregister a
 /// previously register capability.
 #[derive(Debug)]
-pub enum UnregisterCapability { }
+pub enum UnregisterCapability {}
 
 impl Notification for UnregisterCapability {
     type Params = UnregistrationParams;
@@ -104,7 +104,7 @@ impl Notification for UnregisterCapability {
  * A notification sent from the client to the server to signal the change of configuration settings.
  */
 #[derive(Debug)]
-pub enum DidChangeConfiguration { }
+pub enum DidChangeConfiguration {}
 
 impl Notification for DidChangeConfiguration {
     type Params = DidChangeConfigurationParams;
@@ -117,7 +117,7 @@ impl Notification for DidChangeConfiguration {
  * using the document's uri.
  */
 #[derive(Debug)]
-pub enum DidOpenTextDocument { }
+pub enum DidOpenTextDocument {}
 
 impl Notification for DidOpenTextDocument {
     type Params = DidOpenTextDocumentParams;
@@ -129,7 +129,7 @@ impl Notification for DidOpenTextDocument {
  * In 2.0 the shape of the params has changed to include proper version numbers and language ids.
  */
 #[derive(Debug)]
-pub enum DidChangeTextDocument { }
+pub enum DidChangeTextDocument {}
 
 impl Notification for DidChangeTextDocument {
     type Params = DidChangeTextDocumentParams;
@@ -139,7 +139,7 @@ impl Notification for DidChangeTextDocument {
 /// The document will save notification is sent from the client to the server before the document
 /// is actually saved.
 #[derive(Debug)]
-pub enum WillSave { }
+pub enum WillSave {}
 
 impl Notification for WillSave {
     type Params = ();
@@ -152,7 +152,7 @@ impl Notification for WillSave {
 /// edits took too long or if a server constantly fails on this request. This is done to keep the
 /// save fast and reliable.
 #[derive(Debug)]
-pub enum WillSaveWaitUntil { }
+pub enum WillSaveWaitUntil {}
 
 impl Notification for WillSaveWaitUntil {
     type Params = ();
@@ -166,7 +166,7 @@ impl Notification for WillSaveWaitUntil {
  * the truth now exists on disk).
  */
 #[derive(Debug)]
-pub enum DidCloseTextDocument { }
+pub enum DidCloseTextDocument {}
 
 impl Notification for DidCloseTextDocument {
     type Params = DidCloseTextDocumentParams;
@@ -177,7 +177,7 @@ impl Notification for DidCloseTextDocument {
  * The document save notification is sent from the client to the server when the document was saved in the client.
  */
 #[derive(Debug)]
-pub enum DidSaveTextDocument { }
+pub enum DidSaveTextDocument {}
 
 impl Notification for DidSaveTextDocument {
     type Params = DidSaveTextDocumentParams;
@@ -189,7 +189,7 @@ impl Notification for DidSaveTextDocument {
  * watched by the language client.
  */
 #[derive(Debug)]
-pub enum DidChangeWatchedFiles { }
+pub enum DidChangeWatchedFiles {}
 
 impl Notification for DidChangeWatchedFiles {
     type Params = DidChangeWatchedFilesParams;
@@ -200,7 +200,7 @@ impl Notification for DidChangeWatchedFiles {
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
  */
 #[derive(Debug)]
-pub enum PublishDiagnostics { }
+pub enum PublishDiagnostics {}
 
 impl Notification for PublishDiagnostics {
     type Params = PublishDiagnosticsParams;

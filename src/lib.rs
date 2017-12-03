@@ -23,9 +23,9 @@ such as `urn:isbn:0451450523`.
 #[macro_use]
 extern crate enum_primitive;
 extern crate serde;
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 
 extern crate url;
 extern crate url_serde;
@@ -102,8 +102,7 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    #[serde(with = "url_serde")]
-    pub uri: Url,
+    #[serde(with = "url_serde")] pub uri: Url,
     pub range: Range,
 }
 
@@ -479,6 +478,7 @@ pub struct InitializeParams {
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
     #[serde(rename = "rootPath")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub root_path: Option<String>,
 
     /// The rootUri of the workspace. Is null if no
@@ -503,12 +503,9 @@ pub struct InitializeParams {
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub enum TraceOption {
-    #[serde(rename = "off")]
-    Off,
-    #[serde(rename = "messages")]
-    Messages,
-    #[serde(rename = "verbose")]
-    Verbose,
+    #[serde(rename = "off")] Off,
+    #[serde(rename = "messages")] Messages,
+    #[serde(rename = "verbose")] Verbose,
 }
 
 impl Default for TraceOption {
@@ -628,6 +625,7 @@ pub struct SynchronizationCapability {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionItemCapability {
     /**
      * Client supports snippets as insert text.
@@ -637,10 +635,27 @@ pub struct CompletionItemCapability {
      * the end of the snippet. Placeholders with equal identifiers are linked,
      * that is typing in one will update others too.
      */
-    #[serde(rename = "snippetSupport")]
     pub snippet_support: Option<bool>,
+
+    pub commit_characters_support: Option<bool>,
+
+    pub documentation_format: Option<Vec<MarkupKind>>,
 }
 
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HoverCapability {
+    /**
+     * Whether completion supports dynamic registration.
+     */
+    pub dynamic_registration: Option<bool>,
+
+    /**
+     * Client supports the follow content formats for the content
+     * property. The order describes the preferred format of the client.
+     */
+    pub content_format: Option<Vec<MarkupKind>>,
+}
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CompletionCapability {
@@ -658,6 +673,31 @@ pub struct CompletionCapability {
     pub completion_item: Option<CompletionItemCapability>,
 }
 
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignatureInformationSettings {
+    /**
+     * Client supports the follow content formats for the documentation
+     * property. The order describes the preferred format of the client.
+     */
+    documentation_format: Option<Vec<MarkupKind>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignatureHelpCapability {
+    /**
+     * Whether completion supports dynamic registration.
+     */
+    pub dynamic_registration: Option<bool>,
+
+    /**
+     * The client supports the following `SignatureInformation`
+     * specific properties.
+     */
+    pub signature_information: Option<SignatureInformationSettings>,
+}
+
 /**
  * Text document specific client capabilities.
  */
@@ -672,13 +712,13 @@ pub struct TextDocumentClientCapabilities {
     /**
      * Capabilities specific to the `textDocument/hover`
      */
-    pub hover: Option<GenericCapability>,
+    pub hover: Option<HoverCapability>,
 
     /**
      * Capabilities specific to the `textDocument/signatureHelp`
      */
     #[serde(rename = "signatureHelp")]
-    pub signature_help: Option<GenericCapability>,
+    pub signature_help: Option<SignatureHelpCapability>,
 
     /**
      * Capabilities specific to the `textDocument/references`
@@ -1346,25 +1386,24 @@ pub struct CompletionParams {
     pub position: Position,
 
     // CompletionParams properties:
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub context: Option<CompletionContext>,
+    #[serde(skip_serializing_if = "Option::is_none")] pub context: Option<CompletionContext>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CompletionContext {
-	/**
-	 * How the completion was triggered.
-	 */
-     #[serde(rename = "triggerKind")]
-	pub trigger_kind: CompletionTriggerKind,
+    /**
+     * How the completion was triggered.
+     */
+    #[serde(rename = "triggerKind")]
+    pub trigger_kind: CompletionTriggerKind,
 
-	/**
-	 * The trigger character (a single character) that has trigger code complete.
-	 * Is undefined if `triggerKind !== CompletionTriggerKind.TriggerCharacter`
-	 */
-     #[serde(rename = "triggerCharacter")]
-     #[serde(skip_serializing_if = "Option::is_none")]
-	pub trigger_character: Option<String>,
+    /**
+     * The trigger character (a single character) that has trigger code complete.
+     * Is undefined if `triggerKind !== CompletionTriggerKind.TriggerCharacter`
+     */
+    #[serde(rename = "triggerCharacter")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trigger_character: Option<String>,
 }
 
 enum_from_primitive!{
@@ -1415,6 +1454,13 @@ pub struct CompletionList {
     pub items: Vec<CompletionItem>,
 }
 
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum Documentation {
+    String(String),
+    MarkupContent(MarkupContent),
+}
+
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 pub struct CompletionItem {
     /// The label of this completion item. By default
@@ -1434,7 +1480,7 @@ pub struct CompletionItem {
 
     /// A human-readable string that represents a doc-comment.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub documentation: Option<String>,
+    pub documentation: Option<Documentation>,
 
     /// A string that shoud be used when comparing this item
     /// with other items. When `falsy` the label is used.
@@ -1602,6 +1648,7 @@ pub struct Hover {
 pub enum HoverContents {
     Scalar(MarkedString),
     Array(Vec<MarkedString>),
+    Markup(MarkupContent),
 }
 
 /**
@@ -1669,7 +1716,7 @@ pub struct SignatureInformation {
 
     /// The human-readable doc-comment of this signature. Will be shown
     /// in the UI but can be omitted.
-    pub documentation: Option<String>,
+    pub documentation: Option<Documentation>,
 
     /// The parameters of this signature.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1687,7 +1734,7 @@ pub struct ParameterInformation {
     /// The human-readable doc-comment of this parameter. Will be shown
     /// in the UI but can be omitted.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub documentation: Option<String>,
+    pub documentation: Option<Documentation>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2037,10 +2084,9 @@ impl<'de> serde::Deserialize<'de> for FormattingOptions {
                     }
                     properties.insert(key.into_owned(), map.next_value()?);
                 }
-                let tab_size = tab_size
-                    .ok_or_else(|| de::Error::missing_field("tab_size"))?;
-                let insert_spaces = insert_spaces
-                    .ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
+                let tab_size = tab_size.ok_or_else(|| de::Error::missing_field("tab_size"))?;
+                let insert_spaces =
+                    insert_spaces.ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
                 Ok(FormattingOptions {
                     tab_size: tab_size,
                     insert_spaces: insert_spaces,
@@ -2139,6 +2185,53 @@ pub struct RenameParams {
     pub new_name: String,
 }
 
+/**
+ * Describes the content type that a client supports in various
+ * result literals like `Hover`, `ParameterInfo` or `CompletionItem`.
+ *
+ * Please note that `MarkupKinds` must not start with a `$`. This kinds
+ * are reserved for internal usage.
+ */
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MarkupKind {
+    /// Plain text is supported as a content format
+    PlainText,
+    /// Markdown is supported as a content format
+    Markdown,
+}
+
+/**
+ * A `MarkupContent` literal represents a string value which content is interpreted base on its
+ * kind flag. Currently the protocol supports `plaintext` and `markdown` as markup kinds.
+ *
+ * If the kind is `markdown` then the value can contain fenced code blocks like in GitHub issues.
+ * See https://help.github.com/articles/creating-and-highlighting-code-blocks/#syntax-highlighting
+ *
+ * Here is an example how such a string can be constructed using JavaScript / TypeScript:
+ * ```ts
+ * let markdown: MarkdownContent = {
+ *  kind: MarkupKind.Markdown,
+ *	value: [
+ *		'# Header',
+ *		'Some text',
+ *		'```typescript',
+ *		'someCode();',
+ *		'```'
+ *	].join('\n')
+ * };
+ * ```
+ *
+ * *Please Note* that clients might sanitize the return markdown. A client could decide to
+ * remove HTML from the markdown to avoid script execution.
+ */
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+pub struct MarkupContent {
+    pub kind: MarkupKind,
+    pub value: String,
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2156,7 +2249,6 @@ mod tests {
 
     #[test]
     fn number_or_string() {
-
         test_serialization(&NumberOrString::Number(123), r#"123"#);
 
         test_serialization(&NumberOrString::String("abcd".into()), r#""abcd""#);
@@ -2164,7 +2256,6 @@ mod tests {
 
     #[test]
     fn marked_string() {
-
         test_serialization(&MarkedString::from_markdown("xxx".into()), r#""xxx""#);
 
         test_serialization(
