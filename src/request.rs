@@ -6,6 +6,34 @@ pub trait Request {
     const METHOD: &'static str;
 }
 
+#[macro_export]
+macro_rules! lsp_request {
+    ("initialize") => { $crate::request::Initialize };
+    ("shutdown") => { $crate::request::Shutdown };
+    ("window/showMessageRequest") => { $crate::request::ShowMessageRequest };
+    ("textDocument/willSaveWaitUntil") => { $crate::request::WillSaveWaitUntil };
+    ("textDocument/completion") => { $crate::request::Completion };
+    ("textDocument/hover") => { $crate::request::HoverRequest };
+    ("textDocument/signatureHelp") => { $crate::request::SignatureHelp };
+    ("textDocument/definition") => { $crate::request::Definition };
+    ("textDocument/references") => { $crate::request::References };
+    ("textDocument/documentHighlight") => { $crate::request::DocumentHighlightRequest };
+    ("textDocument/documentSymbol") => { $crate::request::DocumentSymbol };
+    ("textDocument/codeAction") => { $crate::request::CodeAction };
+    ("textDocument/codeLens") => { $crate::request::CodeLensRequest };
+    ("codeLens/resolve") => { $crate::request::CodeLensResolve };
+    ("textDocument/documentLink") => { $crate::request::DocumentLink };
+    ("textDocument/applyEdit") => { $crate::request::ApplyEdit };
+    ("textDocument/rangeFormatting") => { $crate::request::RangeFormatting };
+    ("textDocument/onTypeFormatting") => { $crate::request::OnTypeFormatting };
+    ("textDocument/formatting") => { $crate::request::Formatting };
+    ("textDocument/rename") => { $crate::request::Rename };
+    ("completionItem/resolve") => { $crate::request::ResolveCompletionItem };
+    ("documentLink/resolve") => { $crate::request::DocumentLinkResolve };
+    ("workspace/symbol") => { $crate::request::WorkspaceSymbol };
+    ("workspace/executeCommand") => { $crate::request::ExecuteCommand }
+}
+
 /**
 
  The initialize request is sent as the first request from the client to the server.

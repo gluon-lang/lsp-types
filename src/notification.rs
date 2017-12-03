@@ -5,6 +5,32 @@ pub trait Notification {
     const METHOD: &'static str;
 }
 
+#[macro_export]
+macro_rules! lsp_notification {
+    ("$/cancelRequest") => { $crate::notification::Cancel };
+    ("initialized") => { $crate::notification::Initialized };
+    ("exit") => { $crate::notification::Exit };
+
+    ("window/showMessage") => { $crate::notification::ShowMessage };
+    ("window/logMessage") => { $crate::notification::LogMessage };
+
+    ("telemetry/event") => { $crate::notification::Event };
+
+    ("client/registerCapability") => { $crate::notification::RegistrationParams };
+    ("client/unregisterCapability") => { $crate::notification::UnregistrationParams };
+
+    ("textDocument/didOpen") => { $crate::notification::DidOpenTextDocument };
+    ("textDocument/didChange") => { $crate::notification::DidChangeTextDocument };
+    ("textDocument/willSave") => { $crate::notification::WillSaveTextDocument };
+    ("textDocument/didSave") => { $crate::notification::DidSaveTextDocument };
+    ("textDocument/didClose") => { $crate::notification::DidCloseTextDocument };
+    ("textDocument/publishDiagnostics") => { $crate::notification::PublishDiagnostics };
+
+    ("workspace/didChangeConfiguration") => { $crate::notification::DidChangeConfiguration };
+    ("workspace/didChangeWatchedFiles") => { $crate::notification::DidChangeWatchedFiles };
+}
+
+
 /// The base protocol now offers support for request cancellation. To cancel a request,
 /// a notification message with the following properties is sent:
 ///
