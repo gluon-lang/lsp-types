@@ -16,8 +16,8 @@ macro_rules! lsp_notification {
 
     ("telemetry/event") => { $crate::notification::Event };
 
-    ("client/registerCapability") => { $crate::notification::RegistrationParams };
-    ("client/unregisterCapability") => { $crate::notification::UnregistrationParams };
+    ("client/registerCapability") => { $crate::notification::RegisterCapability };
+    ("client/unregisterCapability") => { $crate::notification::UnregisterCapability };
 
     ("textDocument/didOpen") => { $crate::notification::DidOpenTextDocument };
     ("textDocument/didChange") => { $crate::notification::DidChangeTextDocument };
