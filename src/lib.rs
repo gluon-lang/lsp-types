@@ -644,6 +644,22 @@ pub struct CompletionItemCapability {
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct CompletionItemKindCapability {
+    /**
+     * The completion item kind values the client supports. When this
+     * property exists the client also guarantees that it will
+     * handle values outside its set gracefully and falls back
+     * to a default value when unknown.
+     *
+     * If this property is not present the client only supports
+     * the completion items kinds from `Text` to `Reference` as defined in
+     * the initial version of the protocol.
+     */
+    pub value_set: Option<Vec<CompletionItemKind>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct HoverCapability {
     /**
      * Whether completion supports dynamic registration.
@@ -655,6 +671,18 @@ pub struct HoverCapability {
      * property. The order describes the preferred format of the client.
      */
     pub content_format: Option<Vec<MarkupKind>>,
+
+    /**
+     * The client supports the following `CompletionItem` specific
+     * capabilities.
+     */
+    pub completion_item: Option<CompletionItemKindCapability>,
+
+    /**
+     * The client supports to send additional context information for a
+     * `textDocument/completion` requestion.
+     */
+    pub context_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
