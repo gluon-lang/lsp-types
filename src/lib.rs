@@ -362,23 +362,18 @@ pub struct TextDocumentItem {
 
     /// The text document's language identifier.
     #[serde(rename = "languageId")]
-    pub language_id: Option<String>,
+    pub language_id: String,
 
     /// The version number of this document (it will strictly increase after each
     /// change, including undo/redo).
-    pub version: Option<u64>,
+    pub version: u64,
 
     /// The content of the opened text document.
     pub text: String,
 }
 
 impl TextDocumentItem {
-    pub fn new(
-        uri: Url,
-        language_id: Option<String>,
-        version: Option<u64>,
-        text: String,
-    ) -> TextDocumentItem {
+    pub fn new(uri: Url, language_id: String, version: u64, text: String) -> TextDocumentItem {
         TextDocumentItem {
             uri: uri,
             language_id: language_id,
