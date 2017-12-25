@@ -14,8 +14,8 @@ macro_rules! lsp_request {
     ("textDocument/willSaveWaitUntil") => { $crate::request::WillSaveWaitUntil };
     ("textDocument/completion") => { $crate::request::Completion };
     ("textDocument/hover") => { $crate::request::HoverRequest };
-    ("textDocument/signatureHelp") => { $crate::request::SignatureHelp };
-    ("textDocument/definition") => { $crate::request::Definition };
+    ("textDocument/signatureHelp") => { $crate::request::SignatureHelpRequest };
+    ("textDocument/definition") => { $crate::request::GotoDefinition };
     ("textDocument/references") => { $crate::request::References };
     ("textDocument/documentHighlight") => { $crate::request::DocumentHighlightRequest };
     ("textDocument/documentSymbol") => { $crate::request::DocumentSymbol };
