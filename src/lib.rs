@@ -935,12 +935,63 @@ pub struct ExecuteCommandOptions {
     pub commands: Vec<String>,
 }
 
+/**
+ * Save options.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+pub struct SaveOptions {
+    /**
+     * The client is supposed to include the content on save.
+     */
+    #[serde(rename = "includeText")]
+    pub include_text: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+pub struct TextDocumentSyncOptions {
+    /**
+     * Open and close notifications are sent to the server.
+     */
+    #[serde(rename = "openClose")]
+    pub open_close: Option<bool>,
+
+    /**
+     * Change notifications are sent to the server. See TextDocumentSyncKind.None, TextDocumentSyncKind.Full
+     * and TextDocumentSyncKindIncremental.
+     */
+    pub change: Option<TextDocumentSyncKind>,
+
+    /**
+     * Will save notifications are sent to the server.
+     */
+    #[serde(rename = "willSave")]
+    pub will_save: Option<bool>,
+
+    /**
+     * Will save wait until requests are sent to the server.
+     */
+    #[serde(rename = "willSaveWaitUntil")]
+    pub will_save_wait_until: Option<bool>,
+
+    /**
+     * Save notifications are sent to the server.
+     */
+    pub save: Option<SaveOptions>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum TextDocumentSyncCapability {
+    Kind(TextDocumentSyncKind),
+    Options(TextDocumentSyncOptions),
+}
+
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "textDocumentSync")]
-    pub text_document_sync: Option<TextDocumentSyncKind>,
+    pub text_document_sync: Option<TextDocumentSyncCapability>,
 
     /// The server provides hover support.
     #[serde(skip_serializing_if = "Option::is_none")]
