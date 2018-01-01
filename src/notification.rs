@@ -30,7 +30,6 @@ macro_rules! lsp_notification {
     ("workspace/didChangeWatchedFiles") => { $crate::notification::DidChangeWatchedFiles };
 }
 
-
 /// The base protocol now offers support for request cancellation. To cancel a request,
 /// a notification message with the following properties is sent:
 ///
@@ -115,7 +114,6 @@ impl Notification for RegisterCapability {
     const METHOD: &'static str = "client/registerCapability";
 }
 
-
 /// The client/unregisterCapability request is sent from the server to the client to unregister a
 /// previously register capability.
 #[derive(Debug)]
@@ -184,7 +182,6 @@ impl Notification for WillSaveWaitUntil {
     type Params = ();
     const METHOD: &'static str = "textDocument/willSaveWaitUntil";
 }
-
 
 /**
  * The document close notification is sent from the client to the server when the document got closed in the client.

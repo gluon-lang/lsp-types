@@ -289,7 +289,8 @@ pub struct TextDocumentEdit {
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
-    pub changes: Option<HashMap<url_serde::SerdeUrl, Vec<TextEdit>>>,
+    #[serde(with = "url_map")]
+    pub changes: Option<HashMap<Url, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
 
     /**
      * An array of `TextDocumentEdit`s to express changes to n different text documents
@@ -301,14 +302,107 @@ pub struct WorkspaceEdit {
     pub document_changes: Option<Vec<TextDocumentEdit>>,
 }
 
-impl WorkspaceEdit {
-    pub fn new(changes: HashMap<Url, Vec<TextEdit>>) -> WorkspaceEdit {
-        let mut map = HashMap::new();
-        for (k, v) in changes {
-            map.insert(url_serde::Serde(k), v);
+mod url_map {
+    use super::*;
+
+    use std::fmt;
+
+    pub fn deserialize<'de, D>(
+        deserializer: D,
+    ) -> Result<Option<HashMap<Url, Vec<TextEdit>>>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct UrlMapVisitor;
+        impl<'de> de::Visitor<'de> for UrlMapVisitor {
+            type Value = HashMap<Url, Vec<TextEdit>>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("map")
+            }
+
+            fn visit_map<M>(self, mut visitor: M) -> Result<Self::Value, M::Error>
+            where
+                M: de::MapAccess<'de>,
+            {
+                let mut values = HashMap::with_capacity(visitor.size_hint().unwrap_or(0));
+
+                // While there are entries remaining in the input, add them
+                // into our map.
+                while let Some((key, value)) = visitor.next_entry::<url_serde::De<Url>, _>()? {
+                    values.insert(key.into_inner(), value);
+                }
+
+                Ok(values)
+            }
         }
 
-        WorkspaceEdit { changes: Some(map), document_changes: None, }
+        struct OptionUrlMapVisitor;
+        impl<'de> de::Visitor<'de> for OptionUrlMapVisitor {
+            type Value = Option<HashMap<Url, Vec<TextEdit>>>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("option")
+            }
+
+            #[inline]
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(None)
+            }
+
+            #[inline]
+            fn visit_none<E>(self) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(None)
+            }
+
+            #[inline]
+            fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                deserializer.deserialize_map(UrlMapVisitor).map(Some)
+            }
+        }
+
+        // Instantiate our Visitor and ask the Deserializer to drive
+        // it over the input data, resulting in an instance of MyMap.
+        deserializer.deserialize_option(OptionUrlMapVisitor)
+    }
+
+    pub fn serialize<S>(
+        changes: &Option<HashMap<Url, Vec<TextEdit>>>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeMap;
+
+        match *changes {
+            Some(ref changes) => {
+                let mut map = serializer.serialize_map(Some(changes.len()))?;
+                for (k, v) in changes {
+                    map.serialize_entry(k.as_str(), v)?;
+                }
+                map.end()
+            }
+            None => serializer.serialize_none(),
+        }
+    }
+}
+
+impl WorkspaceEdit {
+    pub fn new(changes: HashMap<Url, Vec<TextEdit>>) -> WorkspaceEdit {
+        WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+        }
     }
 }
 
@@ -373,7 +467,6 @@ pub struct VersionedTextDocumentIdentifier {
     pub version: u64,
 }
 
-
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: u64) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier {
@@ -409,7 +502,6 @@ impl TextDocumentPositionParams {
         }
     }
 }
-
 
 /// A document filter denotes a document through properties like language, schema or pattern.
 /// Examples are a filter that applies to TypeScript files on disk or a filter the applies to JSON
@@ -1241,7 +1333,6 @@ pub enum TextDocumentSaveReason {
     FocusOut = 3,
 }
 
-
 impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -1639,7 +1730,6 @@ pub struct Hover {
     /// that is used to visualize a hover, e.g. by changing the background color.
     pub range: Option<Range>,
 }
-
 
 /**
  * Hover contents could be single entry or multiple entries.
@@ -2232,7 +2322,6 @@ pub struct MarkupContent {
     pub value: String,
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2276,7 +2365,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn workspace_edit() {
         test_serialization(
@@ -2288,7 +2376,7 @@ mod tests {
         );
 
         test_serialization(&WorkspaceEdit {
-                                changes: Some(vec![(url_serde::Serde(Url::parse("file://test").unwrap()), vec![])]
+                                changes: Some(vec![(Url::parse("file://test").unwrap(), vec![])]
                                     .into_iter()
                                     .collect()),
                                 document_changes: None,
