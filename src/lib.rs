@@ -264,73 +264,51 @@ impl TextEdit {
     }
 }
 
+/**
+  Describes textual changes on a single text document. The text document is referred to as a
+  `VersionedTextDocumentIdentifier` to allow clients to check the text document version before an
+  edit is applied. A `TextDocumentEdit` describes all changes on a version Si and after they are
+  applied move the document to version Si+1. So the creator of a `TextDocumentEdit` doesn't need to
+  sort the array or do any kind of ordering. However the edits must be non overlapping.
+  */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct TextDocumentEdit {
+    /**
+     * The text document to change.
+     */
+    #[serde(rename = "textDocument")]
+    pub text_document: VersionedTextDocumentIdentifier,
+
+    /**
+     * The edits to be applied.
+     */
+    pub edits: Vec<TextEdit>,
+}
+
 /// A workspace edit represents changes to many resources managed in the workspace.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
-    #[serde(with = "url_map")]
-    pub changes: HashMap<Url, Vec<TextEdit>>, //    changes: { [uri: string]: TextEdit[]; };
-}
+    pub changes: Option<HashMap<url_serde::SerdeUrl, Vec<TextEdit>>>,
 
-mod url_map {
-    use super::*;
-
-    use std::fmt;
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<HashMap<Url, Vec<TextEdit>>, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        struct UrlMapVisitor;
-
-        impl<'de> de::Visitor<'de> for UrlMapVisitor {
-            type Value = HashMap<Url, Vec<TextEdit>>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("map")
-            }
-
-            fn visit_map<M>(self, mut visitor: M) -> Result<Self::Value, M::Error>
-            where
-                M: de::MapAccess<'de>,
-            {
-                let mut values = HashMap::with_capacity(visitor.size_hint().unwrap_or(0));
-
-                // While there are entries remaining in the input, add them
-                // into our map.
-                while let Some((key, value)) = visitor.next_entry::<url_serde::De<Url>, _>()? {
-                    values.insert(key.into_inner(), value);
-                }
-
-                Ok(values)
-            }
-        }
-
-        // Instantiate our Visitor and ask the Deserializer to drive
-        // it over the input data, resulting in an instance of MyMap.
-        deserializer.deserialize_map(UrlMapVisitor)
-    }
-
-    pub fn serialize<S>(
-        changes: &HashMap<Url, Vec<TextEdit>>,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        use serde::ser::SerializeMap;
-
-        let mut map = serializer.serialize_map(Some(changes.len()))?;
-        for (k, v) in changes {
-            map.serialize_entry(k.as_str(), v)?;
-        }
-        map.end()
-    }
+    /**
+     * An array of `TextDocumentEdit`s to express changes to n different text documents
+     * where each text document edit addresses a specific version of a text document.
+     * Whether a client supports versioned document edits is expressed via
+     * `WorkspaceClientCapabilities.workspaceEdit.documentChanges`.
+     */
+    #[serde(rename = "documentChanges")]
+    pub document_changes: Option<Vec<TextDocumentEdit>>,
 }
 
 impl WorkspaceEdit {
     pub fn new(changes: HashMap<Url, Vec<TextEdit>>) -> WorkspaceEdit {
-        WorkspaceEdit { changes: changes }
+        let mut map = HashMap::new();
+        for (k, v) in changes {
+            map.insert(url_serde::Serde(k), v);
+        }
+
+        WorkspaceEdit { changes: Some(map), document_changes: None, }
     }
 }
 
@@ -2303,17 +2281,19 @@ mod tests {
     fn workspace_edit() {
         test_serialization(
             &WorkspaceEdit {
-                changes: vec![].into_iter().collect(),
+                changes: Some(vec![].into_iter().collect()),
+                document_changes: None,
             },
-            r#"{"changes":{}}"#,
+            r#"{"changes":{},"documentChanges":null}"#,
         );
 
         test_serialization(&WorkspaceEdit {
-                                changes: vec![(Url::parse("file://test").unwrap(), vec![])]
+                                changes: Some(vec![(url_serde::Serde(Url::parse("file://test").unwrap()), vec![])]
                                     .into_iter()
-                                    .collect(),
+                                    .collect()),
+                                document_changes: None,
                             },
-                           r#"{"changes":{"file://test/":[]}}"#);
+                           r#"{"changes":{"file://test/":[]},"documentChanges":null}"#);
     }
 
     #[test]
