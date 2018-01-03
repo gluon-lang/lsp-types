@@ -464,14 +464,14 @@ pub struct VersionedTextDocumentIdentifier {
     pub uri: Url,
 
     /// The version number of this document.
-    pub version: u64,
+    pub version: Option<u64>,
 }
 
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: u64) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier {
             uri: uri,
-            version: version,
+            version: Some(version),
         }
     }
 }
