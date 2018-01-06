@@ -290,6 +290,8 @@ pub struct TextDocumentEdit {
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(with = "url_map")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub changes: Option<HashMap<Url, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
 
     /**
@@ -2424,6 +2426,14 @@ mod tests {
                 document_changes: None,
             },
             r#"{"changes":{},"documentChanges":null}"#,
+        );
+
+        test_serialization(
+            &WorkspaceEdit {
+                changes: None,
+                document_changes: None,
+            },
+            r#"{"documentChanges":null}"#,
         );
 
         test_serialization(&WorkspaceEdit {
