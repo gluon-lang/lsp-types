@@ -2375,6 +2375,32 @@ pub struct MarkupContent {
     pub value: String,
 }
 
+/**
+ * The progress notification is sent from the server to the client to ask the client
+ * to indicate progress.
+ */
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+pub struct ProgressParams {
+    // A unique identifier to associate multiple progress notifications with the same progress.
+    pub id: String,
+
+    // The title of the progress.
+    // This should be the same for all ProgressParams with the same id.
+    pub title: Option<String>,
+
+    // Optional progress message to display.
+    // If unset, the previous progress message (if any) is still valid.
+    pub message: Option<String>,
+
+    // Optional progress percentage to display.
+    // If unset, the previous progress percentage (if any) is still valid.
+    pub percentage: Option<f64>,
+
+    // Set to true on the final progress update.
+    // No more progress notifications with the same ID should be sent.
+    pub done: Option<bool>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

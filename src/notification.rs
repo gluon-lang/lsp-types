@@ -13,6 +13,7 @@ macro_rules! lsp_notification {
 
     ("window/showMessage") => { $crate::notification::ShowMessage };
     ("window/logMessage") => { $crate::notification::LogMessage };
+    ("window/progress") => { $crate::notification::Progress };
 
     ("telemetry/event") => { $crate::notification::Event };
 
@@ -90,6 +91,17 @@ pub enum LogMessage {}
 impl Notification for LogMessage {
     type Params = LogMessageParams;
     const METHOD: &'static str = "window/logMessage";
+}
+
+/**
+ * The progress notification is sent from the server to the client to ask the client to indicate progress.
+ */
+#[derive(Debug)]
+pub enum Progress {}
+
+impl Notification for Progress {
+    type Params = ProgressParams;
+    const METHOD: &'static str = "window/progress";
 }
 
 /**
