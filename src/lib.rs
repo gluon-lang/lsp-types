@@ -797,83 +797,91 @@ pub struct SignatureHelpCapability {
  * Text document specific client capabilities.
  */
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentClientCapabilities {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub synchronization: Option<SynchronizationCapability>,
     /**
      * Capabilities specific to the `textDocument/completion`
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub completion: Option<CompletionCapability>,
 
     /**
      * Capabilities specific to the `textDocument/hover`
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hover: Option<HoverCapability>,
 
     /**
      * Capabilities specific to the `textDocument/signatureHelp`
      */
-    #[serde(rename = "signatureHelp")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub signature_help: Option<SignatureHelpCapability>,
 
     /**
      * Capabilities specific to the `textDocument/references`
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub references: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/documentHighlight`
      */
-    #[serde(rename = "documentHighlight")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_highlight: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/documentSymbol`
      */
-    #[serde(rename = "documentSymbol")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_symbol: Option<GenericCapability>,
     /**
      * Capabilities specific to the `textDocument/formatting`
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub formatting: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/rangeFormatting`
      */
-    #[serde(rename = "rangeFormatting")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub range_formatting: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/onTypeFormatting`
      */
-    #[serde(rename = "onTypeFormatting")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub on_type_formatting: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/definition`
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub definition: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/codeAction`
      */
-    #[serde(rename = "codeAction")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub code_action: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/codeLens`
      */
-    #[serde(rename = "codeLens")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub code_lens: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/documentLink`
      */
-    #[serde(rename = "documentLink")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_link: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `textDocument/rename`
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rename: Option<GenericCapability>,
 }
 
@@ -881,21 +889,24 @@ pub struct TextDocumentClientCapabilities {
  * Where ClientCapabilities are currently empty:
  */
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ClientCapabilities {
     /**
      * Workspace specific client capabilities.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace: Option<WorkspaceClientCapabilites>,
 
     /**
      * Text document specific client capabilities.
      */
-    #[serde(rename = "textDocument")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document: Option<TextDocumentClientCapabilities>,
 
     /**
      * Experimental client capabilities.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
 }
 
