@@ -16,9 +16,6 @@ macro_rules! lsp_notification {
 
     ("telemetry/event") => { $crate::notification::Event };
 
-    ("client/registerCapability") => { $crate::notification::RegisterCapability };
-    ("client/unregisterCapability") => { $crate::notification::UnregisterCapability };
-
     ("textDocument/didOpen") => { $crate::notification::DidOpenTextDocument };
     ("textDocument/didChange") => { $crate::notification::DidChangeTextDocument };
     ("textDocument/willSave") => { $crate::notification::WillSaveTextDocument };
@@ -101,27 +98,6 @@ pub enum TelemetryEvent {}
 impl Notification for TelemetryEvent {
     type Params = ();
     const METHOD: &'static str = "telemetry/event";
-}
-
-/**
- * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
- */
-#[derive(Debug)]
-pub enum RegisterCapability {}
-
-impl Notification for RegisterCapability {
-    type Params = RegistrationParams;
-    const METHOD: &'static str = "client/registerCapability";
-}
-
-/// The client/unregisterCapability request is sent from the server to the client to unregister a
-/// previously register capability.
-#[derive(Debug)]
-pub enum UnregisterCapability {}
-
-impl Notification for UnregisterCapability {
-    type Params = UnregistrationParams;
-    const METHOD: &'static str = "client/unregisterCapability";
 }
 
 /**

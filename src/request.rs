@@ -10,9 +10,18 @@ pub trait Request {
 macro_rules! lsp_request {
     ("initialize") => { $crate::request::Initialize };
     ("shutdown") => { $crate::request::Shutdown };
+
     ("window/showMessageRequest") => { $crate::request::ShowMessageRequest };
+
+    ("client/registerCapability") => { $crate::request::RegisterCapability };
+    ("client/unregisterCapability") => { $crate::request::UnregisterCapability };
+
+    ("workspace/symbol") => { $crate::request::WorkspaceSymbol };
+    ("workspace/executeCommand") => { $crate::request::ExecuteCommand };
+
     ("textDocument/willSaveWaitUntil") => { $crate::request::WillSaveWaitUntil };
     ("textDocument/completion") => { $crate::request::Completion };
+    ("completionItem/resolve") => { $crate::request::ResolveCompletionItem };
     ("textDocument/hover") => { $crate::request::HoverRequest };
     ("textDocument/signatureHelp") => { $crate::request::SignatureHelpRequest };
     ("textDocument/definition") => { $crate::request::GotoDefinition };
@@ -23,15 +32,12 @@ macro_rules! lsp_request {
     ("textDocument/codeLens") => { $crate::request::CodeLensRequest };
     ("codeLens/resolve") => { $crate::request::CodeLensResolve };
     ("textDocument/documentLink") => { $crate::request::DocumentLink };
+    ("documentLink/resolve") => { $crate::request::DocumentLinkResolve };
     ("textDocument/applyEdit") => { $crate::request::ApplyEdit };
     ("textDocument/rangeFormatting") => { $crate::request::RangeFormatting };
     ("textDocument/onTypeFormatting") => { $crate::request::OnTypeFormatting };
     ("textDocument/formatting") => { $crate::request::Formatting };
     ("textDocument/rename") => { $crate::request::Rename };
-    ("completionItem/resolve") => { $crate::request::ResolveCompletionItem };
-    ("documentLink/resolve") => { $crate::request::DocumentLinkResolve };
-    ("workspace/symbol") => { $crate::request::WorkspaceSymbol };
-    ("workspace/executeCommand") => { $crate::request::ExecuteCommand }
 }
 
 /**
@@ -78,6 +84,29 @@ impl Request for ShowMessageRequest {
     type Params = ShowMessageRequestParams;
     type Result = Option<MessageActionItem>;
     const METHOD: &'static str = "window/showMessageRequest";
+}
+
+/**
+ * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
+ */
+#[derive(Debug)]
+pub enum RegisterCapability {}
+
+impl Request for RegisterCapability {
+    type Params = RegistrationParams;
+    type Result = ();
+    const METHOD: &'static str = "client/registerCapability";
+}
+
+/// The client/unregisterCapability request is sent from the server to the client to unregister a
+/// previously register capability.
+#[derive(Debug)]
+pub enum UnregisterCapability {}
+
+impl Request for UnregisterCapability {
+    type Params = UnregistrationParams;
+    type Result = ();
+    const METHOD: &'static str = "client/unregisterCapability";
 }
 
 /**
