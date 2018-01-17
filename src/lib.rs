@@ -568,6 +568,9 @@ pub struct InitializeParams {
     pub trace: TraceOption,
 }
 
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct InitializedParams { }
+
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub enum TraceOption {
     #[serde(rename = "off")] Off,

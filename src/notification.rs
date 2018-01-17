@@ -49,7 +49,7 @@ impl Notification for Cancel {
 pub enum Initialized {}
 
 impl Notification for Initialized {
-    type Params = ();
+    type Params = InitializedParams;
     const METHOD: &'static str = "initialized";
 }
 
@@ -96,7 +96,7 @@ impl Notification for LogMessage {
 pub enum TelemetryEvent {}
 
 impl Notification for TelemetryEvent {
-    type Params = ();
+    type Params = serde_json::Value;
     const METHOD: &'static str = "telemetry/event";
 }
 
@@ -142,7 +142,7 @@ impl Notification for DidChangeTextDocument {
 pub enum WillSave {}
 
 impl Notification for WillSave {
-    type Params = ();
+    type Params = WillSaveTextDocumentParams;
     const METHOD: &'static str = "textDocument/willSave";
 }
 
@@ -155,7 +155,7 @@ impl Notification for WillSave {
 pub enum WillSaveWaitUntil {}
 
 impl Notification for WillSaveWaitUntil {
-    type Params = ();
+    type Params = WillSaveTextDocumentParams;
     const METHOD: &'static str = "textDocument/willSaveWaitUntil";
 }
 
