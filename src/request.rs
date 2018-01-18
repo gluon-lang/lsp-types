@@ -124,7 +124,7 @@ pub enum Completion {}
 
 impl Request for Completion {
     type Params = CompletionParams;
-    type Result = CompletionResponse;
+    type Result = Option<CompletionResponse>;
     const METHOD: &'static str = "textDocument/completion";
 }
 
