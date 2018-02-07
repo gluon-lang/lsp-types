@@ -135,6 +135,10 @@ pub struct Diagnostic {
 
     /// The diagnostic's message.
     pub message: String,
+
+    /// A number used to associate children diagnostics with their
+    /// parent. Can be omitted.
+    pub group: Option<u64>,
 }
 
 impl Diagnostic {
@@ -144,6 +148,7 @@ impl Diagnostic {
         code: Option<NumberOrString>,
         source: Option<String>,
         message: String,
+        group: Option<u64>
     ) -> Diagnostic {
         Diagnostic {
             range: range,
@@ -151,11 +156,12 @@ impl Diagnostic {
             code: code,
             source: source,
             message: message,
+            group: group,
         }
     }
 
     pub fn new_simple(range: Range, message: String) -> Diagnostic {
-        Self::new(range, None, None, None, message)
+        Self::new(range, None, None, None, message, None)
     }
 
     pub fn new_with_code_number(
@@ -166,7 +172,7 @@ impl Diagnostic {
         message: String,
     ) -> Diagnostic {
         let code = Some(NumberOrString::Number(code_number));
-        Self::new(range, Some(severity), code, source, message)
+        Self::new(range, Some(severity), code, source, message, None)
     }
 }
 
