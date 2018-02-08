@@ -137,7 +137,10 @@ pub struct Diagnostic {
     pub message: String,
 
     /// A number used to associate children diagnostics with their
-    /// parent. Can be omitted.
+    /// parent. This is an extension to the LSP because rustc can emit multiple
+    /// diagnotics that relate to the same error . All related diagnostics
+    /// should have the same `group` value. Can be omitted.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub group: Option<u64>,
 }
 
