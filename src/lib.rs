@@ -990,7 +990,7 @@ pub struct CompletionOptions {
 
     /// The characters that trigger completion automatically.
     #[serde(rename = "triggerCharacters")]
-    pub trigger_characters: Vec<String>,
+    pub trigger_characters: Option<Vec<String>>,
 }
 
 /// Signature help options.
