@@ -33,7 +33,6 @@ extern crate url_serde;
 use url::Url;
 
 use std::collections::HashMap;
-use std::fmt;
 
 use serde::de;
 use serde::de::Error as Error_;
@@ -2201,7 +2200,8 @@ pub struct DocumentFormattingParams {
 }
 
 /// Value-object describing what options formatting should use.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FormattingOptions {
     /// Size of a tab in spaces.
     pub tab_size: u64,
@@ -2210,6 +2210,7 @@ pub struct FormattingOptions {
     pub insert_spaces: bool,
 
     /// Signature for further properties.
+    #[serde(flatten)]
     pub properties: HashMap<String, FormattingProperty>,
 }
 
@@ -2219,84 +2220,6 @@ pub enum FormattingProperty {
     Bool(bool),
     Number(f64),
     String(String),
-}
-
-impl<'de> serde::Deserialize<'de> for FormattingOptions {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        use serde::de::{MapAccess, Visitor};
-
-        struct FormattingOptionsVisitor;
-
-        impl<'de> Visitor<'de> for FormattingOptionsVisitor {
-            type Value = FormattingOptions;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("struct FormattingOptions")
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<FormattingOptions, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                use std::borrow::Cow;
-
-                let mut tab_size = None;
-                let mut insert_spaces = None;
-                let mut properties = HashMap::new();
-                while let Some(key) = map.next_key::<Cow<str>>()? {
-                    match &*key {
-                        "tabSize" => {
-                            if tab_size.is_some() {
-                                return Err(de::Error::duplicate_field("tab_size"));
-                            }
-                            tab_size = Some(map.next_value()?);
-                            continue;
-                        }
-                        "insertSpaces" => {
-                            if insert_spaces.is_some() {
-                                return Err(de::Error::duplicate_field("insert_spaces"));
-                            }
-                            insert_spaces = Some(map.next_value()?);
-                            continue;
-                        }
-                        _ => (),
-                    }
-                    properties.insert(key.into_owned(), map.next_value()?);
-                }
-                let tab_size = tab_size.ok_or_else(|| de::Error::missing_field("tab_size"))?;
-                let insert_spaces =
-                    insert_spaces.ok_or_else(|| de::Error::missing_field("insert_spaces"))?;
-                Ok(FormattingOptions {
-                    tab_size: tab_size,
-                    insert_spaces: insert_spaces,
-                    properties: properties,
-                })
-            }
-        }
-
-        const FIELDS: &'static [&'static str] = &["tabSize", "insertSpaces"];
-        deserializer.deserialize_struct("FormattingOptions", FIELDS, FormattingOptionsVisitor)
-    }
-}
-
-impl serde::Serialize for FormattingOptions {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        use serde::ser::SerializeMap;
-
-        let mut map = serializer.serialize_map(Some(self.properties.len() + 2))?;
-        map.serialize_entry("tabSize", &self.tab_size)?;
-        map.serialize_entry("insertSpaces", &self.insert_spaces)?;
-        for (k, v) in &self.properties {
-            map.serialize_entry(k, v)?;
-        }
-        map.end()
-    }
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
