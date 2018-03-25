@@ -253,13 +253,13 @@ impl Command {
 /// Execution wise text edits should applied from the bottom to the top of the text document. Overlapping text edits
 /// are not supported.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextEdit {
     /// The range of the text document to be manipulated. To insert
     /// text into a document create a range where start === end.
     pub range: Range,
     /// The string to be inserted. For delete operations use an
     /// empty string.
-    #[serde(rename = "newText")]
     pub new_text: String,
 }
 
@@ -280,11 +280,11 @@ impl TextEdit {
   sort the array or do any kind of ordering. However the edits must be non overlapping.
   */
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentEdit {
     /**
      * The text document to change.
      */
-    #[serde(rename = "textDocument")]
     pub text_document: VersionedTextDocumentIdentifier,
 
     /**
@@ -295,6 +295,7 @@ pub struct TextDocumentEdit {
 
 /// A workspace edit represents changes to many resources managed in the workspace.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(with = "url_map")]
@@ -308,7 +309,6 @@ pub struct WorkspaceEdit {
      * Whether a client supports versioned document edits is expressed via
      * `WorkspaceClientCapabilities.workspaceEdit.documentChanges`.
      */
-    #[serde(rename = "documentChanges")]
     pub document_changes: Option<Vec<TextDocumentEdit>>,
 }
 
@@ -437,13 +437,13 @@ impl TextDocumentIdentifier {
 
 /// An item to transfer a text document from the client to the server.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentItem {
     /// The text document's URI.
     #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The text document's language identifier.
-    #[serde(rename = "languageId")]
     pub language_id: String,
 
     /// The version number of this document (it will strictly increase after each
@@ -488,13 +488,13 @@ impl VersionedTextDocumentIdentifier {
 
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentPositionParams {
     // !!!!!! Note:
     // In the spec ReferenceParams extends TextDocumentPositionParams
     // This modelled by "mixing-in" TextDocumentPositionParams in ReferenceParams,
     // so any changes to this type must be effected in sub-type as well.
     /// The text document.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The position inside the text document.
@@ -543,16 +543,15 @@ pub type DocumentSelector = Vec<DocumentFilter>;
 // ========================= Actual Protocol =========================
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InitializeParams {
     /// The process Id of the parent process that started
     /// the server. Is null if the process has not been started by another process.
     /// If the parent process is not alive then the server should exit (see exit notification) its process.
-    #[serde(rename = "processId")]
     pub process_id: Option<u64>,
 
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
-    #[serde(rename = "rootPath")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub root_path: Option<String>,
 
@@ -560,12 +559,10 @@ pub struct InitializeParams {
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
     #[serde(with = "option_url")]
-    #[serde(rename = "rootUri")]
     #[serde(default)]
     pub root_uri: Option<Url>,
 
     /// User provided initialization options.
-    #[serde(rename = "initializationOptions")]
     pub initialization_options: Option<Value>,
 
     /// The capabilities provided by the client (editor)
@@ -614,20 +611,20 @@ mod option_url {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GenericCapability {
     /**
      * This capability supports dynamic registration.
      */
-    #[serde(rename = "dynamicRegistration")]
     pub dynamic_registration: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkspaceEditCapability {
     /**
      * The client supports versioned document changes in `WorkspaceEdit`s
      */
-    #[serde(rename = "documentChanges")]
     pub document_changes: Option<bool>,
 }
 
@@ -635,30 +632,27 @@ pub struct WorkspaceEditCapability {
  * Workspace specific client capabilities.
  */
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkspaceClientCapabilites {
     /**
      * The client supports applying batch edits to the workspace by supporting
      * the request 'workspace/applyEdit'
      */
-    #[serde(rename = "applyEdit")]
     pub apply_edit: Option<bool>,
 
     /**
      * Capabilities specific to `WorkspaceEdit`s
      */
-    #[serde(rename = "workspaceEdit")]
     pub workspace_edit: Option<WorkspaceEditCapability>,
 
     /**
      * Capabilities specific to the `workspace/didChangeConfiguration` notification.
      */
-    #[serde(rename = "didChangeConfiguration")]
     pub did_change_configuration: Option<GenericCapability>,
 
     /**
      * Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
      */
-    #[serde(rename = "didChangeWatchedFiles")]
     pub did_change_watched_files: Option<GenericCapability>,
 
     /**
@@ -669,22 +663,20 @@ pub struct WorkspaceClientCapabilites {
     /**
      * Capabilities specific to the `workspace/executeCommand` request.
      */
-    #[serde(rename = "executeCommand")]
     pub execute_command: Option<GenericCapability>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SynchronizationCapability {
     /**
      * Whether text document synchronization supports dynamic registration.
      */
-    #[serde(rename = "dynamicRegistration")]
     pub dynamic_registration: Option<bool>,
 
     /**
      * The client supports sending will save notifications.
      */
-    #[serde(rename = "willSave")]
     pub will_save: Option<bool>,
 
     /**
@@ -692,13 +684,11 @@ pub struct SynchronizationCapability {
      * waits for a response providing text edits which will
      * be applied to the document before it is saved.
      */
-    #[serde(rename = "willSaveWaitUntil")]
     pub will_save_wait_until: Option<bool>,
 
     /**
      * The client supports did save notifications.
      */
-    #[serde(rename = "didSave")]
     pub did_save: Option<bool>,
 }
 
@@ -764,18 +754,17 @@ pub struct HoverCapability {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionCapability {
     /**
      * Whether completion supports dynamic registration.
      */
-    #[serde(rename = "dynamicRegistration")]
     pub dynamic_registration: Option<bool>,
 
     /**
      * The client supports the following `CompletionItem` specific
      * capabilities.
      */
-    #[serde(rename = "completionItem")]
     pub completion_item: Option<CompletionItemCapability>,
 }
 
@@ -981,44 +970,42 @@ impl serde::Serialize for TextDocumentSyncKind {
 
 /// Completion options.
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionOptions {
     /// The server provides support to resolve additional information for a completion item.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "resolveProvider")]
     pub resolve_provider: Option<bool>,
 
     /// The characters that trigger completion automatically.
-    #[serde(rename = "triggerCharacters")]
     pub trigger_characters: Option<Vec<String>>,
 }
 
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignatureHelpOptions {
     /// The characters that trigger signature help automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "triggerCharacters")]
     pub trigger_characters: Option<Vec<String>>,
 }
 
 /// Code Lens options.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CodeLensOptions {
     /// Code lens has a resolve provider as well.
-    #[serde(rename = "resolveProvider")]
     pub resolve_provider: Option<bool>,
 }
 
 /// Format document on type options
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentOnTypeFormattingOptions {
     /// A character on which formatting should be triggered, like `}`.
-    #[serde(rename = "firstTriggerCharacter")]
     pub first_trigger_character: String,
 
     /// More trigger characters.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "moreTriggerCharacter")]
     pub more_trigger_character: Option<Vec<String>>,
 }
 
@@ -1033,20 +1020,20 @@ pub struct ExecuteCommandOptions {
  * Save options.
  */
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SaveOptions {
     /**
      * The client is supposed to include the content on save.
      */
-    #[serde(rename = "includeText")]
     pub include_text: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentSyncOptions {
     /**
      * Open and close notifications are sent to the server.
      */
-    #[serde(rename = "openClose")]
     pub open_close: Option<bool>,
 
     /**
@@ -1058,13 +1045,11 @@ pub struct TextDocumentSyncOptions {
     /**
      * Will save notifications are sent to the server.
      */
-    #[serde(rename = "willSave")]
     pub will_save: Option<bool>,
 
     /**
      * Will save wait until requests are sent to the server.
      */
-    #[serde(rename = "willSaveWaitUntil")]
     pub will_save_wait_until: Option<bool>,
 
     /**
@@ -1081,85 +1066,70 @@ pub enum TextDocumentSyncCapability {
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "textDocumentSync")]
     pub text_document_sync: Option<TextDocumentSyncCapability>,
 
     /// The server provides hover support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "hoverProvider")]
     pub hover_provider: Option<bool>,
 
     /// The server provides completion support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "completionProvider")]
     pub completion_provider: Option<CompletionOptions>,
 
     /// The server provides signature help support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "signatureHelpProvider")]
     pub signature_help_provider: Option<SignatureHelpOptions>,
 
     /// The server provides goto definition support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "definitionProvider")]
     pub definition_provider: Option<bool>,
 
     /// The server provides find references support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "referencesProvider")]
     pub references_provider: Option<bool>,
 
     /// The server provides document highlight support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "documentHighlightProvider")]
     pub document_highlight_provider: Option<bool>,
 
     /// The server provides document symbol support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "documentSymbolProvider")]
     pub document_symbol_provider: Option<bool>,
 
     /// The server provides workspace symbol support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "workspaceSymbolProvider")]
     pub workspace_symbol_provider: Option<bool>,
 
     /// The server provides code actions.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "codeActionProvider")]
     pub code_action_provider: Option<bool>,
 
     /// The server provides code lens.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "codeLensProvider")]
     pub code_lens_provider: Option<CodeLensOptions>,
 
     /// The server provides document formatting.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "documentFormattingProvider")]
     pub document_formatting_provider: Option<bool>,
 
     /// The server provides document range formatting.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "documentRangeFormattingProvider")]
     pub document_range_formatting_provider: Option<bool>,
 
     /// The server provides document formatting on typing.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "documentOnTypeFormattingProvider")]
     pub document_on_type_formatting_provider: Option<DocumentOnTypeFormattingOptions>,
 
     /// The server provides rename support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "renameProvider")]
     pub rename_provider: Option<bool>,
 
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "executeCommandProvider")]
     pub execute_command_provider: Option<ExecuteCommandOptions>,
 }
 
@@ -1248,6 +1218,7 @@ pub struct LogMessageParams {
  * General parameters to to register for a capability.
  */
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Registration {
     /**
      * The id used to register the request. The id can be used to deregister
@@ -1263,7 +1234,6 @@ pub struct Registration {
     /**
      * Options necessary for the registration.
      */
-    #[serde(rename = "registerOptions")]
     pub register_options: Value,
 }
 
@@ -1275,12 +1245,12 @@ pub struct RegistrationParams {
 /// Since most of the registration options require to specify a document selector there is a base
 /// interface that can be used.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentRegistrationOptions {
     /**
      * A document selector to identify the scope of the registration. If set to null
      * the document selector provided on the client side will be used.
      */
-    #[serde(rename = "documentSelector")]
     pub document_selector: Option<DocumentSelector>,
 }
 
@@ -1313,34 +1283,33 @@ pub struct DidChangeConfigurationParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DidOpenTextDocumentParams {
     /// The document that was opened.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentItem,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DidChangeTextDocumentParams {
     /// The document that did change. The version number points
     /// to the version after all provided content changes have
     /// been applied.
-    #[serde(rename = "textDocument")]
     pub text_document: VersionedTextDocumentIdentifier,
     /// The actual content changes.
-    #[serde(rename = "contentChanges")]
     pub content_changes: Vec<TextDocumentContentChangeEvent>,
 }
 
 /// An event describing a change to a text document. If range and rangeLength are omitted
 /// the new text is considered to be the full content of the document.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentContentChangeEvent {
     /// The range of the document that changed.
     pub range: Option<Range>,
 
     /// The length of the range that got replaced.
     /// NOTE: seems redundant, see: https://github.com/Microsoft/language-server-protocol/issues/9
-    #[serde(rename = "rangeLength")]
     pub range_length: Option<u64>,
 
     /// The new text of the document.
@@ -1353,19 +1322,18 @@ pub struct TextDocumentContentChangeEvent {
  * Extends TextDocumentRegistrationOptions
  */
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TextDocumentChangeRegistrationOptions {
     /**
      * A document selector to identify the scope of the registration. If set to null
      * the document selector provided on the client side will be used.
      */
-    #[serde(rename = "documentSelector")]
     pub document_selector: Option<DocumentSelector>,
 
     /**
      * How documents are synced to the server. See TextDocumentSyncKind.Full
      * and TextDocumentSyncKindIncremental.
      */
-    #[serde(rename = "syncKind")]
     pub sync_kind: i32,
 }
 
@@ -1373,11 +1341,11 @@ pub struct TextDocumentChangeRegistrationOptions {
  * The parameters send in a will save text document notification.
  */
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WillSaveTextDocumentParams {
     /**
      * The document that will be saved.
      */
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /**
@@ -1437,16 +1405,16 @@ impl serde::Serialize for TextDocumentSaveReason {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DidCloseTextDocumentParams {
     /// The document that was closed.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -1542,10 +1510,10 @@ pub enum CompletionResponse {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionParams {
     // This field was "mixed-in" from TextDocumentPositionParams
     /// The text document.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     // This field was "mixed-in" from TextDocumentPositionParams
@@ -1553,22 +1521,22 @@ pub struct CompletionParams {
     pub position: Position,
 
     // CompletionParams properties:
-    #[serde(skip_serializing_if = "Option::is_none")] pub context: Option<CompletionContext>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<CompletionContext>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionContext {
     /**
      * How the completion was triggered.
      */
-    #[serde(rename = "triggerKind")]
     pub trigger_kind: CompletionTriggerKind,
 
     /**
      * The trigger character (a single character) that has trigger code complete.
      * Is undefined if `triggerKind !== CompletionTriggerKind.TriggerCharacter`
      */
-    #[serde(rename = "triggerCharacter")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_character: Option<String>,
 }
@@ -1611,10 +1579,10 @@ impl serde::Serialize for CompletionTriggerKind {
 /// Represents a collection of [completion items](#CompletionItem) to be presented
 /// in the editor.
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionList {
     /// This list it not complete. Further typing should result in recomputing
     /// this list.
-    #[serde(rename = "isIncomplete")]
     pub is_incomplete: bool,
 
     /// The completion items.
@@ -1629,6 +1597,7 @@ pub enum Documentation {
 }
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionItem {
     /// The label of this completion item. By default
     /// also the text that is inserted when selecting
@@ -1652,39 +1621,33 @@ pub struct CompletionItem {
     /// A string that shoud be used when comparing this item
     /// with other items. When `falsy` the label is used.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "sortText")]
     pub sort_text: Option<String>,
 
     /// A string that should be used when filtering a set of
     /// completion items. When `falsy` the label is used.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "filterText")]
     pub filter_text: Option<String>,
 
     /// A string that should be inserted a document when selecting
     /// this completion. When `falsy` the label is used.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "insertText")]
     pub insert_text: Option<String>,
 
     /// The format of the insert text. The format applies to both the `insertText` property
     /// and the `newText` property of a provided `textEdit`.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "insertTextFormat")]
     pub insert_text_format: Option<InsertTextFormat>,
 
     /// An edit which is applied to a document when selecting
     /// this completion. When an edit is provided the value of
     /// insertText is ignored.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "textEdit")]
     pub text_edit: Option<TextEdit>,
 
     /// An optional array of additional text edits that are applied when
     /// selecting this completion. Edits must not overlap with the main edit
     /// nor with themselves.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "additionalTextEdits")]
     pub additional_text_edits: Option<Vec<TextEdit>>,
 
     /// An optional command that is executed *after* inserting this completion. *Note* that
@@ -1865,16 +1828,15 @@ impl MarkedString {
 /// callable. There can be multiple signature but only one
 /// active and only one active parameter.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignatureHelp {
     /// One or more signatures.
     pub signatures: Vec<SignatureInformation>,
 
     /// The active signature.
-    #[serde(rename = "activeSignature")]
     pub active_signature: Option<u64>,
 
     /// The active parameter of the active signature.
-    #[serde(rename = "activeParameter")]
     pub active_parameter: Option<u64>,
 }
 
@@ -1911,10 +1873,10 @@ pub struct ParameterInformation {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ReferenceParams {
     // This field was "mixed-in" from TextDocumentPositionParams
     /// The text document.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     // This field was "mixed-in" from TextDocumentPositionParams
@@ -1926,9 +1888,9 @@ pub struct ReferenceParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ReferenceContext {
     /// Include the declaration of the current symbol.
-    #[serde(rename = "includeDeclaration")]
     pub include_declaration: bool,
 }
 
@@ -1986,15 +1948,16 @@ impl serde::Serialize for DocumentHighlightKind {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentSymbolParams {
     /// The text document.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
 /// Represents information about programming constructs like variables, classes,
 /// interfaces etc.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SymbolInformation {
     /// The name of this symbol.
     pub name: String,
@@ -2006,7 +1969,6 @@ pub struct SymbolInformation {
     pub location: Location,
 
     /// The name of the symbol containing this symbol.
-    #[serde(rename = "containerName")]
     pub container_name: Option<String>,
 }
 
@@ -2118,9 +2080,9 @@ pub struct ApplyWorkspaceEditResponse {
 
 /// Params for the CodeActionRequest
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CodeActionParams {
     /// The document in which the command was invoked.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The range for which the command was invoked.
@@ -2139,9 +2101,9 @@ pub struct CodeActionContext {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CodeLensParams {
     /// The document to request code lens for.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -2164,11 +2126,11 @@ pub struct CodeLens {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentLinkParams {
     /**
      * The document to provide document links for.
      */
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 }
 
@@ -2190,9 +2152,9 @@ pub struct DocumentLink {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentFormattingParams {
     /// The document to format.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The format options.
@@ -2223,9 +2185,9 @@ pub enum FormattingProperty {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentRangeFormattingParams {
     /// The document to format.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The range to format
@@ -2236,9 +2198,9 @@ pub struct DocumentRangeFormattingParams {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentOnTypeFormattingParams {
     /// The document to format.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The position at which this request was sent.
@@ -2253,31 +2215,29 @@ pub struct DocumentOnTypeFormattingParams {
 
 /// Extends TextDocumentRegistrationOptions
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentOnTypeFormattingRegistrationOptions {
     /**
      * A document selector to identify the scope of the registration. If set to null
      * the document selector provided on the client side will be used.
      */
-    #[serde(rename = "documentSelector")]
     pub document_selector: Option<DocumentSelector>,
 
     /**
      * A character on which formatting should be triggered, like `}`.
      */
-    #[serde(rename = "firstTriggerCharacter")]
     pub first_trigger_character: String,
 
     /**
      * More trigger characters.
      */
-    #[serde(rename = "moreTriggerCharacter")]
     pub more_trigger_character: Option<Vec<String>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RenameParams {
     /// The document to format.
-    #[serde(rename = "textDocument")]
     pub text_document: TextDocumentIdentifier,
 
     /// The position at which this request was sent.
@@ -2286,7 +2246,6 @@ pub struct RenameParams {
     /// The new name of the symbol. If the given name is not valid the
     /// request must return a [ResponseError](#ResponseError) with an
     /// appropriate message set.
-    #[serde(rename = "newName")]
     pub new_name: String,
 }
 
