@@ -4,4 +4,4 @@ Types useful for interacting with a [language server](https://code.visualstudio.
 
 ## Links
 
-[Protocol reference](https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md)
+[Protocol reference](https://github.com/Microsoft/language-server-protocol/blob/gh-pages/specification.md)
