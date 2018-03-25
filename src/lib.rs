@@ -610,7 +610,7 @@ mod option_url {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GenericCapability {
     /**
@@ -619,7 +619,7 @@ pub struct GenericCapability {
     pub dynamic_registration: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceEditCapability {
     /**
@@ -631,7 +631,7 @@ pub struct WorkspaceEditCapability {
 /**
  * Workspace specific client capabilities.
  */
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceClientCapabilites {
     /**
@@ -666,7 +666,7 @@ pub struct WorkspaceClientCapabilites {
     pub execute_command: Option<GenericCapability>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SynchronizationCapability {
     /**
@@ -692,7 +692,7 @@ pub struct SynchronizationCapability {
     pub did_save: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionItemCapability {
     /**
@@ -710,7 +710,7 @@ pub struct CompletionItemCapability {
     pub documentation_format: Option<Vec<MarkupKind>>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionItemKindCapability {
     /**
@@ -726,7 +726,7 @@ pub struct CompletionItemKindCapability {
     pub value_set: Option<Vec<CompletionItemKind>>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HoverCapability {
     /**
@@ -753,7 +753,7 @@ pub struct HoverCapability {
     pub context_support: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionCapability {
     /**
@@ -778,7 +778,7 @@ pub struct SignatureInformationSettings {
     documentation_format: Option<Vec<MarkupKind>>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignatureHelpCapability {
     /**
@@ -796,7 +796,7 @@ pub struct SignatureHelpCapability {
 /**
  * Text document specific client capabilities.
  */
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -888,7 +888,7 @@ pub struct TextDocumentClientCapabilities {
 /**
  * Where ClientCapabilities are currently empty:
  */
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClientCapabilities {
     /**
