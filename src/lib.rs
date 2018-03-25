@@ -570,7 +570,7 @@ pub struct InitializeParams {
 
     /// The initial trace setting. If omitted trace is disabled ('off').
     #[serde(default)]
-    pub trace: TraceOption,
+    pub trace: Option<TraceOption>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
