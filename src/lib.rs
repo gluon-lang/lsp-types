@@ -576,7 +576,7 @@ pub struct InitializeParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct InitializedParams { }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub enum TraceOption {
     #[serde(rename = "off")] Off,
     #[serde(rename = "messages")] Messages,
