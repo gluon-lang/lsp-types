@@ -2002,9 +2002,6 @@ pub enum SymbolKind {
     Event = 24,
     Operator = 25,
     TypeParameter = 26,
-
-    // Capturing all unknown enums by this lib.
-    Unknown = 255,
 }
 }
 
@@ -2016,7 +2013,12 @@ impl<'de> serde::Deserialize<'de> for SymbolKind {
         use enum_primitive::FromPrimitive;
 
         let i = try!(u8::deserialize(deserializer));
-        Ok(SymbolKind::from_u8(i).unwrap_or(SymbolKind::Unknown))
+        SymbolKind::from_u8(i).ok_or_else(|| {
+            D::Error::invalid_value(
+                de::Unexpected::Unsigned(i as u64),
+                &"value between 1 and 18 (inclusive)",
+            )
+        })
     }
 }
 
