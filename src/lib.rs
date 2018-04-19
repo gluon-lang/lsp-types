@@ -2,19 +2,15 @@
 
 Language Server Protocol types for Rust.
 
-Based on: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+Based on: <https://microsoft.github.io/language-server-protocol/specification>
 
-Last protocol update:
-2017-04-29 at commit:
-https://github.com/Microsoft/language-server-protocol/commit/20cf6216a7e30da2afcafea32e5e2593ebe7c65e
-
-This library uses the URL crate for parsing URIs.
-Note that there is some confusion on the meaning of URLs vs URIs:
-http://stackoverflow.com/a/28865728/393898 .
-According to that information, on the classical sense of "URLs", "URLs" are a subset of URIs,
-But on the modern/new meaning of URLs, they are the same as URIs.
-The important take-away aspect is that the URL crate should be able to parse any URI,
-such as `urn:isbn:0451450523`.
+This library uses the URL crate for parsing URIs.  Note that there is
+some confusion on the meaning of URLs vs URIs:
+<http://stackoverflow.com/a/28865728/393898>.  According to that
+information, on the classical sense of "URLs", "URLs" are a subset of
+URIs, But on the modern/new meaning of URLs, they are the same as
+URIs.  The important take-away aspect is that the URL crate should be
+able to parse any URI, such as `urn:isbn:0451450523`.
 
 
 */
@@ -1309,7 +1305,7 @@ pub struct TextDocumentContentChangeEvent {
     pub range: Option<Range>,
 
     /// The length of the range that got replaced.
-    /// NOTE: seems redundant, see: https://github.com/Microsoft/language-server-protocol/issues/9
+    /// NOTE: seems redundant, see: <https://github.com/Microsoft/language-server-protocol/issues/9>
     pub range_length: Option<u64>,
 
     /// The new text of the document.
@@ -1793,11 +1789,10 @@ pub enum HoverContents {
  - as code block of the given langauge if it is represented as a pair of a language and a value
 
  The pair of a language and a value is an equivalent to markdown:
- ```${language}
- ${value}
- ```
+     ```${language}
+     ${value}
+     ```
  */
-// type MarkedString = string | { language: string; value: string };
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
@@ -2268,7 +2263,7 @@ pub enum MarkupKind {
  * kind flag. Currently the protocol supports `plaintext` and `markdown` as markup kinds.
  *
  * If the kind is `markdown` then the value can contain fenced code blocks like in GitHub issues.
- * See https://help.github.com/articles/creating-and-highlighting-code-blocks/#syntax-highlighting
+ * See <https://help.github.com/articles/creating-and-highlighting-code-blocks/#syntax-highlighting>
  *
  * Here is an example how such a string can be constructed using JavaScript / TypeScript:
  * ```ts
