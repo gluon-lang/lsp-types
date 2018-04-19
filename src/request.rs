@@ -183,12 +183,41 @@ pub enum GotoDefinitionResponse {
 
 /// The references request is sent from the client to the server to resolve project-wide references for the
 /// symbol denoted by the given text document position.
+#[derive(Debug)]
 pub enum References {}
 
 impl Request for References {
     type Params = ReferenceParams;
     type Result = Option<Vec<Location>>;
     const METHOD: &'static str = "textDocument/references";
+}
+
+/// The goto type definition request is sent from the client to the
+/// server to resolve the type definition location of a symbol at a
+/// given text document position.
+#[derive(Debug)]
+pub enum GotoTypeDefinition {}
+
+pub type GotoTypeDefinitionResponse = GotoDefinitionResponse;
+
+impl Request for GotoTypeDefinition {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<GotoTypeDefinitionResponse>;
+    const METHOD: &'static str = "textDocument/typeDefinition";
+}
+
+/// The goto implementation request is sent from the client to the
+/// server to resolve the implementation location of a symbol at a
+/// given text document position.
+#[derive(Debug)]
+pub enum GotoImplementation {}
+
+pub type GotoImplementationResponse = GotoDefinitionResponse;
+
+impl Request for GotoImplementation {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<GotoImplementationResponse>;
+    const METHOD: &'static str = "textDocument/implementation";
 }
 
 /**
