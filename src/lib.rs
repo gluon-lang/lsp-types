@@ -633,7 +633,7 @@ pub struct WorkspaceEditCapability {
  */
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WorkspaceClientCapabilites {
+pub struct WorkspaceClientCapabilities {
     /**
      * The client supports applying batch edits to the workspace by supporting
      * the request 'workspace/applyEdit'
@@ -895,7 +895,7 @@ pub struct ClientCapabilities {
      * Workspace specific client capabilities.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workspace: Option<WorkspaceClientCapabilites>,
+    pub workspace: Option<WorkspaceClientCapabilities>,
 
     /**
      * Text document specific client capabilities.
