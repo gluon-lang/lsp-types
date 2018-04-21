@@ -18,6 +18,8 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 
 #[macro_use]
 extern crate enum_primitive;
+#[macro_use]
+extern crate bitflags;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -1479,6 +1481,59 @@ impl FileEvent {
     }
 }
 
+/// Describe options to be used when registered for text document change events.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DidChangeWatchedFilesRegistrationOptions {
+    /// The watchers to register.
+    pub watchers: Vec<FileSystemWatcher>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileSystemWatcher {
+    /// The  glob pattern to watch
+    pub glob_pattern: String,
+
+    /// The kind of events of interest. If omitted it defaults to WatchKind.Create |
+    /// WatchKind.Change | WatchKind.Delete which is 7.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<WatchKind>,
+}
+
+bitflags! {
+pub struct WatchKind: u8 {
+    /// Interested in create events.
+    const Create = 1;
+    /// Interested in change events
+    const Change = 2;
+    /// Interested in delete events
+    const Delete = 4;
+}
+}
+
+impl<'de> serde::Deserialize<'de> for WatchKind {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let i = try!(u8::deserialize(deserializer));
+        WatchKind::from_bits(i).ok_or_else(|| {
+            D::Error::invalid_value(
+                    de::Unexpected::Unsigned(i as u64),
+                    &"Unknown flag",)
+        })
+    }
+}
+
+impl serde::Serialize for WatchKind {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u8(self.bits())
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
@@ -2384,5 +2439,12 @@ mod tests {
     #[test]
     fn root_uri_can_be_missing() {
         serde_json::from_str::<InitializeParams>(r#"{ "capabilities": {} }"#).unwrap();
+    }
+
+    #[test]
+    fn test_watch_kind() {
+        test_serialization(&WatchKind::Create, "1");
+        test_serialization(&(WatchKind::Create | WatchKind::Change), "3");
+        test_serialization(&(WatchKind::Create | WatchKind::Change | WatchKind::Delete), "7");
     }
 }
