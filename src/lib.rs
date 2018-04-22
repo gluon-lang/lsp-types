@@ -1232,7 +1232,8 @@ pub struct Registration {
     /**
      * Options necessary for the registration.
      */
-    pub register_options: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub register_options: Option<Value>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
