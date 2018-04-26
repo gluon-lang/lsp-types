@@ -115,6 +115,7 @@ impl Location {
 /// Represents a diagnostic, such as a compiler error or warning.
 /// Diagnostic objects are only valid in the scope of a resource.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Diagnostic {
     /// The range at which the message applies.
     pub range: Range,
@@ -133,12 +134,10 @@ pub struct Diagnostic {
     /// The diagnostic's message.
     pub message: String,
 
-    /// A number used to associate children diagnostics with their
-    /// parent. This is an extension to the LSP because rustc can emit multiple
-    /// diagnotics that relate to the same error . All related diagnostics
-    /// should have the same `group` value. Can be omitted.
+    /// An array of related diagnostic information, e.g. when symbol-names within
+    /// a scope collide all definitions can be marked via this property.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub group: Option<u64>,
+    pub related_information: Option<Vec<DiagnosticRelatedInformation>>,
 }
 
 impl Diagnostic {
@@ -148,15 +147,15 @@ impl Diagnostic {
         code: Option<NumberOrString>,
         source: Option<String>,
         message: String,
-        group: Option<u64>
+        related_information: Option<Vec<DiagnosticRelatedInformation>>,
     ) -> Diagnostic {
         Diagnostic {
-            range: range,
-            severity: severity,
-            code: code,
-            source: source,
-            message: message,
-            group: group,
+            range,
+            severity,
+            code,
+            source,
+            message,
+            related_information
         }
     }
 
@@ -187,6 +186,18 @@ pub enum DiagnosticSeverity {
     Information = 3,
     /// Reports a hint.
     Hint = 4,
+}
+
+/// Represents a related message and source code location for a diagnostic. This
+/// should be used to point to code locations that cause or related to a
+/// diagnostics, e.g when duplicating a symbol in a scope.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct DiagnosticRelatedInformation {
+	/// The location of this related diagnostic information.
+	pub location: Location,
+
+	/// The message of this related diagnostic information.
+	pub message: String,
 }
 
 impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
