@@ -17,9 +17,9 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 #![allow(non_upper_case_globals)]
 
 #[macro_use]
-extern crate enum_primitive;
-#[macro_use]
 extern crate bitflags;
+#[macro_use]
+extern crate enum_primitive;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -642,6 +642,38 @@ pub struct WorkspaceEditCapability {
 }
 
 /**
+ * Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolKindCapability {
+    /**
+     * The symbol kind values the client supports. When this
+     * property exists the client also guarantees that it will
+     * handle values outside its set gracefully and falls back
+     * to a default value when unknown.
+     *
+     * If this property is not present the client only supports
+     * the symbol kinds from `File` to `Array` as defined in
+     * the initial version of the protocol.
+     */
+    pub value_set: Option<Vec<SymbolKind>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolCapability {
+    /**
+     * This capability supports dynamic registration.
+     */
+    pub dynamic_registration: Option<bool>,
+    /**
+     * Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
+     */
+    pub symbol_kind: Option<SymbolKindCapability>,
+}
+
+/**
  * Workspace specific client capabilities.
  */
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -671,7 +703,7 @@ pub struct WorkspaceClientCapabilities {
     /**
      * Capabilities specific to the `workspace/symbol` request.
      */
-    pub symbol: Option<GenericCapability>,
+    pub symbol: Option<SymbolCapability>,
 
     /**
      * Capabilities specific to the `workspace/executeCommand` request.
