@@ -820,7 +820,7 @@ pub struct SignatureInformationSettings {
      * Client supports the follow content formats for the documentation
      * property. The order describes the preferred format of the client.
      */
-    documentation_format: Option<Vec<MarkupKind>>,
+    pub documentation_format: Option<Vec<MarkupKind>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
