@@ -99,7 +99,8 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    #[serde(with = "url_serde")] pub uri: Url,
+    #[serde(with = "url_serde")]
+    pub uri: Url,
     pub range: Range,
 }
 
@@ -155,7 +156,7 @@ impl Diagnostic {
             code,
             source,
             message,
-            related_information
+            related_information,
         }
     }
 
@@ -193,11 +194,11 @@ pub enum DiagnosticSeverity {
 /// diagnostics, e.g when duplicating a symbol in a scope.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DiagnosticRelatedInformation {
-	/// The location of this related diagnostic information.
-	pub location: Location,
+    /// The location of this related diagnostic information.
+    pub location: Location,
 
-	/// The message of this related diagnostic information.
-	pub message: String,
+    /// The message of this related diagnostic information.
+    pub message: String,
 }
 
 impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
@@ -583,13 +584,16 @@ pub struct InitializeParams {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct InitializedParams { }
+pub struct InitializedParams {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub enum TraceOption {
-    #[serde(rename = "off")] Off,
-    #[serde(rename = "messages")] Messages,
-    #[serde(rename = "verbose")] Verbose,
+    #[serde(rename = "off")]
+    Off,
+    #[serde(rename = "messages")]
+    Messages,
+    #[serde(rename = "verbose")]
+    Verbose,
 }
 
 impl Default for TraceOption {
@@ -600,8 +604,8 @@ impl Default for TraceOption {
 
 mod option_url {
     use serde::{self, Serialize};
-    use url_serde::{De, Ser};
     use url::Url;
+    use url_serde::{De, Ser};
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
     where
@@ -1530,9 +1534,7 @@ impl<'de> serde::Deserialize<'de> for WatchKind {
     {
         let i = try!(u8::deserialize(deserializer));
         WatchKind::from_bits(i).ok_or_else(|| {
-            D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
-                    &"Unknown flag",)
+            D::Error::invalid_value(de::Unexpected::Unsigned(i as u64), &"Unknown flag")
         })
     }
 }
@@ -2457,6 +2459,9 @@ mod tests {
     fn test_watch_kind() {
         test_serialization(&WatchKind::Create, "1");
         test_serialization(&(WatchKind::Create | WatchKind::Change), "3");
-        test_serialization(&(WatchKind::Create | WatchKind::Change | WatchKind::Delete), "7");
+        test_serialization(
+            &(WatchKind::Create | WatchKind::Change | WatchKind::Delete),
+            "7",
+        );
     }
 }

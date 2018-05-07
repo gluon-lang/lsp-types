@@ -7,24 +7,52 @@ pub trait Notification {
 
 #[macro_export]
 macro_rules! lsp_notification {
-    ("$/cancelRequest") => { $crate::notification::Cancel };
-    ("initialized") => { $crate::notification::Initialized };
-    ("exit") => { $crate::notification::Exit };
+    ("$/cancelRequest") => {
+        $crate::notification::Cancel
+    };
+    ("initialized") => {
+        $crate::notification::Initialized
+    };
+    ("exit") => {
+        $crate::notification::Exit
+    };
 
-    ("window/showMessage") => { $crate::notification::ShowMessage };
-    ("window/logMessage") => { $crate::notification::LogMessage };
+    ("window/showMessage") => {
+        $crate::notification::ShowMessage
+    };
+    ("window/logMessage") => {
+        $crate::notification::LogMessage
+    };
 
-    ("telemetry/event") => { $crate::notification::Event };
+    ("telemetry/event") => {
+        $crate::notification::Event
+    };
 
-    ("textDocument/didOpen") => { $crate::notification::DidOpenTextDocument };
-    ("textDocument/didChange") => { $crate::notification::DidChangeTextDocument };
-    ("textDocument/willSave") => { $crate::notification::WillSaveTextDocument };
-    ("textDocument/didSave") => { $crate::notification::DidSaveTextDocument };
-    ("textDocument/didClose") => { $crate::notification::DidCloseTextDocument };
-    ("textDocument/publishDiagnostics") => { $crate::notification::PublishDiagnostics };
+    ("textDocument/didOpen") => {
+        $crate::notification::DidOpenTextDocument
+    };
+    ("textDocument/didChange") => {
+        $crate::notification::DidChangeTextDocument
+    };
+    ("textDocument/willSave") => {
+        $crate::notification::WillSaveTextDocument
+    };
+    ("textDocument/didSave") => {
+        $crate::notification::DidSaveTextDocument
+    };
+    ("textDocument/didClose") => {
+        $crate::notification::DidCloseTextDocument
+    };
+    ("textDocument/publishDiagnostics") => {
+        $crate::notification::PublishDiagnostics
+    };
 
-    ("workspace/didChangeConfiguration") => { $crate::notification::DidChangeConfiguration };
-    ("workspace/didChangeWatchedFiles") => { $crate::notification::DidChangeWatchedFiles };
+    ("workspace/didChangeConfiguration") => {
+        $crate::notification::DidChangeConfiguration
+    };
+    ("workspace/didChangeWatchedFiles") => {
+        $crate::notification::DidChangeWatchedFiles
+    };
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
