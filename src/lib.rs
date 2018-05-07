@@ -802,6 +802,15 @@ pub struct SignatureHelpCapability {
     pub signature_information: Option<SignatureInformationSettings>,
 }
 
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PublishDiagnosticsCapability {
+    /**
+     * Whether the clients accepts diagnostics with related information.
+     */
+    pub related_information: Option<bool>,
+}
+
 /**
  * Text document specific client capabilities.
  */
@@ -892,6 +901,12 @@ pub struct TextDocumentClientCapabilities {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rename: Option<GenericCapability>,
+
+    /**
+     * Capabilities specific to `textDocument/publishDiagnostics`.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub publish_diagnostics: Option<PublishDiagnosticsCapability>,
 }
 
 /**
