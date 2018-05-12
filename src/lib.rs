@@ -572,6 +572,7 @@ pub struct InitializeParams {
     pub root_uri: Option<Url>,
 
     /// User provided initialization options.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub initialization_options: Option<Value>,
 
     /// The capabilities provided by the client (editor)
