@@ -8,36 +8,88 @@ pub trait Request {
 
 #[macro_export]
 macro_rules! lsp_request {
-    ("initialize") => { $crate::request::Initialize };
-    ("shutdown") => { $crate::request::Shutdown };
+    ("initialize") => {
+        $crate::request::Initialize
+    };
+    ("shutdown") => {
+        $crate::request::Shutdown
+    };
 
-    ("window/showMessageRequest") => { $crate::request::ShowMessageRequest };
+    ("window/showMessageRequest") => {
+        $crate::request::ShowMessageRequest
+    };
 
-    ("client/registerCapability") => { $crate::request::RegisterCapability };
-    ("client/unregisterCapability") => { $crate::request::UnregisterCapability };
+    ("client/registerCapability") => {
+        $crate::request::RegisterCapability
+    };
+    ("client/unregisterCapability") => {
+        $crate::request::UnregisterCapability
+    };
 
-    ("workspace/symbol") => { $crate::request::WorkspaceSymbol };
-    ("workspace/executeCommand") => { $crate::request::ExecuteCommand };
+    ("workspace/symbol") => {
+        $crate::request::WorkspaceSymbol
+    };
+    ("workspace/executeCommand") => {
+        $crate::request::ExecuteCommand
+    };
 
-    ("textDocument/willSaveWaitUntil") => { $crate::request::WillSaveWaitUntil };
-    ("textDocument/completion") => { $crate::request::Completion };
-    ("completionItem/resolve") => { $crate::request::ResolveCompletionItem };
-    ("textDocument/hover") => { $crate::request::HoverRequest };
-    ("textDocument/signatureHelp") => { $crate::request::SignatureHelpRequest };
-    ("textDocument/definition") => { $crate::request::GotoDefinition };
-    ("textDocument/references") => { $crate::request::References };
-    ("textDocument/documentHighlight") => { $crate::request::DocumentHighlightRequest };
-    ("textDocument/documentSymbol") => { $crate::request::DocumentSymbol };
-    ("textDocument/codeAction") => { $crate::request::CodeAction };
-    ("textDocument/codeLens") => { $crate::request::CodeLensRequest };
-    ("codeLens/resolve") => { $crate::request::CodeLensResolve };
-    ("textDocument/documentLink") => { $crate::request::DocumentLink };
-    ("documentLink/resolve") => { $crate::request::DocumentLinkResolve };
-    ("textDocument/applyEdit") => { $crate::request::ApplyEdit };
-    ("textDocument/rangeFormatting") => { $crate::request::RangeFormatting };
-    ("textDocument/onTypeFormatting") => { $crate::request::OnTypeFormatting };
-    ("textDocument/formatting") => { $crate::request::Formatting };
-    ("textDocument/rename") => { $crate::request::Rename };
+    ("textDocument/willSaveWaitUntil") => {
+        $crate::request::WillSaveWaitUntil
+    };
+    ("textDocument/completion") => {
+        $crate::request::Completion
+    };
+    ("completionItem/resolve") => {
+        $crate::request::ResolveCompletionItem
+    };
+    ("textDocument/hover") => {
+        $crate::request::HoverRequest
+    };
+    ("textDocument/signatureHelp") => {
+        $crate::request::SignatureHelpRequest
+    };
+    ("textDocument/definition") => {
+        $crate::request::GotoDefinition
+    };
+    ("textDocument/references") => {
+        $crate::request::References
+    };
+    ("textDocument/documentHighlight") => {
+        $crate::request::DocumentHighlightRequest
+    };
+    ("textDocument/documentSymbol") => {
+        $crate::request::DocumentSymbol
+    };
+    ("textDocument/codeAction") => {
+        $crate::request::CodeAction
+    };
+    ("textDocument/codeLens") => {
+        $crate::request::CodeLensRequest
+    };
+    ("codeLens/resolve") => {
+        $crate::request::CodeLensResolve
+    };
+    ("textDocument/documentLink") => {
+        $crate::request::DocumentLink
+    };
+    ("documentLink/resolve") => {
+        $crate::request::DocumentLinkResolve
+    };
+    ("textDocument/applyEdit") => {
+        $crate::request::ApplyEdit
+    };
+    ("textDocument/rangeFormatting") => {
+        $crate::request::RangeFormatting
+    };
+    ("textDocument/onTypeFormatting") => {
+        $crate::request::OnTypeFormatting
+    };
+    ("textDocument/formatting") => {
+        $crate::request::Formatting
+    };
+    ("textDocument/rename") => {
+        $crate::request::Rename
+    };
 }
 
 /**

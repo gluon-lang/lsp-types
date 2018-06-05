@@ -17,9 +17,9 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 #![allow(non_upper_case_globals)]
 
 #[macro_use]
-extern crate enum_primitive;
-#[macro_use]
 extern crate bitflags;
+#[macro_use]
+extern crate enum_primitive;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -99,7 +99,8 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    #[serde(with = "url_serde")] pub uri: Url,
+    #[serde(with = "url_serde")]
+    pub uri: Url,
     pub range: Range,
 }
 
@@ -155,7 +156,7 @@ impl Diagnostic {
             code,
             source,
             message,
-            related_information
+            related_information,
         }
     }
 
@@ -193,11 +194,11 @@ pub enum DiagnosticSeverity {
 /// diagnostics, e.g when duplicating a symbol in a scope.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DiagnosticRelatedInformation {
-	/// The location of this related diagnostic information.
-	pub location: Location,
+    /// The location of this related diagnostic information.
+    pub location: Location,
 
-	/// The message of this related diagnostic information.
-	pub message: String,
+    /// The message of this related diagnostic information.
+    pub message: String,
 }
 
 impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
@@ -584,13 +585,16 @@ pub struct InitializeParams {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct InitializedParams { }
+pub struct InitializedParams {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub enum TraceOption {
-    #[serde(rename = "off")] Off,
-    #[serde(rename = "messages")] Messages,
-    #[serde(rename = "verbose")] Verbose,
+    #[serde(rename = "off")]
+    Off,
+    #[serde(rename = "messages")]
+    Messages,
+    #[serde(rename = "verbose")]
+    Verbose,
 }
 
 impl Default for TraceOption {
@@ -601,8 +605,8 @@ impl Default for TraceOption {
 
 mod option_url {
     use serde::{self, Serialize};
-    use url_serde::{De, Ser};
     use url::Url;
+    use url_serde::{De, Ser};
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
     where
@@ -639,6 +643,38 @@ pub struct WorkspaceEditCapability {
 }
 
 /**
+ * Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolKindCapability {
+    /**
+     * The symbol kind values the client supports. When this
+     * property exists the client also guarantees that it will
+     * handle values outside its set gracefully and falls back
+     * to a default value when unknown.
+     *
+     * If this property is not present the client only supports
+     * the symbol kinds from `File` to `Array` as defined in
+     * the initial version of the protocol.
+     */
+    pub value_set: Option<Vec<SymbolKind>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolCapability {
+    /**
+     * This capability supports dynamic registration.
+     */
+    pub dynamic_registration: Option<bool>,
+    /**
+     * Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
+     */
+    pub symbol_kind: Option<SymbolKindCapability>,
+}
+
+/**
  * Workspace specific client capabilities.
  */
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -668,7 +704,7 @@ pub struct WorkspaceClientCapabilities {
     /**
      * Capabilities specific to the `workspace/symbol` request.
      */
-    pub symbol: Option<GenericCapability>,
+    pub symbol: Option<SymbolCapability>,
 
     /**
      * Capabilities specific to the `workspace/executeCommand` request.
@@ -785,7 +821,7 @@ pub struct SignatureInformationSettings {
      * Client supports the follow content formats for the documentation
      * property. The order describes the preferred format of the client.
      */
-    documentation_format: Option<Vec<MarkupKind>>,
+    pub documentation_format: Option<Vec<MarkupKind>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -1546,9 +1582,7 @@ impl<'de> serde::Deserialize<'de> for WatchKind {
     {
         let i = try!(u8::deserialize(deserializer));
         WatchKind::from_bits(i).ok_or_else(|| {
-            D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
-                    &"Unknown flag",)
+            D::Error::invalid_value(de::Unexpected::Unsigned(i as u64), &"Unknown flag")
         })
     }
 }
@@ -2473,6 +2507,9 @@ mod tests {
     fn test_watch_kind() {
         test_serialization(&WatchKind::Create, "1");
         test_serialization(&(WatchKind::Create | WatchKind::Change), "3");
-        test_serialization(&(WatchKind::Create | WatchKind::Change | WatchKind::Delete), "7");
+        test_serialization(
+            &(WatchKind::Create | WatchKind::Change | WatchKind::Delete),
+            "7",
+        );
     }
 }
