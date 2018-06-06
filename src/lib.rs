@@ -427,7 +427,6 @@ impl WorkspaceEdit {
 }
 
 /// Text documents are identified using a URI. On the protocol level, URIs are passed as strings.
-/// The corresponding JSON structure looks like this:
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct TextDocumentIdentifier {
     // !!!!!! Note:
