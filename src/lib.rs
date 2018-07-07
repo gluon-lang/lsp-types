@@ -19,7 +19,8 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 #[macro_use]
 extern crate bitflags;
 #[macro_use]
-extern crate enum_primitive;
+extern crate num_derive;
+extern crate num_traits;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -32,6 +33,7 @@ use url::Url;
 
 use std::collections::HashMap;
 
+use num_traits::FromPrimitive;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
@@ -1697,13 +1699,11 @@ pub struct CompletionContext {
     pub trigger_character: Option<String>,
 }
 
-enum_from_primitive!{
 /// How a completion was triggered.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, FromPrimitive)]
 pub enum CompletionTriggerKind {
     Invoked = 1,
     TriggerCharacter = 2,
-}
 }
 
 impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
@@ -1711,8 +1711,6 @@ impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
     where
         D: serde::Deserializer<'de>,
     {
-        use enum_primitive::FromPrimitive;
-
         let i = try!(u8::deserialize(deserializer));
         CompletionTriggerKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
@@ -1829,9 +1827,8 @@ impl CompletionItem {
     }
 }
 
-enum_from_primitive!{
 /// The kind of a completion entry.
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, FromPrimitive)]
 pub enum CompletionItemKind {
     Text = 1,
     Method = 2,
@@ -1859,15 +1856,12 @@ pub enum CompletionItemKind {
     Operator = 24,
     TypeParameter = 25,
 }
-}
 
 impl<'de> serde::Deserialize<'de> for CompletionItemKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        use enum_primitive::FromPrimitive;
-
         let i = try!(u8::deserialize(deserializer));
         CompletionItemKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
@@ -1887,13 +1881,11 @@ impl serde::Serialize for CompletionItemKind {
     }
 }
 
-enum_from_primitive!{
 /// Defines how to interpret the insert text in a completion item
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, FromPrimitive)]
 pub enum InsertTextFormat {
     PlainText = 1,
     Snippet = 2,
-}
 }
 
 impl<'de> serde::Deserialize<'de> for InsertTextFormat {
@@ -1901,8 +1893,6 @@ impl<'de> serde::Deserialize<'de> for InsertTextFormat {
     where
         D: serde::Deserializer<'de>,
     {
-        use enum_primitive::FromPrimitive;
-
         let i = try!(u8::deserialize(deserializer));
         InsertTextFormat::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
@@ -2134,8 +2124,7 @@ pub struct SymbolInformation {
 }
 
 /// A symbol kind.
-enum_from_primitive!{
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, FromPrimitive)]
 pub enum SymbolKind {
     File = 1,
     Module = 2,
@@ -2167,15 +2156,12 @@ pub enum SymbolKind {
     // Capturing all unknown enums by this lib.
     Unknown = 255,
 }
-}
 
 impl<'de> serde::Deserialize<'de> for SymbolKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        use enum_primitive::FromPrimitive;
-
         let i = try!(u8::deserialize(deserializer));
         Ok(SymbolKind::from_u8(i).unwrap_or(SymbolKind::Unknown))
     }
