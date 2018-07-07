@@ -15,7 +15,8 @@ keywords = ["language", "server", "lsp", "vscode"]
 license = "MIT"
 
 [dependencies]
-enum_primitive = "0.1.0"
+num-derive = "0.2.2"
+num-traits = "0.2"
 bitflags = "1.0.1"
 serde = "1.0.34"
 serde_derive = "1.0.34"
