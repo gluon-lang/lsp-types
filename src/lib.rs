@@ -1169,6 +1169,28 @@ pub enum TextDocumentSyncCapability {
     Options(TextDocumentSyncOptions),
 }
 
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ImplementationProviderCapability {
+    Simple(bool),
+    Options(StaticTextDocumentRegistrationOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum TypeDefinitionProviderCapability {
+    Simple(bool),
+    Options(StaticTextDocumentRegistrationOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ColorProviderCapability {
+    Simple(bool),
+    ColorProvider(ColorProviderOptions),
+    Options(StaticTextDocumentColorProviderOptions),
+}
+
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerCapabilities {
@@ -1191,6 +1213,14 @@ pub struct ServerCapabilities {
     /// The server provides goto definition support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub definition_provider: Option<bool>,
+
+    /// The server provides goto type definition support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub type_definition_provider: Option<TypeDefinitionProviderCapability>,
+
+    /// the server provides goto implementation support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub implementation_provider: Option<ImplementationProviderCapability>,
 
     /// The server provides find references support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1231,6 +1261,10 @@ pub struct ServerCapabilities {
     /// The server provides rename support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rename_provider: Option<bool>,
+
+    /// The server provides color provider support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_provider: Option<ColorProviderCapability>,
 
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1357,6 +1391,43 @@ pub struct TextDocumentRegistrationOptions {
      * the document selector provided on the client side will be used.
      */
     pub document_selector: Option<DocumentSelector>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StaticRegistrationOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StaticTextDocumentRegistrationOptions {
+    /**
+     * A document selector to identify the scope of the registration. If set to null
+     * the document selector provided on the client side will be used.
+     */
+    pub document_selector: Option<DocumentSelector>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ColorProviderOptions {}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StaticTextDocumentColorProviderOptions {
+    /**
+     * A document selector to identify the scope of the registration. If set to null
+     * the document selector provided on the client side will be used.
+     */
+    pub document_selector: Option<DocumentSelector>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
 }
 
 /**
