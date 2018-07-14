@@ -1814,14 +1814,14 @@ pub struct CompletionList {
     pub items: Vec<CompletionItem>,
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum Documentation {
     String(String),
     MarkupContent(MarkupContent),
 }
 
-#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionItem {
     /// The label of this completion item. By default
@@ -2475,7 +2475,7 @@ pub struct RenameParams {
  * Please note that `MarkupKinds` must not start with a `$`. This kinds
  * are reserved for internal usage.
  */
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum MarkupKind {
     /// Plain text is supported as a content format
@@ -2508,7 +2508,7 @@ pub enum MarkupKind {
  * *Please Note* that clients might sanitize the return markdown. A client could decide to
  * remove HTML from the markdown to avoid script execution.
  */
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 pub struct MarkupContent {
     pub kind: MarkupKind,
     pub value: String,
