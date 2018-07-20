@@ -812,20 +812,6 @@ pub struct HoverCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content_format: Option<Vec<MarkupKind>>,
-
-    /**
-     * The client supports the following `CompletionItem` specific
-     * capabilities.
-     */
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub completion_item: Option<CompletionItemKindCapability>,
-
-    /**
-     * The client supports to send additional context information for a
-     * `textDocument/completion` requestion.
-     */
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub context_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -843,6 +829,16 @@ pub struct CompletionCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub completion_item: Option<CompletionItemCapability>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completion_item_kind: Option<CompletionItemKindCapability>,
+
+    /**
+     * The client supports to send additional context information for a
+     * `textDocument/completion` requestion.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
