@@ -25,7 +25,7 @@ macro_rules! lsp_notification {
     };
 
     ("telemetry/event") => {
-        $crate::notification::Event
+        $crate::notification::TelemetryEvent
     };
 
     ("textDocument/didOpen") => {
@@ -36,6 +36,9 @@ macro_rules! lsp_notification {
     };
     ("textDocument/willSave") => {
         $crate::notification::WillSaveTextDocument
+    };
+    ("textDocument/willSaveWaitUntil") => {
+        $crate::notification::WillSaveWaitUntil
     };
     ("textDocument/didSave") => {
         $crate::notification::DidSaveTextDocument
@@ -232,4 +235,45 @@ pub enum PublishDiagnostics {}
 impl Notification for PublishDiagnostics {
     type Params = PublishDiagnosticsParams;
     const METHOD: &'static str = "textDocument/publishDiagnostics";
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::mem;
+
+    fn fake_call<N: Notification>(_params: N::Params) { }
+
+    macro_rules! check_macro {
+        ($name:tt) => {
+            // check whethe the macro name matches the method
+            assert_eq!(<lsp_notification!($name) as Notification>::METHOD, $name);
+            // test whether type checking passes for each component
+            if false {
+                // don't want to actually implement/run this
+                let params: <lsp_notification!($name) as Notification>::Params = unsafe { mem::uninitialized() };
+                fake_call::<lsp_notification!($name)>(params);
+            }
+        }
+    }
+
+    #[test]
+    fn check_macro_definition() {
+        check_macro!("$/cancelRequest");
+        check_macro!("initialized");
+        check_macro!("exit");
+        check_macro!("window/showMessage");
+        check_macro!("window/logMessage");
+        check_macro!("telemetry/event");
+        check_macro!("textDocument/didOpen");
+        check_macro!("textDocument/didChange");
+        check_macro!("textDocument/willSave");
+        check_macro!("textDocument/willSaveWaitUntil");
+        check_macro!("textDocument/didSave");
+        check_macro!("textDocument/didClose");
+        check_macro!("textDocument/publishDiagnostics");
+        check_macro!("workspace/didChangeConfiguration");
+        check_macro!("workspace/didChangeWatchedFiles");
+    }
 }

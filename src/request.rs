@@ -33,9 +33,6 @@ macro_rules! lsp_request {
         $crate::request::ExecuteCommand
     };
 
-    ("textDocument/willSaveWaitUntil") => {
-        $crate::request::WillSaveWaitUntil
-    };
     ("textDocument/completion") => {
         $crate::request::Completion
     };
@@ -75,7 +72,7 @@ macro_rules! lsp_request {
     ("documentLink/resolve") => {
         $crate::request::DocumentLinkResolve
     };
-    ("textDocument/applyEdit") => {
+    ("workspace/applyEdit") => {
         $crate::request::ApplyWorkspaceEdit
     };
     ("textDocument/rangeFormatting") => {
@@ -446,4 +443,56 @@ impl Request for Rename {
     type Params = RenameParams;
     type Result = Option<WorkspaceEdit>;
     const METHOD: &'static str = "textDocument/rename";
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::mem;
+
+    fn fake_call<R: Request>(_params: R::Params) -> R::Result {
+        unimplemented!()
+    }
+
+    macro_rules! check_macro {
+        ($name:tt) => {
+            // check whethe the macro name matches the method
+            assert_eq!(<lsp_request!($name) as Request>::METHOD, $name);
+            // test whether type checking passes for each component
+            if false {
+                // don't want to actually implement/run this
+                let params: <lsp_request!($name) as Request>::Params = unsafe { mem::uninitialized()};
+                let _res: <lsp_request!($name) as Request>::Result = fake_call::<lsp_request!($name)>(params);
+            }
+        }
+    }
+
+    #[test]
+    fn check_macro_definition() {
+        check_macro!("initialize");
+        check_macro!("shutdown");
+        check_macro!("window/showMessageRequest");
+        check_macro!("client/registerCapability");
+        check_macro!("client/unregisterCapability");
+        check_macro!("workspace/symbol");
+        check_macro!("workspace/executeCommand");
+        check_macro!("textDocument/completion");
+        check_macro!("completionItem/resolve");
+        check_macro!("textDocument/hover");
+        check_macro!("textDocument/signatureHelp");
+        check_macro!("textDocument/definition");
+        check_macro!("textDocument/references");
+        check_macro!("textDocument/documentHighlight");
+        check_macro!("textDocument/documentSymbol");
+        check_macro!("textDocument/codeAction");
+        check_macro!("textDocument/codeLens");
+        check_macro!("codeLens/resolve");
+        check_macro!("textDocument/documentLink");
+        check_macro!("documentLink/resolve");
+        check_macro!("workspace/applyEdit");
+        check_macro!("textDocument/rangeFormatting");
+        check_macro!("textDocument/onTypeFormatting");
+        check_macro!("textDocument/formatting");
+        check_macro!("textDocument/rename");
+    }
 }
