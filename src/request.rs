@@ -447,10 +447,14 @@ impl Request for Rename {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::mem;
+    use super::*;
 
-    fn fake_call<R: Request>(_params: R::Params) -> R::Result {
+    fn fake_call<R>(_params: R::Params) -> R::Result
+        where R: Request,
+              R::Params: serde::Serialize,
+              R::Result: serde::de::DeserializeOwned
+    {
         unimplemented!()
     }
 
@@ -468,7 +472,7 @@ mod test {
     }
 
     #[test]
-    fn check_macro_definition() {
+    fn check_macro_definitions() {
         check_macro!("initialize");
         check_macro!("shutdown");
         check_macro!("window/showMessageRequest");

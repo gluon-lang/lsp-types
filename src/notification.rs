@@ -240,10 +240,13 @@ impl Notification for PublishDiagnostics {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::mem;
+    use super::*;
 
-    fn fake_call<N: Notification>(_params: N::Params) { }
+    fn fake_call<N>(_params: N::Params)
+        where N: Notification,
+              N::Params: serde::Serialize,
+    { }
 
     macro_rules! check_macro {
         ($name:tt) => {
@@ -259,7 +262,7 @@ mod test {
     }
 
     #[test]
-    fn check_macro_definition() {
+    fn check_macro_definitions() {
         check_macro!("$/cancelRequest");
         check_macro!("initialized");
         check_macro!("exit");
