@@ -61,7 +61,7 @@ macro_rules! lsp_request {
         $crate::request::DocumentSymbol
     };
     ("textDocument/codeAction") => {
-        $crate::request::CodeAction
+        $crate::request::CodeActionRequest
     };
     ("textDocument/codeLens") => {
         $crate::request::CodeLensRequest
@@ -70,13 +70,13 @@ macro_rules! lsp_request {
         $crate::request::CodeLensResolve
     };
     ("textDocument/documentLink") => {
-        $crate::request::DocumentLink
+        $crate::request::DocumentLinkRequest
     };
     ("documentLink/resolve") => {
         $crate::request::DocumentLinkResolve
     };
     ("textDocument/applyEdit") => {
-        $crate::request::ApplyEdit
+        $crate::request::ApplyWorkspaceEdit
     };
     ("textDocument/rangeFormatting") => {
         $crate::request::RangeFormatting

@@ -167,9 +167,9 @@ impl Notification for DidChangeTextDocument {
 /// The document will save notification is sent from the client to the server before the document
 /// is actually saved.
 #[derive(Debug)]
-pub enum WillSave {}
+pub enum WillSaveTextDocument {}
 
-impl Notification for WillSave {
+impl Notification for WillSaveTextDocument {
     type Params = WillSaveTextDocumentParams;
     const METHOD: &'static str = "textDocument/willSave";
 }
