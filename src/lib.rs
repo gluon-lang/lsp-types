@@ -2164,6 +2164,13 @@ impl serde::Serialize for DocumentHighlightKind {
     }
 }
 
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum DocumentSymbolResponse {
+    Flat(Vec<SymbolInformation>),
+    Nested(Vec<DocumentSymbol>),
+}
+
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentSymbolParams {

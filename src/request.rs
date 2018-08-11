@@ -299,7 +299,7 @@ pub enum DocumentSymbolRequest {}
 
 impl Request for DocumentSymbolRequest {
     type Params = DocumentSymbolParams;
-    type Result = Option<Vec<SymbolInformation>>;
+    type Result = Option<DocumentSymbolResponse>;
     const METHOD: &'static str = "textDocument/documentSymbol";
 }
 
