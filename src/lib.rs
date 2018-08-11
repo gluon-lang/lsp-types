@@ -29,7 +29,7 @@ extern crate serde_json;
 extern crate url;
 extern crate url_serde;
 
-use url::Url;
+pub use url::Url;
 
 use std::collections::HashMap;
 
