@@ -641,6 +641,10 @@ pub struct GenericCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
+
+    /// The client support hierarchical document symbols.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hierarchical_document_symbol_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -2164,11 +2168,48 @@ impl serde::Serialize for DocumentHighlightKind {
     }
 }
 
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum DocumentSymbolResponse {
+    Flat(Vec<SymbolInformation>),
+    Nested(Vec<DocumentSymbol>),
+}
+
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentSymbolParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
+}
+
+/// Represents programming constructs like variables, classes, interfaces etc.
+/// that appear in a document. Document symbols can be hierarchical and they have two ranges:
+/// one that encloses its definition and one that points to its most interesting range,
+/// e.g. the range of an identifier.
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentSymbol {
+    /// The name of this symbol.
+    pub name: String,
+    /// More detail for this symbol, e.g the signature of a function. If not provided the
+    /// name is used.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub detail: Option<String>,
+    /// The kind of this symbol.
+    pub kind: SymbolKind,
+    /// Indicates if this symbol is deprecated.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<bool>,
+    /// The range enclosing this symbol not including leading/trailing whitespace but everything else
+    /// like comments. This information is typically used to determine if the the clients cursor is
+    /// inside the symbol to reveal in the symbol in the UI.
+    pub range: Range,
+    /// The range that should be selected and revealed when this symbol is being picked, e.g the name of a function.
+    /// Must be contained by the the `range`.
+    pub selection_range: Range,
+    /// Children of this symbol, e.g. properties of a class.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<DocumentSymbol>>,
 }
 
 /// Represents information about programming constructs like variables, classes,
