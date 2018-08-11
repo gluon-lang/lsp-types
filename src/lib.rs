@@ -641,6 +641,10 @@ pub struct GenericCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
+
+    /// The client support hierarchical document symbols.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hierarchical_document_symbol_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
