@@ -295,9 +295,9 @@ impl Request for DocumentHighlightRequest {
  * text document.
  */
 #[derive(Debug)]
-pub enum DocumentSymbol {}
+pub enum DocumentSymbolRequest {}
 
-impl Request for DocumentSymbol {
+impl Request for DocumentSymbolRequest {
     type Params = DocumentSymbolParams;
     type Result = Option<Vec<SymbolInformation>>;
     const METHOD: &'static str = "textDocument/documentSymbol";
