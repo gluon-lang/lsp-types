@@ -243,7 +243,7 @@ mod test {
     use std::mem;
     use super::*;
 
-    fn fake_call<N>(_params: N::Params)
+    fn fake_call<N>()
         where N: Notification,
               N::Params: serde::Serialize,
     { }
@@ -253,11 +253,7 @@ mod test {
             // check whethe the macro name matches the method
             assert_eq!(<lsp_notification!($name) as Notification>::METHOD, $name);
             // test whether type checking passes for each component
-            if false {
-                // don't want to actually implement/run this
-                let params: <lsp_notification!($name) as Notification>::Params = unsafe { mem::uninitialized() };
-                fake_call::<lsp_notification!($name)>(params);
-            }
+            fake_call::<lsp_notification!($name)>();
         }
     }
 

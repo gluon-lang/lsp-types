@@ -450,12 +450,11 @@ mod test {
     use std::mem;
     use super::*;
 
-    fn fake_call<R>(_params: R::Params) -> R::Result
+    fn fake_call<R>()
         where R: Request,
               R::Params: serde::Serialize,
               R::Result: serde::de::DeserializeOwned
     {
-        unimplemented!()
     }
 
     macro_rules! check_macro {
@@ -463,11 +462,7 @@ mod test {
             // check whethe the macro name matches the method
             assert_eq!(<lsp_request!($name) as Request>::METHOD, $name);
             // test whether type checking passes for each component
-            if false {
-                // don't want to actually implement/run this
-                let params: <lsp_request!($name) as Request>::Params = unsafe { mem::uninitialized()};
-                let _res: <lsp_request!($name) as Request>::Result = fake_call::<lsp_request!($name)>(params);
-            }
+            fake_call::<lsp_request!($name)>();
         }
     }
 
