@@ -55,7 +55,7 @@ macro_rules! lsp_request {
         $crate::request::DocumentHighlightRequest
     };
     ("textDocument/documentSymbol") => {
-        $crate::request::DocumentSymbol
+        $crate::request::DocumentSymbolRequest
     };
     ("textDocument/codeAction") => {
         $crate::request::CodeActionRequest
@@ -447,7 +447,6 @@ impl Request for Rename {
 
 #[cfg(test)]
 mod test {
-    use std::mem;
     use super::*;
 
     fn fake_call<R>()

@@ -240,7 +240,6 @@ impl Notification for PublishDiagnostics {
 
 #[cfg(test)]
 mod test {
-    use std::mem;
     use super::*;
 
     fn fake_call<N>()
