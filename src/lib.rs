@@ -2489,6 +2489,7 @@ pub struct CodeActionContext {
     ///
     /// Actions not of this kind are filtered out by the client before being shown. So servers
     /// can omit computing them.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub only: Option<Vec<CodeActionKind>>,
 }
 
@@ -2501,6 +2502,7 @@ pub struct CodeActionOptions {
      * The list of kinds may be generic, such as `CodeActionKind.Refactor`, or the server
      * may list out every specific kind they provide.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub code_action_kinds: Option<Vec<CodeActionKind>>,
 }
 
