@@ -777,11 +777,30 @@ pub struct CompletionItemCapability {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub snippet_support: Option<bool>,
 
+    /**
+     * Client supports commit characters on a completion item.
+     */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub commit_characters_support: Option<bool>,
 
+    /**
+     * Client supports the follow content formats for the documentation
+     * property. The order describes the preferred format of the client.
+     */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation_format: Option<Vec<MarkupKind>>,
+
+    /**
+     * Client supports the deprecated property on a completion item.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated_support: Option<bool>,
+
+    /**
+     * Client supports the preselect property on a completion item.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preselect_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -1887,6 +1906,14 @@ pub struct CompletionItem {
     /// A human-readable string that represents a doc-comment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<Documentation>,
+
+    /// Indicates if this item is deprecated.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<bool>,
+
+    /// Select this item when showing.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preselect: Option<bool>,
 
     /// A string that shoud be used when comparing this item
     /// with other items. When `falsy` the label is used.
