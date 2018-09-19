@@ -87,6 +87,12 @@ macro_rules! lsp_request {
     ("textDocument/rename") => {
         $crate::request::Rename
     };
+    ("textDocument/documentColor") => {
+        $crate::request::DocumentColor
+    };
+    ("textDocument/colorPresentation") => {
+        $crate::request::ColorPresentation
+    };
 }
 
 /**
@@ -445,6 +451,24 @@ impl Request for Rename {
     const METHOD: &'static str = "textDocument/rename";
 }
 
+#[derive(Debug)]
+pub enum DocumentColor {}
+
+impl Request for DocumentColor {
+    type Params = DocumentColorParams;
+    type Result = Option<Vec<ColorInformation>>;
+    const METHOD: &'static str = "textDocument/documentColor";
+}
+
+#[derive(Debug)]
+pub enum ColorPresentation {}
+
+impl Request for ColorPresentation {
+    type Params = ColorPresentationParams;
+    type Result = Option<Vec<ColorPresentation>>;
+    const METHOD: &'static str = "textDocument/colorPresentation";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -492,5 +516,7 @@ mod test {
         check_macro!("textDocument/onTypeFormatting");
         check_macro!("textDocument/formatting");
         check_macro!("textDocument/rename");
+        check_macro!("textDocument/documentColor");
+        check_macro!("textDocument/colorPresentation");
     }
 }
