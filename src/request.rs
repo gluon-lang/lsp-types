@@ -87,6 +87,12 @@ macro_rules! lsp_request {
     ("textDocument/rename") => {
         $crate::request::Rename
     };
+    ("textDocument/documentColor") => {
+        $crate::request::DocumentColor
+    };
+    ("textDocument/colorPresentation") => {
+        $crate::request::ColorPresentationRequest
+    };
 }
 
 /**
@@ -445,14 +451,33 @@ impl Request for Rename {
     const METHOD: &'static str = "textDocument/rename";
 }
 
+#[derive(Debug)]
+pub enum DocumentColor {}
+
+impl Request for DocumentColor {
+    type Params = DocumentColorParams;
+    type Result = Vec<ColorInformation>;
+    const METHOD: &'static str = "textDocument/documentColor";
+}
+
+#[derive(Debug)]
+pub enum ColorPresentationRequest {}
+
+impl Request for ColorPresentationRequest {
+    type Params = ColorPresentationParams;
+    type Result = Vec<ColorPresentation>;
+    const METHOD: &'static str = "textDocument/colorPresentation";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
 
     fn fake_call<R>()
-        where R: Request,
-              R::Params: serde::Serialize,
-              R::Result: serde::de::DeserializeOwned
+    where
+        R: Request,
+        R::Params: serde::Serialize,
+        R::Result: serde::de::DeserializeOwned,
     {
     }
 
@@ -462,7 +487,7 @@ mod test {
             assert_eq!(<lsp_request!($name) as Request>::METHOD, $name);
             // test whether type checking passes for each component
             fake_call::<lsp_request!($name)>();
-        }
+        };
     }
 
     #[test]
@@ -492,5 +517,7 @@ mod test {
         check_macro!("textDocument/onTypeFormatting");
         check_macro!("textDocument/formatting");
         check_macro!("textDocument/rename");
+        check_macro!("textDocument/documentColor");
+        check_macro!("textDocument/colorPresentation");
     }
 }

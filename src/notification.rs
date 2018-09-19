@@ -237,15 +237,16 @@ impl Notification for PublishDiagnostics {
     const METHOD: &'static str = "textDocument/publishDiagnostics";
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
 
     fn fake_call<N>()
-        where N: Notification,
-              N::Params: serde::Serialize,
-    { }
+    where
+        N: Notification,
+        N::Params: serde::Serialize,
+    {
+    }
 
     macro_rules! check_macro {
         ($name:tt) => {
@@ -253,7 +254,7 @@ mod test {
             assert_eq!(<lsp_notification!($name) as Notification>::METHOD, $name);
             // test whether type checking passes for each component
             fake_call::<lsp_notification!($name)>();
-        }
+        };
     }
 
     #[test]
