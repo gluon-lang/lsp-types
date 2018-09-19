@@ -91,7 +91,7 @@ macro_rules! lsp_request {
         $crate::request::DocumentColor
     };
     ("textDocument/colorPresentation") => {
-        $crate::request::ColorPresentation
+        $crate::request::ColorPresentationRequest
     };
 }
 
@@ -461,9 +461,9 @@ impl Request for DocumentColor {
 }
 
 #[derive(Debug)]
-pub enum ColorPresentation {}
+pub enum ColorPresentationRequest {}
 
-impl Request for ColorPresentation {
+impl Request for ColorPresentationRequest {
     type Params = ColorPresentationParams;
     type Result = Option<Vec<ColorPresentation>>;
     const METHOD: &'static str = "textDocument/colorPresentation";
