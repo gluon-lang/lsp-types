@@ -474,9 +474,10 @@ mod test {
     use super::*;
 
     fn fake_call<R>()
-        where R: Request,
-              R::Params: serde::Serialize,
-              R::Result: serde::de::DeserializeOwned
+    where
+        R: Request,
+        R::Params: serde::Serialize,
+        R::Result: serde::de::DeserializeOwned,
     {
     }
 
@@ -486,7 +487,7 @@ mod test {
             assert_eq!(<lsp_request!($name) as Request>::METHOD, $name);
             // test whether type checking passes for each component
             fake_call::<lsp_request!($name)>();
-        }
+        };
     }
 
     #[test]
