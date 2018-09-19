@@ -456,7 +456,7 @@ pub enum DocumentColor {}
 
 impl Request for DocumentColor {
     type Params = DocumentColorParams;
-    type Result = Option<Vec<ColorInformation>>;
+    type Result = Vec<ColorInformation>;
     const METHOD: &'static str = "textDocument/documentColor";
 }
 
@@ -465,7 +465,7 @@ pub enum ColorPresentationRequest {}
 
 impl Request for ColorPresentationRequest {
     type Params = ColorPresentationParams;
-    type Result = Option<Vec<ColorPresentation>>;
+    type Result = Vec<ColorPresentation>;
     const METHOD: &'static str = "textDocument/colorPresentation";
 }
 
