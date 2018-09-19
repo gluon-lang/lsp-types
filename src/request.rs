@@ -350,7 +350,7 @@ pub enum CodeActionRequest {}
 
 impl Request for CodeActionRequest {
     type Params = CodeActionParams;
-    type Result = Option<Vec<Command>>;
+    type Result = Option<CodeActionResponse>;
     const METHOD: &'static str = "textDocument/codeAction";
 }
 

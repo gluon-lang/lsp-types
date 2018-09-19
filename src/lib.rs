@@ -954,7 +954,7 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/codeAction`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action: Option<GenericCapability>,
+    pub code_action: Option<CodeActionCapability>,
 
     /**
      * Capabilities specific to the `textDocument/codeLens`
@@ -1197,6 +1197,45 @@ pub enum ColorProviderCapability {
     Options(StaticTextDocumentColorProviderOptions),
 }
 
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum CodeActionProviderCapability {
+    Simple(bool),
+    Options(CodeActionOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionCapability {
+    ///
+    /// This capability supports dynamic registration.
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// The client support code action literals as a valid
+    /// response of the `textDocument/codeAction` request.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code_action_literal_support: Option<CodeActionLiteralSupport>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionLiteralSupport {
+    /// The code action kind is support with the following value set.
+    pub code_action_kind: CodeActionKindLiteralSupport,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionKindLiteralSupport {
+    /// The code action kind values the client supports. When this
+    /// property exists the client also guarantees that it will
+    /// handle values outside its set gracefully and falls back
+    /// to a default value when unknown.
+    pub value_set: Vec<CodeActionKind>,
+}
+
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerCapabilities {
@@ -1246,7 +1285,7 @@ pub struct ServerCapabilities {
 
     /// The server provides code actions.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action_provider: Option<bool>,
+    pub code_action_provider: Option<CodeActionProviderCapability>,
 
     /// The server provides code lens.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2337,6 +2376,8 @@ pub struct ApplyWorkspaceEditResponse {
     pub applied: bool,
 }
 
+pub type CodeActionKind = String;
+
 /// Params for the CodeActionRequest
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -2351,12 +2392,63 @@ pub struct CodeActionParams {
     pub context: CodeActionContext,
 }
 
+/// response for CodeActionRequest
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum CodeActionResponse {
+    Commands(Vec<Command>),
+    Actions(Vec<CodeAction>),
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct CodeAction {
+    /// A short, human-readable, title for this code action.
+    pub title: String,
+
+    /// The kind of the code action.
+    /// Used to filter code actions.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<CodeActionKind>,
+
+    /// The diagnostics that this code action resolves.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostics: Option<Vec<Diagnostic>>,
+
+    /// The workspace edit this code action performs.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edit: Option<WorkspaceEdit>,
+
+    /// A command this code action executes. If a code action
+    /// provides an edit and a command, first the edit is
+    /// executed and then the command.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub command: Option<Command>,
+}
+
 /// Contains additional diagnostic information about the context in which
 /// a code action is run.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CodeActionContext {
     /// An array of diagnostics.
     pub diagnostics: Vec<Diagnostic>,
+
+    /// Requested kind of actions to return.
+    ///
+    /// Actions not of this kind are filtered out by the client before being shown. So servers
+    /// can omit computing them.
+    pub only: Option<Vec<CodeActionKind>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionOptions {
+    /**
+     * CodeActionKinds that this server may return.
+     *
+     * The list of kinds may be generic, such as `CodeActionKind.Refactor`, or the server
+     * may list out every specific kind they provide.
+     */
+    pub code_action_kinds: Option<Vec<CodeActionKind>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
