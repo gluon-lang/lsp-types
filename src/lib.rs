@@ -641,10 +641,6 @@ pub struct GenericCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
-
-    /// The client support hierarchical document symbols.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub hierarchical_document_symbol_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -944,7 +940,7 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/documentSymbol`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_symbol: Option<GenericCapability>,
+    pub document_symbol: Option<DocumentSymbolCapability>,
     /**
      * Capabilities specific to the `textDocument/formatting`
      */
@@ -2240,6 +2236,22 @@ impl serde::Serialize for DocumentHighlightKind {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentSymbolCapability {
+    /// This capability supports dynamic registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Specific capabilities for the `SymbolKind`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub symbol_kind: Option<SymbolKindCapability>,
+
+    /// The client support hierarchical document symbols.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hierarchical_document_symbol_support: Option<bool>,
+}
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum DocumentSymbolResponse {
@@ -2294,6 +2306,10 @@ pub struct SymbolInformation {
 
     /// The kind of this symbol.
     pub kind: SymbolKind,
+
+    /// Indicates if this symbol is deprecated.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<bool>,
 
     /// The location of this symbol.
     pub location: Location,
