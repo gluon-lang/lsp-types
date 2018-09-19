@@ -308,6 +308,127 @@ pub struct TextDocumentEdit {
     pub edits: Vec<TextEdit>,
 }
 
+/**
+ * Options to create a file.
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateFileOptions {
+    /**
+     * Overwrite existing file. Overwrite wins over `ignoreIfExists`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub overwrite: Option<bool>,
+    /**
+     * Ignore if exists.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_exists: Option<bool>,
+}
+
+/**
+ * Create file operation
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateFile {
+    /**
+     * A create
+     */
+    pub kind: ResourceOperationKind, // must be `ResourceOperationKind.Create`;
+    /**
+     * The resource to create.
+     */
+    pub uri: String,
+    /**
+     * Additional options
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<CreateFileOptions>,
+}
+
+/**
+ * Rename file options
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameFileOptions {
+    /**
+     * Overwrite target if existing. Overwrite wins over `ignoreIfExists`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub overwrite: Option<bool>,
+    /**
+     * Ignores if target exists.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_exists: Option<bool>,
+}
+
+/**
+ * Rename file operation
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameFile {
+    /**
+     * A rename
+     */
+    pub kind: ResourceOperationKind, // must be `ResourceOperationKind.Rename`;
+    /**
+     * The old (existing) location.
+     */
+    pub old_uri: String,
+    /**
+     * The new location.
+     */
+    pub new_uri: String,
+    /**
+     * Rename options.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<RenameFileOptions>,
+}
+
+/**
+ * Delete file options
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteFileOptions {
+    /**
+     * Delete the content recursively if a folder is denoted.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recursive: Option<bool>,
+    /**
+     * Ignore the operation if the file doesn't exist.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_not_exists: Option<bool>,
+}
+
+/**
+ * Delete file operation
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteFile {
+    /**
+     * A delete
+     */
+    pub kind: ResourceOperationKind, // must be `ResourceOperationKind.Delete`
+    /**
+     * The file to delete.
+     */
+    pub uri: String,
+    /**
+     * Delete options.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<DeleteFileOptions>,
+}
+
 /// A workspace edit represents changes to many resources managed in the workspace.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -319,13 +440,35 @@ pub struct WorkspaceEdit {
     pub changes: Option<HashMap<Url, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
 
     /**
-     * An array of `TextDocumentEdit`s to express changes to n different text documents
-     * where each text document edit addresses a specific version of a text document.
+     * Depending on the client capability `workspace.workspaceEdit.resourceOperations` document changes
+     * are either an array of `TextDocumentEdit`s to express changes to n different text documents
+     * where each text document edit addresses a specific version of a text document. Or it can contain
+     * above `TextDocumentEdit`s mixed with create, rename and delete file / folder operations.
+     *
      * Whether a client supports versioned document edits is expressed via
-     * `WorkspaceClientCapabilities.workspaceEdit.documentChanges`.
+     * `workspace.workspaceEdit.documentChanges` client capability.
+     *
+     * If a client neither supports `documentChanges` nor `workspace.workspaceEdit.resourceOperations` then
+     * only plain `TextEdit`s using the `changes` property are supported.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<Vec<TextDocumentEdit>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum DocumentChanges {
+    Edits(Vec<TextDocumentEdit>),
+    Operations(Vec<DocumentChangeOperation>),
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum DocumentChangeOperation {
+    TextDocumentEdit(TextDocumentEdit),
+    CreateFile(CreateFile),
+    RenameFile(RenameFile),
+    DeleteFile(DeleteFile),
 }
 
 mod url_map {
@@ -591,6 +734,13 @@ pub struct InitializeParams {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trace: Option<TraceOption>,
+
+    /// The workspace folders configured in the client when the server starts.
+    /// This property is only available if the client supports workspace folders.
+    /// It can be `null` if the client supports workspace folders but none are
+    /// configured.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -651,6 +801,97 @@ pub struct WorkspaceEditCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<bool>,
+
+    /**
+     * The resource operations the client supports. Clients should at least
+     * support 'create', 'rename' and 'delete' files and folders.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resource_operations: Option<Vec<ResourceOperationKind>>,
+
+    /**
+     * The failure handling strategy of a client if applying the workspace edit
+     * failes.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failure_handling: Option<FailureHandlingKind>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceCapability {
+    /// The server supports workspace folder.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<WorkspaceFolderCapability>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceFolderCapability {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change_notifications: Option<WorkspaceFolderCapabilityChangeNotifications>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum WorkspaceFolderCapabilityChangeNotifications {
+    Bool(bool),
+    Id(String),
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceFolder {
+    /// The associated URI for this workspace folder.
+    pub uri: String,
+    /// The name of the workspace folder. Defaults to the uri's basename.
+    pub name: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidChangeWorkspaceFoldersParams {
+    /**
+     * The actual workspace folder change event.
+     */
+    pub event: WorkspaceFoldersChangeEvent,
+}
+
+/**
+ * The workspace folder change event.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceFoldersChangeEvent {
+    /**
+     * The array of added workspace folders
+     */
+    pub added: Vec<WorkspaceFolder>,
+
+    /**
+     * The array of the removed workspace folders
+     */
+    pub removed: Vec<WorkspaceFolder>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
+#[serde(untagged, rename_all = "lowercase")]
+pub enum ResourceOperationKind {
+    Create,
+    Rename,
+    Delete,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum FailureHandlingKind {
+    Abort,
+    Transactional,
+    TextOnlyTransactional,
+    Undo,
 }
 
 /**
@@ -727,6 +968,18 @@ pub struct WorkspaceClientCapabilities {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execute_command: Option<GenericCapability>,
+
+    /**
+     * The client has support for workspace folders.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<bool>,
+
+    /**
+     * The client supports `workspace/configuration` requests.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub configuration: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -1339,6 +1592,10 @@ pub struct ServerCapabilities {
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execute_command_provider: Option<ExecuteCommandOptions>,
+
+    /// Workspace specific server capabilities
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace: Option<WorkspaceCapability>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1845,6 +2102,7 @@ pub struct CompletionContext {
 pub enum CompletionTriggerKind {
     Invoked = 1,
     TriggerCharacter = 2,
+    TriggerForIncompleteCompletions = 3,
 }
 
 impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {

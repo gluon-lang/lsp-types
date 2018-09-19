@@ -99,6 +99,9 @@ macro_rules! lsp_request {
     ("textDocument/prepareRename") => {
         $crate::request::PrepareRenameRequest
     };
+    ("workspace/workspaceFolders") => {
+        $crate::request::WorkspaceFoldersRequest
+    };
 }
 
 /**
@@ -493,6 +496,15 @@ impl Request for PrepareRenameRequest {
     const METHOD: &'static str = "textDocument/prepareRename";
 }
 
+#[derive(Debug)]
+pub enum WorkspaceFoldersRequest {}
+
+impl Request for WorkspaceFoldersRequest {
+    type Params = ();
+    type Result = Option<Vec<WorkspaceFolder>>;
+    const METHOD: &'static str = "workspace/workspaceFolders";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -545,5 +557,6 @@ mod test {
         check_macro!("textDocument/colorPresentation");
         check_macro!("textDocument/foldingRange");
         check_macro!("textDocument/prepareRename");
+        check_macro!("workspace/workspaceFolders");
     }
 }
