@@ -993,7 +993,7 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/rename`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename: Option<GenericCapability>,
+    pub rename: Option<RenameCapability>,
 
     /**
      * Capabilities specific to `textDocument/publishDiagnostics`.
@@ -1326,7 +1326,7 @@ pub struct ServerCapabilities {
 
     /// The server provides rename support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename_provider: Option<bool>,
+    pub rename_provider: Option<RenameProviderCapability>,
 
     /// The server provides color provider support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2656,6 +2656,40 @@ pub struct RenameParams {
     /// request must return a [ResponseError](#ResponseError) with an
     /// appropriate message set.
     pub new_name: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum RenameProviderCapability {
+    Simple(bool),
+    Options(RenameOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameOptions {
+    /// Renames should be checked and tested before being executed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prepare_provider: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameCapability {
+    /// Whether rename supports dynamic registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Client supports testing for validity of rename operations before execution.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prepare_support: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum PrepareRenameResponse {
+    Range(Range),
+    RangeWithPlaceholder { range: Range, placeholder: String },
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]

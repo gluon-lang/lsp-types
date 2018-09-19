@@ -96,6 +96,9 @@ macro_rules! lsp_request {
     ("textDocument/foldingRange") => {
         $crate::request::FoldingRangeRequest
     };
+    ("textDocument/prepareRename") => {
+        $crate::request::PrepareRenameRequest
+    };
 }
 
 /**
@@ -481,6 +484,15 @@ impl Request for FoldingRangeRequest {
     const METHOD: &'static str = "textDocument/foldingRange";
 }
 
+#[derive(Debug)]
+pub enum PrepareRenameRequest {}
+
+impl Request for PrepareRenameRequest {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<PrepareRenameResponse>;
+    const METHOD: &'static str = "textDocument/prepareRename";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -532,5 +544,6 @@ mod test {
         check_macro!("textDocument/documentColor");
         check_macro!("textDocument/colorPresentation");
         check_macro!("textDocument/foldingRange");
+        check_macro!("textDocument/prepareRename");
     }
 }
