@@ -1000,6 +1000,12 @@ pub struct TextDocumentClientCapabilities {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub publish_diagnostics: Option<PublishDiagnosticsCapability>,
+
+    /**
+     * Capabilities specific to `textDocument/foldingRange` requests.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folding_range: Option<FoldingRangeCapability>,
 }
 
 /**
@@ -1325,6 +1331,10 @@ pub struct ServerCapabilities {
     /// The server provides color provider support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_provider: Option<ColorProviderCapability>,
+
+    /// The server provides folding provider support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folding_range_provider: Option<FoldingRangeProviderCapability>,
 
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2730,6 +2740,94 @@ pub struct ColorPresentation {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub additional_text_edits: Option<Vec<TextEdit>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum FoldingRangeProviderCapability {
+    Simple(bool),
+    FoldingProvider(FoldingProviderOptions),
+    Options(StaticTextDocumentColorProviderOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+pub struct FoldingProviderOptions {}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRangeCapability {
+    /**
+     * Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
+     * the client supports the new `(FoldingRangeProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
+     * return value for the corresponding server capability as well.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /**
+     * The maximum number of folding ranges that the client prefers to receive per document. The value serves as a
+     * hint, servers are free to follow the limit.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range_limit: Option<u64>,
+    /**
+     * If set, the client signals that it only supports folding complete lines. If set, client will
+     * ignore specified `startCharacter` and `endCharacter` properties in a FoldingRange.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub line_folding_only: Option<bool>,
+}
+
+/**
+ * Represents a folding range.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRange {
+    /**
+     * The zero-based line number from where the folded range starts.
+     */
+    pub start_line: u64,
+
+    /**
+     * The zero-based character offset from where the folded range starts. If not defined, defaults to the length of the start line.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_character: Option<u64>,
+
+    /**
+     * The zero-based line number where the folded range ends.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_line: Option<u64>,
+
+    /**
+     * The zero-based character offset before the folded range ends. If not defined, defaults to the length of the end line.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_character: Option<u64>,
+
+    /**
+     * Describes the kind of the folding range such as `comment' or 'region'. The kind
+     * is used to categorize folding ranges and used by commands like 'Fold all comments'. See
+     * [FoldingRangeKind](#FoldingRangeKind) for an enumeration of standardized kinds.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<FoldingRangeKind>,
+}
+
+/**
+ * Enum of known range kinds
+ */
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum FoldingRangeKind {
+    /// Folding range for a comment
+    Comment,
+    /// Folding range for a imports or includes
+    Imports,
+    /// Folding range for a region (e.g. `#region`)
+    Region,
 }
 
 /**
