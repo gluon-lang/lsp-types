@@ -452,7 +452,7 @@ pub struct WorkspaceEdit {
      * only plain `TextEdit`s using the `changes` property are supported.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_changes: Option<Vec<TextDocumentEdit>>,
+    pub document_changes: Option<Vec<DocumentChanges>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
