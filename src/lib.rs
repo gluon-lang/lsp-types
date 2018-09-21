@@ -3092,8 +3092,7 @@ pub struct FoldingRange {
     /**
      * The zero-based line number where the folded range ends.
      */
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub end_line: Option<u64>,
+    pub end_line: u64,
 
     /**
      * The zero-based character offset before the folded range ends. If not defined, defaults to the length of the end line.
