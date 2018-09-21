@@ -482,7 +482,7 @@ impl Request for ColorPresentationRequest {
 pub enum FoldingRangeRequest {}
 
 impl Request for FoldingRangeRequest {
-    type Params = TextDocumentIdentifier;
+    type Params = FoldingRangeParams;
     type Result = Option<Vec<FoldingRange>>;
     const METHOD: &'static str = "textDocument/foldingRange";
 }

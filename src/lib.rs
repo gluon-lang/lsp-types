@@ -3037,6 +3037,13 @@ pub struct ColorPresentation {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRangeParams {
+    /// The text document.
+    pub text_document: TextDocumentIdentifier,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum FoldingRangeProviderCapability {
     Simple(bool),
