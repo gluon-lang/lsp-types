@@ -887,7 +887,7 @@ pub struct WorkspaceFoldersChangeEvent {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
-#[serde(untagged, rename_all = "lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum ResourceOperationKind {
     Create,
     Rename,
@@ -3356,5 +3356,12 @@ mod tests {
             &(WatchKind::Create | WatchKind::Change | WatchKind::Delete),
             "7",
         );
+    }
+
+    #[test]
+    fn test_resource_operation_kind() {
+        test_serialization(
+            &vec![ResourceOperationKind::Create, ResourceOperationKind::Rename, ResourceOperationKind::Delete],
+            r#"["create","rename","delete"]"#);
     }
 }
