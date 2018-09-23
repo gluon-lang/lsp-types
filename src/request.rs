@@ -93,6 +93,15 @@ macro_rules! lsp_request {
     ("textDocument/colorPresentation") => {
         $crate::request::ColorPresentationRequest
     };
+    ("textDocument/foldingRange") => {
+        $crate::request::FoldingRangeRequest
+    };
+    ("textDocument/prepareRename") => {
+        $crate::request::PrepareRenameRequest
+    };
+    ("workspace/workspaceFolders") => {
+        $crate::request::WorkspaceFoldersRequest
+    };
 }
 
 /**
@@ -350,7 +359,7 @@ pub enum CodeActionRequest {}
 
 impl Request for CodeActionRequest {
     type Params = CodeActionParams;
-    type Result = Option<Vec<Command>>;
+    type Result = Option<CodeActionResponse>;
     const METHOD: &'static str = "textDocument/codeAction";
 }
 
@@ -469,6 +478,33 @@ impl Request for ColorPresentationRequest {
     const METHOD: &'static str = "textDocument/colorPresentation";
 }
 
+#[derive(Debug)]
+pub enum FoldingRangeRequest {}
+
+impl Request for FoldingRangeRequest {
+    type Params = FoldingRangeParams;
+    type Result = Option<Vec<FoldingRange>>;
+    const METHOD: &'static str = "textDocument/foldingRange";
+}
+
+#[derive(Debug)]
+pub enum PrepareRenameRequest {}
+
+impl Request for PrepareRenameRequest {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<PrepareRenameResponse>;
+    const METHOD: &'static str = "textDocument/prepareRename";
+}
+
+#[derive(Debug)]
+pub enum WorkspaceFoldersRequest {}
+
+impl Request for WorkspaceFoldersRequest {
+    type Params = ();
+    type Result = Option<Vec<WorkspaceFolder>>;
+    const METHOD: &'static str = "workspace/workspaceFolders";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -519,5 +555,8 @@ mod test {
         check_macro!("textDocument/rename");
         check_macro!("textDocument/documentColor");
         check_macro!("textDocument/colorPresentation");
+        check_macro!("textDocument/foldingRange");
+        check_macro!("textDocument/prepareRename");
+        check_macro!("workspace/workspaceFolders");
     }
 }

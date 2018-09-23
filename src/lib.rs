@@ -308,6 +308,115 @@ pub struct TextDocumentEdit {
     pub edits: Vec<TextEdit>,
 }
 
+/**
+ * Options to create a file.
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateFileOptions {
+    /**
+     * Overwrite existing file. Overwrite wins over `ignoreIfExists`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub overwrite: Option<bool>,
+    /**
+     * Ignore if exists.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_exists: Option<bool>,
+}
+
+/**
+ * Create file operation
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateFile {
+    /**
+     * The resource to create.
+     */
+    pub uri: String,
+    /**
+     * Additional options
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<CreateFileOptions>,
+}
+
+/**
+ * Rename file options
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameFileOptions {
+    /**
+     * Overwrite target if existing. Overwrite wins over `ignoreIfExists`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub overwrite: Option<bool>,
+    /**
+     * Ignores if target exists.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_exists: Option<bool>,
+}
+
+/**
+ * Rename file operation
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameFile {
+    /**
+     * The old (existing) location.
+     */
+    pub old_uri: String,
+    /**
+     * The new location.
+     */
+    pub new_uri: String,
+    /**
+     * Rename options.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<RenameFileOptions>,
+}
+
+/**
+ * Delete file options
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteFileOptions {
+    /**
+     * Delete the content recursively if a folder is denoted.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recursive: Option<bool>,
+    /**
+     * Ignore the operation if the file doesn't exist.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_if_not_exists: Option<bool>,
+}
+
+/**
+ * Delete file operation
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteFile {
+    /**
+     * The file to delete.
+     */
+    pub uri: String,
+    /**
+     * Delete options.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<DeleteFileOptions>,
+}
+
 /// A workspace edit represents changes to many resources managed in the workspace.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -319,13 +428,56 @@ pub struct WorkspaceEdit {
     pub changes: Option<HashMap<Url, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
 
     /**
-     * An array of `TextDocumentEdit`s to express changes to n different text documents
-     * where each text document edit addresses a specific version of a text document.
+     * Depending on the client capability `workspace.workspaceEdit.resourceOperations` document changes
+     * are either an array of `TextDocumentEdit`s to express changes to n different text documents
+     * where each text document edit addresses a specific version of a text document. Or it can contain
+     * above `TextDocumentEdit`s mixed with create, rename and delete file / folder operations.
+     *
      * Whether a client supports versioned document edits is expressed via
-     * `WorkspaceClientCapabilities.workspaceEdit.documentChanges`.
+     * `workspace.workspaceEdit.documentChanges` client capability.
+     *
+     * If a client neither supports `documentChanges` nor `workspace.workspaceEdit.resourceOperations` then
+     * only plain `TextEdit`s using the `changes` property are supported.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_changes: Option<Vec<TextDocumentEdit>>,
+    pub document_changes: Option<DocumentChanges>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum DocumentChanges {
+    Edits(Vec<TextDocumentEdit>),
+    Operations(Vec<DocumentChangeOperation>),
+}
+
+// TODO: Once https://github.com/serde-rs/serde/issues/912 is solved
+// we can remove ResourceOp and switch to the following implementation
+// of DocumentChangeOperation:
+//
+// #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+// #[serde(tag = "kind", rename_all="lowercase" )]
+// pub enum DocumentChangeOperation {
+//     Create(CreateFile),
+//     Rename(RenameFile),
+//     Delete(DeleteFile),
+//
+//     #[serde(other)]
+//     Edit(TextDocumentEdit),
+// }
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged, rename_all = "lowercase")]
+pub enum DocumentChangeOperation {
+    Op(ResourceOp),
+    Edit(TextDocumentEdit),
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all = "lowercase")]
+pub enum ResourceOp {
+    Create(CreateFile),
+    Rename(RenameFile),
+    Delete(DeleteFile),
 }
 
 mod url_map {
@@ -591,6 +743,13 @@ pub struct InitializeParams {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trace: Option<TraceOption>,
+
+    /// The workspace folders configured in the client when the server starts.
+    /// This property is only available if the client supports workspace folders.
+    /// It can be `null` if the client supports workspace folders but none are
+    /// configured.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -641,10 +800,6 @@ pub struct GenericCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
-
-    /// The client support hierarchical document symbols.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub hierarchical_document_symbol_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -655,6 +810,97 @@ pub struct WorkspaceEditCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<bool>,
+
+    /**
+     * The resource operations the client supports. Clients should at least
+     * support 'create', 'rename' and 'delete' files and folders.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resource_operations: Option<Vec<ResourceOperationKind>>,
+
+    /**
+     * The failure handling strategy of a client if applying the workspace edit
+     * failes.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failure_handling: Option<FailureHandlingKind>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceCapability {
+    /// The server supports workspace folder.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<WorkspaceFolderCapability>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceFolderCapability {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change_notifications: Option<WorkspaceFolderCapabilityChangeNotifications>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum WorkspaceFolderCapabilityChangeNotifications {
+    Bool(bool),
+    Id(String),
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceFolder {
+    /// The associated URI for this workspace folder.
+    pub uri: String,
+    /// The name of the workspace folder. Defaults to the uri's basename.
+    pub name: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidChangeWorkspaceFoldersParams {
+    /**
+     * The actual workspace folder change event.
+     */
+    pub event: WorkspaceFoldersChangeEvent,
+}
+
+/**
+ * The workspace folder change event.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceFoldersChangeEvent {
+    /**
+     * The array of added workspace folders
+     */
+    pub added: Vec<WorkspaceFolder>,
+
+    /**
+     * The array of the removed workspace folders
+     */
+    pub removed: Vec<WorkspaceFolder>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum ResourceOperationKind {
+    Create,
+    Rename,
+    Delete,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum FailureHandlingKind {
+    Abort,
+    Transactional,
+    TextOnlyTransactional,
+    Undo,
 }
 
 /**
@@ -731,6 +977,18 @@ pub struct WorkspaceClientCapabilities {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execute_command: Option<GenericCapability>,
+
+    /**
+     * The client has support for workspace folders.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<bool>,
+
+    /**
+     * The client supports `workspace/configuration` requests.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub configuration: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -777,11 +1035,30 @@ pub struct CompletionItemCapability {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub snippet_support: Option<bool>,
 
+    /**
+     * Client supports commit characters on a completion item.
+     */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub commit_characters_support: Option<bool>,
 
+    /**
+     * Client supports the follow content formats for the documentation
+     * property. The order describes the preferred format of the client.
+     */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation_format: Option<Vec<MarkupKind>>,
+
+    /**
+     * Client supports the deprecated property on a completion item.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated_support: Option<bool>,
+
+    /**
+     * Client supports the preselect property on a completion item.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preselect_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -925,7 +1202,7 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/documentSymbol`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_symbol: Option<GenericCapability>,
+    pub document_symbol: Option<DocumentSymbolCapability>,
     /**
      * Capabilities specific to the `textDocument/formatting`
      */
@@ -954,7 +1231,7 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/codeAction`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action: Option<GenericCapability>,
+    pub code_action: Option<CodeActionCapability>,
 
     /**
      * Capabilities specific to the `textDocument/codeLens`
@@ -978,13 +1255,19 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/rename`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename: Option<GenericCapability>,
+    pub rename: Option<RenameCapability>,
 
     /**
      * Capabilities specific to `textDocument/publishDiagnostics`.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub publish_diagnostics: Option<PublishDiagnosticsCapability>,
+
+    /**
+     * Capabilities specific to `textDocument/foldingRange` requests.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folding_range: Option<FoldingRangeCapability>,
 }
 
 /**
@@ -1197,6 +1480,45 @@ pub enum ColorProviderCapability {
     Options(StaticTextDocumentColorProviderOptions),
 }
 
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum CodeActionProviderCapability {
+    Simple(bool),
+    Options(CodeActionOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionCapability {
+    ///
+    /// This capability supports dynamic registration.
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// The client support code action literals as a valid
+    /// response of the `textDocument/codeAction` request.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code_action_literal_support: Option<CodeActionLiteralSupport>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionLiteralSupport {
+    /// The code action kind is support with the following value set.
+    pub code_action_kind: CodeActionKindLiteralSupport,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionKindLiteralSupport {
+    /// The code action kind values the client supports. When this
+    /// property exists the client also guarantees that it will
+    /// handle values outside its set gracefully and falls back
+    /// to a default value when unknown.
+    pub value_set: Vec<String>,
+}
+
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerCapabilities {
@@ -1246,7 +1568,7 @@ pub struct ServerCapabilities {
 
     /// The server provides code actions.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action_provider: Option<bool>,
+    pub code_action_provider: Option<CodeActionProviderCapability>,
 
     /// The server provides code lens.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1266,15 +1588,23 @@ pub struct ServerCapabilities {
 
     /// The server provides rename support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename_provider: Option<bool>,
+    pub rename_provider: Option<RenameProviderCapability>,
 
     /// The server provides color provider support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_provider: Option<ColorProviderCapability>,
 
+    /// The server provides folding provider support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folding_range_provider: Option<FoldingRangeProviderCapability>,
+
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execute_command_provider: Option<ExecuteCommandOptions>,
+
+    /// Workspace specific server capabilities
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace: Option<WorkspaceCapability>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -1781,6 +2111,7 @@ pub struct CompletionContext {
 pub enum CompletionTriggerKind {
     Invoked = 1,
     TriggerCharacter = 2,
+    TriggerForIncompleteCompletions = 3,
 }
 
 impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
@@ -1848,6 +2179,14 @@ pub struct CompletionItem {
     /// A human-readable string that represents a doc-comment.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<Documentation>,
+
+    /// Indicates if this item is deprecated.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<bool>,
+
+    /// Select this item when showing.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preselect: Option<bool>,
 
     /// A string that shoud be used when comparing this item
     /// with other items. When `falsy` the label is used.
@@ -2174,6 +2513,22 @@ impl serde::Serialize for DocumentHighlightKind {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentSymbolCapability {
+    /// This capability supports dynamic registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Specific capabilities for the `SymbolKind`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub symbol_kind: Option<SymbolKindCapability>,
+
+    /// The client support hierarchical document symbols.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hierarchical_document_symbol_support: Option<bool>,
+}
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum DocumentSymbolResponse {
@@ -2228,6 +2583,10 @@ pub struct SymbolInformation {
 
     /// The kind of this symbol.
     pub kind: SymbolKind,
+
+    /// Indicates if this symbol is deprecated.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<bool>,
 
     /// The location of this symbol.
     pub location: Location,
@@ -2351,12 +2710,132 @@ pub struct CodeActionParams {
     pub context: CodeActionContext,
 }
 
+/// response for CodeActionRequest
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum CodeActionResponse {
+    Commands(Vec<Command>),
+    Actions(Vec<CodeAction>),
+}
+
+/**
+ * A set of predefined code action kinds
+ */
+pub mod code_action_kind {
+
+    /**
+     * Base kind for quickfix actions: 'quickfix'
+     */
+    pub const QUICKFIX: &'static str = "quickfix";
+
+    /**
+     * Base kind for refactoring actions: 'refactor'
+     */
+    pub const REFACTOR: &'static str = "refactor";
+
+    /**
+     * Base kind for refactoring extraction actions: 'refactor.extract'
+     *
+     * Example extract actions:
+     *
+     * - Extract method
+     * - Extract function
+     * - Extract variable
+     * - Extract interface from class
+     * - ...
+     */
+    pub const REFACTOR_EXTRACT: &'static str = "refactor.extract";
+
+    /**
+     * Base kind for refactoring inline actions: 'refactor.inline'
+     *
+     * Example inline actions:
+     *
+     * - Inline function
+     * - Inline variable
+     * - Inline constant
+     * - ...
+     */
+    pub const REFACTOR_INLINE: &'static str = "refactor.inline";
+
+    /**
+     * Base kind for refactoring rewrite actions: 'refactor.rewrite'
+     *
+     * Example rewrite actions:
+     *
+     * - Convert JavaScript function to class
+     * - Add or remove parameter
+     * - Encapsulate field
+     * - Make method static
+     * - Move method to base class
+     * - ...
+     */
+    pub const REFACTOR_REWRITE: &'static str = "refactor.rewrite";
+
+    /**
+     * Base kind for source actions: `source`
+     *
+     * Source code actions apply to the entire file.
+     */
+    pub const SOURCE: &'static str = "source";
+
+    /**
+     * Base kind for an organize imports source action: `source.organizeImports`
+     */
+    pub const SOURCE_ORGANIZE_IMPORTS: &'static str = "source.organizeImports";
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct CodeAction {
+    /// A short, human-readable, title for this code action.
+    pub title: String,
+
+    /// The kind of the code action.
+    /// Used to filter code actions.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
+
+    /// The diagnostics that this code action resolves.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostics: Option<Vec<Diagnostic>>,
+
+    /// The workspace edit this code action performs.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edit: Option<WorkspaceEdit>,
+
+    /// A command this code action executes. If a code action
+    /// provides an edit and a command, first the edit is
+    /// executed and then the command.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub command: Option<Command>,
+}
+
 /// Contains additional diagnostic information about the context in which
 /// a code action is run.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct CodeActionContext {
     /// An array of diagnostics.
     pub diagnostics: Vec<Diagnostic>,
+
+    /// Requested kind of actions to return.
+    ///
+    /// Actions not of this kind are filtered out by the client before being shown. So servers
+    /// can omit computing them.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub only: Option<Vec<String>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionOptions {
+    /**
+     * CodeActionKinds that this server may return.
+     *
+     * The list of kinds may be generic, such as `CodeActionKind.Refactor`, or the server
+     * may list out every specific kind they provide.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code_action_kinds: Option<Vec<String>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2512,6 +2991,40 @@ pub struct RenameParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum RenameProviderCapability {
+    Simple(bool),
+    Options(RenameOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameOptions {
+    /// Renames should be checked and tested before being executed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prepare_provider: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RenameCapability {
+    /// Whether rename supports dynamic registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Client supports testing for validity of rename operations before execution.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prepare_support: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum PrepareRenameResponse {
+    Range(Range),
+    RangeWithPlaceholder { range: Range, placeholder: String },
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentColorParams {
     /// The text document
@@ -2595,6 +3108,100 @@ pub struct ColorPresentation {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub additional_text_edits: Option<Vec<TextEdit>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRangeParams {
+    /// The text document.
+    pub text_document: TextDocumentIdentifier,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum FoldingRangeProviderCapability {
+    Simple(bool),
+    FoldingProvider(FoldingProviderOptions),
+    Options(StaticTextDocumentColorProviderOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+pub struct FoldingProviderOptions {}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRangeCapability {
+    /**
+     * Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
+     * the client supports the new `(FoldingRangeProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
+     * return value for the corresponding server capability as well.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /**
+     * The maximum number of folding ranges that the client prefers to receive per document. The value serves as a
+     * hint, servers are free to follow the limit.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range_limit: Option<u64>,
+    /**
+     * If set, the client signals that it only supports folding complete lines. If set, client will
+     * ignore specified `startCharacter` and `endCharacter` properties in a FoldingRange.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub line_folding_only: Option<bool>,
+}
+
+/**
+ * Represents a folding range.
+ */
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRange {
+    /**
+     * The zero-based line number from where the folded range starts.
+     */
+    pub start_line: u64,
+
+    /**
+     * The zero-based character offset from where the folded range starts. If not defined, defaults to the length of the start line.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_character: Option<u64>,
+
+    /**
+     * The zero-based line number where the folded range ends.
+     */
+    pub end_line: u64,
+
+    /**
+     * The zero-based character offset before the folded range ends. If not defined, defaults to the length of the end line.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_character: Option<u64>,
+
+    /**
+     * Describes the kind of the folding range such as `comment' or 'region'. The kind
+     * is used to categorize folding ranges and used by commands like 'Fold all comments'. See
+     * [FoldingRangeKind](#FoldingRangeKind) for an enumeration of standardized kinds.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<FoldingRangeKind>,
+}
+
+/**
+ * Enum of known range kinds
+ */
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum FoldingRangeKind {
+    /// Folding range for a comment
+    Comment,
+    /// Folding range for a imports or includes
+    Imports,
+    /// Folding range for a region (e.g. `#region`)
+    Region,
 }
 
 /**
@@ -2749,5 +3356,12 @@ mod tests {
             &(WatchKind::Create | WatchKind::Change | WatchKind::Delete),
             "7",
         );
+    }
+
+    #[test]
+    fn test_resource_operation_kind() {
+        test_serialization(
+            &vec![ResourceOperationKind::Create, ResourceOperationKind::Rename, ResourceOperationKind::Delete],
+            r#"["create","rename","delete"]"#);
     }
 }

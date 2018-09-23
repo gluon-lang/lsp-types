@@ -56,6 +56,9 @@ macro_rules! lsp_notification {
     ("workspace/didChangeWatchedFiles") => {
         $crate::notification::DidChangeWatchedFiles
     };
+    ("workspace/didChangeWorkspaceFolders") => {
+        $crate::notification::DidChangeWorkspaceFolders
+    };
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -227,6 +230,18 @@ impl Notification for DidChangeWatchedFiles {
 }
 
 /**
+ * The workspace/didChangeWorkspaceFolders notification is sent from the client to the server to inform the server
+ * about workspace folder configuration changes
+ */
+#[derive(Debug)]
+pub enum DidChangeWorkspaceFolders {}
+
+impl Notification for DidChangeWorkspaceFolders {
+    type Params = DidChangeWorkspaceFoldersParams;
+    const METHOD: &'static str = "workspace/didChangeWorkspaceFolders";
+}
+
+/**
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
  */
 #[derive(Debug)]
@@ -274,5 +289,6 @@ mod test {
         check_macro!("textDocument/publishDiagnostics");
         check_macro!("workspace/didChangeConfiguration");
         check_macro!("workspace/didChangeWatchedFiles");
+        check_macro!("workspace/didChangeWorkspaceFolders");
     }
 }
