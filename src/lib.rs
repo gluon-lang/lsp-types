@@ -453,27 +453,27 @@ pub enum DocumentChanges {
 // TODO: Once https://github.com/serde-rs/serde/issues/912 is solved
 // we can remove ResourceOp and switch to the following implementation
 // of DocumentChangeOperation:
-// 
+//
 // #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 // #[serde(tag = "kind", rename_all="lowercase" )]
 // pub enum DocumentChangeOperation {
 //     Create(CreateFile),
 //     Rename(RenameFile),
 //     Delete(DeleteFile),
-// 
+//
 //     #[serde(other)]
 //     Edit(TextDocumentEdit),
 // }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[serde(untagged, rename_all="lowercase" )]
+#[serde(untagged, rename_all = "lowercase")]
 pub enum DocumentChangeOperation {
     Op(ResourceOp),
     Edit(TextDocumentEdit),
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[serde(tag = "kind", rename_all="lowercase" )]
+#[serde(tag = "kind", rename_all = "lowercase")]
 pub enum ResourceOp {
     Create(CreateFile),
     Rename(RenameFile),
@@ -2724,65 +2724,65 @@ pub enum CodeActionResponse {
 pub mod code_action_kind {
 
     /**
-	 * Base kind for quickfix actions: 'quickfix'
-	 */
+     * Base kind for quickfix actions: 'quickfix'
+     */
     pub const QUICKFIX: &'static str = "quickfix";
 
-	/**
-	 * Base kind for refactoring actions: 'refactor'
-	 */
-     pub const REFACTOR: &'static str = "refactor";
+    /**
+     * Base kind for refactoring actions: 'refactor'
+     */
+    pub const REFACTOR: &'static str = "refactor";
 
-	/**
-	 * Base kind for refactoring extraction actions: 'refactor.extract'
-	 *
-	 * Example extract actions:
-	 *
-	 * - Extract method
-	 * - Extract function
-	 * - Extract variable
-	 * - Extract interface from class
-	 * - ...
-	 */
-     pub const REFACTOR_EXTRACT: &'static str = "refactor.extract";
+    /**
+     * Base kind for refactoring extraction actions: 'refactor.extract'
+     *
+     * Example extract actions:
+     *
+     * - Extract method
+     * - Extract function
+     * - Extract variable
+     * - Extract interface from class
+     * - ...
+     */
+    pub const REFACTOR_EXTRACT: &'static str = "refactor.extract";
 
-	/**
-	 * Base kind for refactoring inline actions: 'refactor.inline'
-	 *
-	 * Example inline actions:
-	 *
-	 * - Inline function
-	 * - Inline variable
-	 * - Inline constant
-	 * - ...
-	 */
-     pub const REFACTOR_INLINE: &'static str = "refactor.inline";
+    /**
+     * Base kind for refactoring inline actions: 'refactor.inline'
+     *
+     * Example inline actions:
+     *
+     * - Inline function
+     * - Inline variable
+     * - Inline constant
+     * - ...
+     */
+    pub const REFACTOR_INLINE: &'static str = "refactor.inline";
 
-	/**
-	 * Base kind for refactoring rewrite actions: 'refactor.rewrite'
-	 *
-	 * Example rewrite actions:
-	 *
-	 * - Convert JavaScript function to class
-	 * - Add or remove parameter
-	 * - Encapsulate field
-	 * - Make method static
-	 * - Move method to base class
-	 * - ...
-	 */
-     pub const REFACTOR_REWRITE: &'static str = "refactor.rewrite";
+    /**
+     * Base kind for refactoring rewrite actions: 'refactor.rewrite'
+     *
+     * Example rewrite actions:
+     *
+     * - Convert JavaScript function to class
+     * - Add or remove parameter
+     * - Encapsulate field
+     * - Make method static
+     * - Move method to base class
+     * - ...
+     */
+    pub const REFACTOR_REWRITE: &'static str = "refactor.rewrite";
 
-	/**
-	 * Base kind for source actions: `source`
-	 *
-	 * Source code actions apply to the entire file.
-	 */
-     pub const SOURCE: &'static str = "source";
+    /**
+     * Base kind for source actions: `source`
+     *
+     * Source code actions apply to the entire file.
+     */
+    pub const SOURCE: &'static str = "source";
 
-	/**
-	 * Base kind for an organize imports source action: `source.organizeImports`
-	 */
-     pub const SOURCE_ORGANIZE_IMPORTS: &'static str = "source.organizeImports";
+    /**
+     * Base kind for an organize imports source action: `source.organizeImports`
+     */
+    pub const SOURCE_ORGANIZE_IMPORTS: &'static str = "source.organizeImports";
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
