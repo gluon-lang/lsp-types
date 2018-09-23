@@ -1507,7 +1507,7 @@ pub struct CodeActionKindLiteralSupport {
     /// property exists the client also guarantees that it will
     /// handle values outside its set gracefully and falls back
     /// to a default value when unknown.
-    pub value_set: Vec<CodeActionKind>,
+    pub value_set: Vec<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -2687,8 +2687,6 @@ pub struct ApplyWorkspaceEditResponse {
     pub applied: bool,
 }
 
-pub type CodeActionKind = String;
-
 /// Params for the CodeActionRequest
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -2711,6 +2709,73 @@ pub enum CodeActionResponse {
     Actions(Vec<CodeAction>),
 }
 
+/**
+ * A set of predefined code action kinds
+ */
+pub mod code_action_kind {
+
+    /**
+	 * Base kind for quickfix actions: 'quickfix'
+	 */
+    pub const QUICKFIX: &'static str = "quickfix";
+
+	/**
+	 * Base kind for refactoring actions: 'refactor'
+	 */
+     pub const REFACTOR: &'static str = "refactor";
+
+	/**
+	 * Base kind for refactoring extraction actions: 'refactor.extract'
+	 *
+	 * Example extract actions:
+	 *
+	 * - Extract method
+	 * - Extract function
+	 * - Extract variable
+	 * - Extract interface from class
+	 * - ...
+	 */
+     pub const REFACTOR_EXTRACT: &'static str = "refactor.extract";
+
+	/**
+	 * Base kind for refactoring inline actions: 'refactor.inline'
+	 *
+	 * Example inline actions:
+	 *
+	 * - Inline function
+	 * - Inline variable
+	 * - Inline constant
+	 * - ...
+	 */
+     pub const REFACTOR_INLINE: &'static str = "refactor.inline";
+
+	/**
+	 * Base kind for refactoring rewrite actions: 'refactor.rewrite'
+	 *
+	 * Example rewrite actions:
+	 *
+	 * - Convert JavaScript function to class
+	 * - Add or remove parameter
+	 * - Encapsulate field
+	 * - Make method static
+	 * - Move method to base class
+	 * - ...
+	 */
+     pub const REFACTOR_REWRITE: &'static str = "refactor.rewrite";
+
+	/**
+	 * Base kind for source actions: `source`
+	 *
+	 * Source code actions apply to the entire file.
+	 */
+     pub const SOURCE: &'static str = "source";
+
+	/**
+	 * Base kind for an organize imports source action: `source.organizeImports`
+	 */
+     pub const SOURCE_ORGANIZE_IMPORTS: &'static str = "source.organizeImports";
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct CodeAction {
     /// A short, human-readable, title for this code action.
@@ -2719,7 +2784,7 @@ pub struct CodeAction {
     /// The kind of the code action.
     /// Used to filter code actions.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub kind: Option<CodeActionKind>,
+    pub kind: Option<String>,
 
     /// The diagnostics that this code action resolves.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2748,7 +2813,7 @@ pub struct CodeActionContext {
     /// Actions not of this kind are filtered out by the client before being shown. So servers
     /// can omit computing them.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub only: Option<Vec<CodeActionKind>>,
+    pub only: Option<Vec<String>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -2761,7 +2826,7 @@ pub struct CodeActionOptions {
      * may list out every specific kind they provide.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action_kinds: Option<Vec<CodeActionKind>>,
+    pub code_action_kinds: Option<Vec<String>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
