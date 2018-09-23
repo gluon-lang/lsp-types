@@ -333,10 +333,6 @@ pub struct CreateFileOptions {
 #[serde(rename_all = "camelCase")]
 pub struct CreateFile {
     /**
-     * A create
-     */
-    pub kind: ResourceOperationKind, // must be `ResourceOperationKind.Create`;
-    /**
      * The resource to create.
      */
     pub uri: String,
@@ -371,10 +367,6 @@ pub struct RenameFileOptions {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenameFile {
-    /**
-     * A rename
-     */
-    pub kind: ResourceOperationKind, // must be `ResourceOperationKind.Rename`;
     /**
      * The old (existing) location.
      */
@@ -415,10 +407,6 @@ pub struct DeleteFileOptions {
 #[serde(rename_all = "camelCase")]
 pub struct DeleteFile {
     /**
-     * A delete
-     */
-    pub kind: ResourceOperationKind, // must be `ResourceOperationKind.Delete`
-    /**
      * The file to delete.
      */
     pub uri: String,
@@ -452,7 +440,7 @@ pub struct WorkspaceEdit {
      * only plain `TextEdit`s using the `changes` property are supported.
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_changes: Option<Vec<DocumentChanges>>,
+    pub document_changes: Option<DocumentChanges>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -462,13 +450,34 @@ pub enum DocumentChanges {
     Operations(Vec<DocumentChangeOperation>),
 }
 
+// TODO: Once https://github.com/serde-rs/serde/issues/912 is solved
+// we can remove ResourceOp and switch to the following implementation
+// of DocumentChangeOperation:
+// 
+// #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+// #[serde(tag = "kind", rename_all="lowercase" )]
+// pub enum DocumentChangeOperation {
+//     Create(CreateFile),
+//     Rename(RenameFile),
+//     Delete(DeleteFile),
+// 
+//     #[serde(other)]
+//     Edit(TextDocumentEdit),
+// }
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[serde(untagged)]
+#[serde(untagged, rename_all="lowercase" )]
 pub enum DocumentChangeOperation {
-    TextDocumentEdit(TextDocumentEdit),
-    CreateFile(CreateFile),
-    RenameFile(RenameFile),
-    DeleteFile(DeleteFile),
+    Op(ResourceOp),
+    Edit(TextDocumentEdit),
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all="lowercase" )]
+pub enum ResourceOp {
+    Create(CreateFile),
+    Rename(RenameFile),
+    Delete(DeleteFile),
 }
 
 mod url_map {
