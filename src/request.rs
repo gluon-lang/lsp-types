@@ -177,11 +177,14 @@ impl Request for UnregisterCapability {
  The Completion request is sent from the client to the server to compute completion items at a given cursor position.
  Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive,
  servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve').
- This request is sent when a completion item is selected in the user interface. A typically use case is for example:
- the 'textDocument/completion' request doesn't fill in the documentation property for returned completion items
- since it is expensive to compute. When the item is selected in the user interface then a 'completionItem/resolve'
+ This request is sent when a completion item is selected in the user interface. A typical use case is for example:
+ the 'textDocument/completion' request doesn’t fill in the documentation property for returned completion items
+ since it is expensive to compute. When the item is selected in the user interface then a ‘completionItem/resolve’
  request is sent with the selected completion item as a param. The returned completion item should have the
- documentation property filled in.
+ documentation property filled in. The request can delay the computation of the detail and documentation properties.
+ However, properties that are needed for the initial sorting and filtering, like sortText, filterText, insertText,
+ and textEdit must be provided in the textDocument/completion request and must not be changed during resolve.
+
 */
 #[derive(Debug)]
 pub enum Completion {}
@@ -291,7 +294,7 @@ impl Request for GotoImplementation {
  However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since
  the first one is allowed to be more fuzzy.
  Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
- use Textas the kind.
+ use Text as the kind.
 */
 #[derive(Debug)]
 pub enum DocumentHighlightRequest {}
@@ -399,10 +402,8 @@ impl Request for DocumentLinkRequest {
 }
 
 /**
-
  The document link resolve request is sent from the client to the server to resolve the target of
  a given document link.
-
 */
 #[derive(Debug)]
 pub enum DocumentLinkResolve {}
@@ -460,6 +461,8 @@ impl Request for Rename {
     const METHOD: &'static str = "textDocument/rename";
 }
 
+/// The document color request is sent from the client to the server to list all color references found in a given text document.
+/// Along with the range, a color value in RGB is returned.
 #[derive(Debug)]
 pub enum DocumentColor {}
 
@@ -469,6 +472,8 @@ impl Request for DocumentColor {
     const METHOD: &'static str = "textDocument/documentColor";
 }
 
+/// The color presentation request is sent from the client to the server to obtain a list of presentations for a color value
+/// at a given location.
 #[derive(Debug)]
 pub enum ColorPresentationRequest {}
 
@@ -478,6 +483,7 @@ impl Request for ColorPresentationRequest {
     const METHOD: &'static str = "textDocument/colorPresentation";
 }
 
+/// The folding range request is sent from the client to the server to return all folding ranges found in a given text document.
 #[derive(Debug)]
 pub enum FoldingRangeRequest {}
 
@@ -487,6 +493,8 @@ impl Request for FoldingRangeRequest {
     const METHOD: &'static str = "textDocument/foldingRange";
 }
 
+/// The prepare rename request is sent from the client to the server to setup and test the validity of a rename operation
+/// at a given location.
 #[derive(Debug)]
 pub enum PrepareRenameRequest {}
 
@@ -496,6 +504,9 @@ impl Request for PrepareRenameRequest {
     const METHOD: &'static str = "textDocument/prepareRename";
 }
 
+/// The workspace/workspaceFolders request is sent from the server to the client to fetch the current open list of
+/// workspace folders. Returns null in the response if only a single file is open in the tool.
+/// Returns an empty array if a workspace is open but no folders are configured.
 #[derive(Debug)]
 pub enum WorkspaceFoldersRequest {}
 
