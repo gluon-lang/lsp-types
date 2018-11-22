@@ -2123,7 +2123,7 @@ impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
         CompletionTriggerKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
-                &"value between 1 and 2 (inclusive)",
+                &"value between 1 and 3 (inclusive)",
             )
         })
     }
