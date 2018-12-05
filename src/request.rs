@@ -99,6 +99,12 @@ macro_rules! lsp_request {
     ("textDocument/prepareRename") => {
         $crate::request::PrepareRenameRequest
     };
+    ("textDocument/implementation") => {
+        $crate::request::GotoImplementation
+    };
+    ("textDocument/typeDefinition") => {
+        $crate::request::GotoTypeDefinition
+    };
     ("workspace/workspaceFolders") => {
         $crate::request::WorkspaceFoldersRequest
     };
