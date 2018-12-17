@@ -960,10 +960,13 @@ pub struct SymbolCapability {
     /**
      * This capability supports dynamic registration.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
+
     /**
      * Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub symbol_kind: Option<SymbolKindCapability>,
 }
 
