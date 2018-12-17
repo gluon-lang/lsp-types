@@ -45,6 +45,9 @@ macro_rules! lsp_request {
     ("textDocument/signatureHelp") => {
         $crate::request::SignatureHelpRequest
     };
+    ("textDocument/declaration") => {
+        $crate::request::GotoDeclaration
+    };
     ("textDocument/definition") => {
         $crate::request::GotoDefinition
     };
@@ -233,6 +236,17 @@ impl Request for SignatureHelpRequest {
     const METHOD: &'static str = "textDocument/signatureHelp";
 }
 
+#[derive(Debug)]
+pub enum GotoDeclaration {}
+
+/// The goto declaration request is sent from the client to the server to resolve the declaration location of
+/// a symbol at a given text document position.
+impl Request for GotoDeclaration {
+    type Params = TextDocumentPositionParams;
+    type Result = Option<GotoDefinitionResponse>;
+    const METHOD: &'static str = "textDocument/declaration";
+}
+
 /// The goto definition request is sent from the client to the server to resolve the definition location of
 /// a symbol at a given text document position.
 #[derive(Debug)]
@@ -244,14 +258,13 @@ impl Request for GotoDefinition {
     const METHOD: &'static str = "textDocument/definition";
 }
 
-/**
- * GotoDefinition response can be single location or multiple ones.
- */
+ // GotoDefinition response can be single location, or multiple Locations or a link.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GotoDefinitionResponse {
     Scalar(Location),
     Array(Vec<Location>),
+    Link(Vec<LocationLink>)
 }
 
 /// The references request is sent from the client to the server to resolve project-wide references for the
@@ -556,6 +569,7 @@ mod test {
         check_macro!("completionItem/resolve");
         check_macro!("textDocument/hover");
         check_macro!("textDocument/signatureHelp");
+        check_macro!("textDocument/declaration");
         check_macro!("textDocument/definition");
         check_macro!("textDocument/references");
         check_macro!("textDocument/documentHighlight");
