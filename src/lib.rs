@@ -1131,6 +1131,20 @@ pub struct SignatureInformationSettings {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation_format: Option<Vec<MarkupKind>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parameter_information: Option<ParameterInformationSettings>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ParameterInformationSettings {
+    /**
+    * The client supports processing label offsets instead of a
+    * simple label string.
+    */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label_offset_support: Option<bool>
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -2427,14 +2441,24 @@ pub struct SignatureInformation {
 /// have a label and a doc-comment.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ParameterInformation {
-    /// The label of this parameter. Will be shown in
-    /// the UI.
-    pub label: String,
+    /// The label of this parameter information.
+    ///
+    /// Either a string or an inclusive start and exclusive end offsets within its containing
+    /// signature label. (see SignatureInformation.label). *Note*: A label of type string must be
+    /// a substring of its containing signature label.
+    pub label: ParameterLabel,
 
     /// The human-readable doc-comment of this parameter. Will be shown
     /// in the UI but can be omitted.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<Documentation>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ParameterLabel {
+    Simple(String),
+    LabelOffsets([u64; 2]),
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
