@@ -589,5 +589,7 @@ mod test {
         check_macro!("textDocument/foldingRange");
         check_macro!("textDocument/prepareRename");
         check_macro!("workspace/workspaceFolders");
+        check_macro!("textDocument/implementation");
+        check_macro!("textDocument/typeDefinition");
     }
 }
