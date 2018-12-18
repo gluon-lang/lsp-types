@@ -258,7 +258,7 @@ impl Request for GotoDefinition {
     const METHOD: &'static str = "textDocument/definition";
 }
 
- // GotoDefinition response can be single location, or multiple Locations or a link.
+ /// GotoDefinition response can be single location, or multiple Locations or a link.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GotoDefinitionResponse {
