@@ -115,6 +115,28 @@ impl Location {
     }
 }
 
+/// Represents a link between a source and a target location.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LocationLink {
+    /// Span of the origin of this link.
+    ///
+    ///  Used as the underlined span for mouse interaction. Defaults to the word range at
+    ///  the mouse position.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub origin_selection_range: Option<Range>,
+
+    /// The target resource identifier of this link.
+    pub target_uri: String,
+
+    /// The full target range of this link.
+    pub target_range: Range,
+
+    /// The span of this link.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_selection_range: Option<Range>
+}
+
 /// Represents a diagnostic, such as a compiler error or warning.
 /// Diagnostic objects are only valid in the scope of a resource.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -804,6 +826,16 @@ pub struct GenericCapability {
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct GotoCapability {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// The client supports additional metadata in the form of definition links.
+    pub link_support: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkspaceEditCapability {
     /**
      * The client supports versioned document changes in `WorkspaceEdit`s
@@ -928,10 +960,13 @@ pub struct SymbolCapability {
     /**
      * This capability supports dynamic registration.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
+
     /**
      * Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub symbol_kind: Option<SymbolKindCapability>,
 }
 
@@ -1131,6 +1166,20 @@ pub struct SignatureInformationSettings {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation_format: Option<Vec<MarkupKind>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parameter_information: Option<ParameterInformationSettings>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ParameterInformationSettings {
+    /**
+    * The client supports processing label offsets instead of a
+    * simple label string.
+    */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label_offset_support: Option<bool>
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
@@ -1222,10 +1271,28 @@ pub struct TextDocumentClientCapabilities {
     pub on_type_formatting: Option<GenericCapability>,
 
     /**
+     * Capabilities specific to the `textDocument/declaration`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub declaration: Option<GotoCapability>,
+
+    /**
      * Capabilities specific to the `textDocument/definition`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub definition: Option<GenericCapability>,
+    pub definition: Option<GotoCapability>,
+
+    /**
+     * Capabilities specific to the `textDocument/typeDefinition`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub type_definition: Option<GotoCapability>,
+
+    /**
+     * Capabilities specific to the `textDocument/implementation`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub implementation: Option<GotoCapability>,
 
     /**
      * Capabilities specific to the `textDocument/codeAction`
@@ -2427,14 +2494,24 @@ pub struct SignatureInformation {
 /// have a label and a doc-comment.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct ParameterInformation {
-    /// The label of this parameter. Will be shown in
-    /// the UI.
-    pub label: String,
+    /// The label of this parameter information.
+    ///
+    /// Either a string or an inclusive start and exclusive end offsets within its containing
+    /// signature label. (see SignatureInformation.label). *Note*: A label of type string must be
+    /// a substring of its containing signature label.
+    pub label: ParameterLabel,
 
     /// The human-readable doc-comment of this parameter. Will be shown
     /// in the UI but can be omitted.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub documentation: Option<Documentation>,
+}
+
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ParameterLabel {
+    Simple(String),
+    LabelOffsets([u64; 2]),
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
