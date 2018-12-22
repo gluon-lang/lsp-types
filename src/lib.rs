@@ -2396,7 +2396,7 @@ impl serde::Serialize for InsertTextFormat {
 }
 
 /// The result of a hover request.
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Hover {
     /// The hover's content
     pub contents: HoverContents,
@@ -2409,7 +2409,7 @@ pub struct Hover {
 /**
  * Hover contents could be single entry or multiple entries.
  */
-#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum HoverContents {
     Scalar(MarkedString),
@@ -2427,14 +2427,14 @@ pub enum HoverContents {
      ${value}
      ```
  */
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
     String(String),
     LanguageString(LanguageString),
 }
 
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct LanguageString {
     pub language: String,
     pub value: String,
