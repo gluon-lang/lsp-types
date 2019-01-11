@@ -127,7 +127,8 @@ pub struct LocationLink {
     pub origin_selection_range: Option<Range>,
 
     /// The target resource identifier of this link.
-    pub target_uri: String,
+    #[serde(with = "url_serde")]
+    pub target_uri: Url,
 
     /// The full target range of this link.
     pub target_range: Range,
@@ -357,7 +358,8 @@ pub struct CreateFile {
     /**
      * The resource to create.
      */
-    pub uri: String,
+    #[serde(with = "url_serde")]
+    pub uri: Url,
     /**
      * Additional options
      */
@@ -392,11 +394,13 @@ pub struct RenameFile {
     /**
      * The old (existing) location.
      */
-    pub old_uri: String,
+    #[serde(with = "url_serde")]
+    pub old_uri: Url,
     /**
      * The new location.
      */
-    pub new_uri: String,
+    #[serde(with = "url_serde")]
+    pub new_uri: Url,
     /**
      * Rename options.
      */
@@ -431,7 +435,8 @@ pub struct DeleteFile {
     /**
      * The file to delete.
      */
-    pub uri: String,
+    #[serde(with = "url_serde")]
+    pub uri: Url,
     /**
      * Delete options.
      */
@@ -883,11 +888,12 @@ pub enum WorkspaceFolderCapabilityChangeNotifications {
     Id(String),
 }
 
-#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceFolder {
     /// The associated URI for this workspace folder.
-    pub uri: String,
+    #[serde(with = "url_serde")]
+    pub uri: Url,
     /// The name of the workspace folder. Defaults to the uri's basename.
     pub name: String,
 }
