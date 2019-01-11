@@ -1,4 +1,4 @@
-# languageserver-types [![Build Status](https://travis-ci.org/gluon-lang/languageserver-types.svg?branch=master)](https://travis-ci.org/gluon-lang/languageserver-types) [![Documentation](https://docs.rs/languageserver-types/badge.svg)](https://docs.rs/crate/languageserver-types)
+# lsp-types [![Build Status](https://travis-ci.org/gluon-lang/lsp-types.svg?branch=master)](https://travis-ci.org/gluon-lang/lsp-types) [![Documentation](https://docs.rs/lsp-types/badge.svg)](https://docs.rs/crate/lsp-types)
 
 Types useful for interacting with a [language server](https://code.visualstudio.com/blogs/2016/06/27/common-language-protocol).
 
