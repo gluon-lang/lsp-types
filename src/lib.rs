@@ -134,8 +134,7 @@ pub struct LocationLink {
     pub target_range: Range,
 
     /// The span of this link.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub target_selection_range: Option<Range>
+    pub target_selection_range: Range,
 }
 
 /// Represents a diagnostic, such as a compiler error or warning.
