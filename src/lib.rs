@@ -204,7 +204,7 @@ impl Diagnostic {
 }
 
 /// The protocol currently supports the following diagnostic severities:
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy)]
 pub enum DiagnosticSeverity {
     /// Reports an error.
     Error = 1,
