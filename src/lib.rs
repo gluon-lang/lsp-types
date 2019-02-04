@@ -2932,7 +2932,7 @@ pub struct CodeLensParams {
 ///
 /// A code lens is _unresolved_ when no command is associated to it. For performance
 /// reasons the creation of a code lens and resolving should be done in two stages.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct CodeLens {
     /// The range in which this code lens is valid. Should only span a single line.
     pub range: Range,
