@@ -113,7 +113,7 @@ macro_rules! lsp_request {
     };
     ("workspace/configuration") => {
         $crate::request::WorkspaceConfiguration
-    }
+    };
 }
 
 /**
