@@ -506,6 +506,24 @@ pub enum ResourceOp {
     Delete(DeleteFile),
 }
 
+#[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConfigurationParams {
+	items: Vec<ConfigurationItem>
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConfigurationItem {
+	/// The scope to get the configuration section for.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	scope_uri: Option<String>,
+
+	///The configuration section asked for.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	section: Option<String>,
+}
+
 mod url_map {
     use super::*;
 
