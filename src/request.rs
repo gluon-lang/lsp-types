@@ -111,6 +111,9 @@ macro_rules! lsp_request {
     ("workspace/workspaceFolders") => {
         $crate::request::WorkspaceFoldersRequest
     };
+    ("workspace/configuration") => {
+        $crate::request::WorkspaceConfiguration
+    }
 }
 
 /**
@@ -371,6 +374,29 @@ impl Request for ApplyWorkspaceEdit {
     const METHOD: &'static str = "workspace/applyEdit";
 }
 
+/// The workspace/configuration request is sent from the server to the client to fetch configuration settings
+/// from the client. The request can fetch several configuration settings in one roundtrip.
+/// The order of the returned configuration settings correspond to the order of the passed ConfigurationItems
+/// (e.g. the first item in the response is the result for the first configuration item in the params).
+///
+/// A ConfigurationItem consists of the configuration section to ask for and an additional scope URI.
+/// The configuration section ask for is defined by the server and doesn’t necessarily need to correspond to
+/// the configuration store used be the client. So a server might ask for a configuration cpp.formatterOptions
+/// but the client stores the configuration in a XML store layout differently.
+/// It is up to the client to do the necessary conversion. If a scope URI is provided the client should return
+/// the setting scoped to the provided resource. If the client for example uses EditorConfig to manage its
+/// settings the configuration should be returned for the passed resource URI. If the client can’t provide a
+/// configuration setting for a given scope then null need to be present in the returned array.
+#[derive(Debug)]
+pub enum WorkspaceConfiguration {}
+
+impl Request for WorkspaceConfiguration {
+    type Params = ConfigurationParams;
+    type Result = Vec<Value>;
+    const METHOD: &'static str = "workspace/configuration";
+}
+
+
 /**
  * The code action request is sent from the client to the server to compute commands for a given text document
  * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
@@ -591,5 +617,6 @@ mod test {
         check_macro!("workspace/workspaceFolders");
         check_macro!("textDocument/implementation");
         check_macro!("textDocument/typeDefinition");
+        check_macro!("workspace/configuration");
     }
 }

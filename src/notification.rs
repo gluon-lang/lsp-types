@@ -265,7 +265,7 @@ mod test {
 
     macro_rules! check_macro {
         ($name:tt) => {
-            // check whethe the macro name matches the method
+            // check whether the macro name matches the method
             assert_eq!(<lsp_notification!($name) as Notification>::METHOD, $name);
             // test whether type checking passes for each component
             fake_call::<lsp_notification!($name)>();
