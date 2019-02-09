@@ -43,7 +43,7 @@ pub mod request;
 
 /* ----------------- Auxiliary types ----------------- */
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum NumberOrString {
     Number(u64),
