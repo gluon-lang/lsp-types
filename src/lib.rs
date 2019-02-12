@@ -509,7 +509,7 @@ pub enum ResourceOp {
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConfigurationParams {
-	items: Vec<ConfigurationItem>
+	pub items: Vec<ConfigurationItem>
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -517,11 +517,11 @@ pub struct ConfigurationParams {
 pub struct ConfigurationItem {
 	/// The scope to get the configuration section for.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	scope_uri: Option<String>,
+	pub scope_uri: Option<String>,
 
 	///The configuration section asked for.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	section: Option<String>,
+	pub section: Option<String>,
 }
 
 mod url_map {
