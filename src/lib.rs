@@ -2487,11 +2487,11 @@ pub struct SignatureHelp {
 
     /// The active signature.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active_signature: Option<u64>,
+    pub active_signature: Option<i64>,
 
     /// The active parameter of the active signature.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active_parameter: Option<u64>,
+    pub active_parameter: Option<i64>,
 }
 
 /// Represents the signature of something callable. A signature
