@@ -108,6 +108,9 @@ macro_rules! lsp_request {
     ("textDocument/typeDefinition") => {
         $crate::request::GotoTypeDefinition
     };
+    ("textDocument/selectionRange") => {
+        $crate::request::SelectionRangeRequest
+    };
     ("workspace/workspaceFolders") => {
         $crate::request::WorkspaceFoldersRequest
     };
@@ -561,6 +564,24 @@ impl Request for WorkspaceFoldersRequest {
     const METHOD: &'static str = "workspace/workspaceFolders";
 }
 
+///The selection range request is sent from the client to the server to return
+///suggested selection ranges at given positions. A selection range is a range
+///around the cursor position which the user might be interested in selecting.
+///Typically, but not necessary, selection ranges correspond to the nodes of the
+///syntax tree.
+/// Selection ranges should be computed independently for each position. Ranges
+/// for a specific position should form hierarchy: each range has an optional,
+/// strictly larger, parent range.
+#[cfg(feature = "proposed")]
+pub enum SelectionRangeRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for SelectionRangeRequest {
+    type Params = SelectionRangeParams;
+    type Result = Vec<SelectionRange>;
+    const METHOD: &'static str = "textDocument/selectionRange";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -618,5 +639,11 @@ mod test {
         check_macro!("textDocument/implementation");
         check_macro!("textDocument/typeDefinition");
         check_macro!("workspace/configuration");
+    }
+
+    #[test]
+    #[cfg(feature = "proposed")]
+    fn check_proposed_macro_definitions() {
+        check_macro!("textDocument/selectionRange");
     }
 }
