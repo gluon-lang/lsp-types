@@ -59,6 +59,10 @@ macro_rules! lsp_notification {
     ("workspace/didChangeWorkspaceFolders") => {
         $crate::notification::DidChangeWorkspaceFolders
     };
+    // Proposed
+    // ("window/progress") => {
+    //     $crate::notification::Progress
+    // };
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -252,6 +256,24 @@ impl Notification for PublishDiagnostics {
     const METHOD: &'static str = "textDocument/publishDiagnostics";
 }
 
+#[cfg(feature = "proposed")]
+pub use proposed::*;
+
+#[cfg(feature = "proposed")]
+pub mod proposed {
+    use super::*;
+
+    /// The progress notification is sent from the server to the client to ask
+    /// the client to indicate progress.
+    #[derive(Debug)]
+    pub enum Progress {}
+
+    impl Notification for Progress {
+        type Params = ProgressParams;
+        const METHOD: &'static str = "window/progress";
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -290,5 +312,8 @@ mod test {
         check_macro!("workspace/didChangeConfiguration");
         check_macro!("workspace/didChangeWatchedFiles");
         check_macro!("workspace/didChangeWorkspaceFolders");
+
+        // Proposed
+        // check_macro!("window/progress");
     }
 }

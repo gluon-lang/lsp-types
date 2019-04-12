@@ -1361,6 +1361,19 @@ pub struct TextDocumentClientCapabilities {
 }
 
 /**
+ * Window specific client capabilities.
+ */
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WindowClientCapabilities {
+    /**
+     * Whether `window/progress` server notifications are supported.
+     */
+    #[cfg(feature = "proposed")]
+    pub progress: Option<bool>,
+}
+
+/**
  * Where ClientCapabilities are currently empty:
  */
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize)]
@@ -1377,6 +1390,12 @@ pub struct ClientCapabilities {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document: Option<TextDocumentClientCapabilities>,
+
+    /**
+     * Window specific client capabilities.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub window: Option<WindowClientCapabilities>,
 
     /**
      * Experimental client capabilities.
@@ -3348,6 +3367,40 @@ pub enum MarkupKind {
 pub struct MarkupContent {
     pub kind: MarkupKind,
     pub value: String,
+}
+
+#[cfg(feature = "proposed")]
+pub use proposed::*;
+
+#[cfg(feature = "proposed")]
+mod proposed {
+    /// The progress notification is sent from the server to the client to ask
+    /// the client to indicate progress.
+    #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+    pub struct ProgressParams {
+        /// A unique identifier to associate multiple progress notifications
+        /// with the same progress.
+        pub id: String,
+
+        /// Mandatory title of the progress operation. Used to briefly inform
+        /// about the kind of operation being performed.
+        /// Examples: "Indexing" or "Linking dependencies".
+        pub title: String,
+
+        /// Optional, more detailed associated progress message. Contains
+        /// complementary information to the `title`.
+        /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
+        /// If unset, the previous progress message (if any) is still valid.
+        pub message: Option<String>,
+
+        /// Optional progress percentage to display (value 100 is considered 100%).
+        /// If unset, the previous progress percentage (if any) is still valid.
+        pub percentage: Option<f64>,
+
+        /// Set to true on the final progress update.
+        /// No more progress notifications with the same ID should be sent.
+        pub done: Option<bool>,
+    }
 }
 
 #[cfg(test)]
