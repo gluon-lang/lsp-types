@@ -1635,6 +1635,11 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document_sync: Option<TextDocumentSyncCapability>,
 
+    /// Capabilities specific to `textDocument/selectionRange` requests.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub selection_range_provider: Option<GenericCapability>,
+
     /// The server provides hover support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hover_provider: Option<bool>,
@@ -3307,6 +3312,28 @@ pub struct FoldingRange {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<FoldingRangeKind>,
+}
+
+/// A parameter literal used in selection range requests.
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SelectionRangeParams {
+    /// The text document.
+    pub text_document: TextDocumentIdentifier,
+    /// The positions inside the text document.
+    pub positions: Vec<Position>,
+}
+
+/// Represents a selection range.
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SelectionRange {
+    /// Range of the selection.
+    pub range: Range,
+    /// The parent selection range containing this range.
+    pub parent: Option<Box<SelectionRange>>,
 }
 
 /**
