@@ -310,12 +310,12 @@ impl TextEdit {
 }
 
 /**
-  Describes textual changes on a single text document. The text document is referred to as a
-  `VersionedTextDocumentIdentifier` to allow clients to check the text document version before an
-  edit is applied. A `TextDocumentEdit` describes all changes on a version Si and after they are
-  applied move the document to version Si+1. So the creator of a `TextDocumentEdit` doesn't need to
-  sort the array or do any kind of ordering. However the edits must be non overlapping.
-  */
+Describes textual changes on a single text document. The text document is referred to as a
+`VersionedTextDocumentIdentifier` to allow clients to check the text document version before an
+edit is applied. A `TextDocumentEdit` describes all changes on a version Si and after they are
+applied move the document to version Si+1. So the creator of a `TextDocumentEdit` doesn't need to
+sort the array or do any kind of ordering. However the edits must be non overlapping.
+*/
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentEdit {
@@ -509,19 +509,19 @@ pub enum ResourceOp {
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConfigurationParams {
-	pub items: Vec<ConfigurationItem>
+    pub items: Vec<ConfigurationItem>,
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConfigurationItem {
-	/// The scope to get the configuration section for.
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub scope_uri: Option<String>,
+    /// The scope to get the configuration section for.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scope_uri: Option<String>,
 
-	///The configuration section asked for.
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub section: Option<String>,
+    ///The configuration section asked for.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub section: Option<String>,
 }
 
 mod url_map {
@@ -1198,11 +1198,11 @@ pub struct SignatureInformationSettings {
 #[serde(rename_all = "camelCase")]
 pub struct ParameterInformationSettings {
     /**
-    * The client supports processing label offsets instead of a
-    * simple label string.
-    */
+     * The client supports processing label offsets instead of a
+     * simple label string.
+     */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub label_offset_support: Option<bool>
+    pub label_offset_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -2465,15 +2465,15 @@ pub enum HoverContents {
 }
 
 /**
- The marked string is rendered:
- - as markdown if it is represented as a string
- - as code block of the given langauge if it is represented as a pair of a language and a value
+The marked string is rendered:
+- as markdown if it is represented as a string
+- as code block of the given langauge if it is represented as a pair of a language and a value
 
- The pair of a language and a value is an equivalent to markdown:
-     ```${language}
-     ${value}
-     ```
- */
+The pair of a language and a value is an equivalent to markdown:
+    ```${language}
+    ${value}
+    ```
+*/
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
@@ -3486,13 +3486,17 @@ mod tests {
             r#"{}"#,
         );
 
-        test_serialization(&WorkspaceEdit {
-                                changes: Some(vec![(Url::parse("file://test").unwrap(), vec![])]
-                                    .into_iter()
-                                    .collect()),
-                                document_changes: None,
-                            },
-                           r#"{"changes":{"file://test/":[]}}"#);
+        test_serialization(
+            &WorkspaceEdit {
+                changes: Some(
+                    vec![(Url::parse("file://test").unwrap(), vec![])]
+                        .into_iter()
+                        .collect(),
+                ),
+                document_changes: None,
+            },
+            r#"{"changes":{"file://test/":[]}}"#,
+        );
     }
 
     #[test]
@@ -3536,7 +3540,12 @@ mod tests {
     #[test]
     fn test_resource_operation_kind() {
         test_serialization(
-            &vec![ResourceOperationKind::Create, ResourceOperationKind::Rename, ResourceOperationKind::Delete],
-            r#"["create","rename","delete"]"#);
+            &vec![
+                ResourceOperationKind::Create,
+                ResourceOperationKind::Rename,
+                ResourceOperationKind::Delete,
+            ],
+            r#"["create","rename","delete"]"#,
+        );
     }
 }
