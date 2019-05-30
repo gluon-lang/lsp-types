@@ -264,13 +264,13 @@ impl Request for GotoDefinition {
     const METHOD: &'static str = "textDocument/definition";
 }
 
- /// GotoDefinition response can be single location, or multiple Locations or a link.
+/// GotoDefinition response can be single location, or multiple Locations or a link.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum GotoDefinitionResponse {
     Scalar(Location),
     Array(Vec<Location>),
-    Link(Vec<LocationLink>)
+    Link(Vec<LocationLink>),
 }
 
 /// The references request is sent from the client to the server to resolve project-wide references for the
@@ -398,7 +398,6 @@ impl Request for WorkspaceConfiguration {
     type Result = Vec<Value>;
     const METHOD: &'static str = "workspace/configuration";
 }
-
 
 /**
  * The code action request is sent from the client to the server to compute commands for a given text document
