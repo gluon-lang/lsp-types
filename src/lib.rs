@@ -2835,11 +2835,13 @@ pub struct CodeActionParams {
 }
 
 /// response for CodeActionRequest
-#[derive(Debug, Clone, Deserialize, Serialize)]
+pub type CodeActionResponse = Vec<CodeActionOrCommand>;
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
-pub enum CodeActionResponse {
-    Commands(Vec<Command>),
-    Actions(Vec<CodeAction>),
+pub enum CodeActionOrCommand {
+    Command(Command),
+    CodeAction(CodeAction),
 }
 
 /**
