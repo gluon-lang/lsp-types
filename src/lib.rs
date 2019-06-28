@@ -2835,11 +2835,13 @@ pub struct CodeActionParams {
 }
 
 /// response for CodeActionRequest
-#[derive(Debug, Clone, Deserialize, Serialize)]
+pub type CodeActionResponse = Vec<CodeActionOrCommand>;
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
-pub enum CodeActionResponse {
-    Commands(Vec<Command>),
-    Actions(Vec<CodeAction>),
+pub enum CodeActionOrCommand {
+    Command(Command),
+    CodeAction(CodeAction),
 }
 
 /**
@@ -3547,5 +3549,24 @@ mod tests {
             ],
             r#"["create","rename","delete"]"#,
         );
+    }
+
+    #[test]
+    fn test_code_action_response() {
+        test_serialization(
+            &vec![CodeActionOrCommand::Command(Command {
+                title: "title".to_string(),
+                command: "command".to_string(),
+                arguments: None,
+            }),
+            CodeActionOrCommand::CodeAction(CodeAction {
+                title: "title".to_string(),
+                kind: Some(code_action_kind::QUICKFIX.to_owned()),
+                command: None,
+                diagnostics: None,
+                edit: None,
+            })],
+            r#"[{"title":"title","command":"command"},{"title":"title","kind":"quickfix"}]"#,
+        )
     }
 }
