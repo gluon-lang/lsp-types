@@ -2188,6 +2188,18 @@ pub enum CompletionResponse {
     List(CompletionList),
 }
 
+impl From<Vec<CompletionItem>> for CompletionResponse {
+    fn from(items: Vec<CompletionItem>) -> Self {
+        CompletionResponse::Array(items)
+    }
+}
+
+impl From<CompletionList> for CompletionResponse {
+    fn from(list: CompletionList) -> Self {
+        CompletionResponse::List(list)
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionParams {
@@ -2660,6 +2672,18 @@ pub enum DocumentSymbolResponse {
     Nested(Vec<DocumentSymbol>),
 }
 
+impl From<Vec<SymbolInformation>> for DocumentSymbolResponse {
+    fn from(info: Vec<SymbolInformation>) -> Self {
+        DocumentSymbolResponse::Flat(info)
+    }
+}
+
+impl From<Vec<DocumentSymbol>> for DocumentSymbolResponse {
+    fn from(symbols: Vec<DocumentSymbol>) -> Self {
+        DocumentSymbolResponse::Nested(symbols)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentSymbolParams {
@@ -2855,7 +2879,6 @@ impl From<CodeAction> for CodeActionOrCommand {
         CodeActionOrCommand::CodeAction(action)
     }
 }
-
 
 /**
  * A set of predefined code action kinds

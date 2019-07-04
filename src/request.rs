@@ -273,6 +273,24 @@ pub enum GotoDefinitionResponse {
     Link(Vec<LocationLink>),
 }
 
+impl From<Location> for GotoDefinitionResponse {
+    fn from(location: Location) -> Self {
+        GotoDefinitionResponse::Scalar(location)
+    }
+}
+
+impl From<Vec<Location>> for GotoDefinitionResponse {
+    fn from(locations: Vec<Location>) -> Self {
+        GotoDefinitionResponse::Array(locations)
+    }
+}
+
+impl From<Vec<LocationLink>> for GotoDefinitionResponse {
+    fn from(locations: Vec<LocationLink>) -> Self {
+        GotoDefinitionResponse::Link(locations)
+    }
+}
+
 /// The references request is sent from the client to the server to resolve project-wide references for the
 /// symbol denoted by the given text document position.
 #[derive(Debug)]
