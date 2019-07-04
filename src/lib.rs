@@ -2844,6 +2844,19 @@ pub enum CodeActionOrCommand {
     CodeAction(CodeAction),
 }
 
+impl From<Command> for CodeActionOrCommand {
+    fn from(comand: Command) -> Self {
+        CodeActionOrCommand::Command(comand)
+    }
+}
+
+impl From<CodeAction> for CodeActionOrCommand {
+    fn from(action: CodeAction) -> Self {
+        CodeActionOrCommand::CodeAction(action)
+    }
+}
+
+
 /**
  * A set of predefined code action kinds
  */
