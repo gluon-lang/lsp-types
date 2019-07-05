@@ -20,14 +20,13 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 extern crate bitflags;
 #[macro_use]
 extern crate num_derive;
-extern crate num_traits;
-extern crate serde;
+
+use serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
+use serde_json;
 
-extern crate url;
-extern crate url_serde;
+use url_serde;
 
 pub use url::Url;
 
@@ -233,7 +232,7 @@ impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match u8::deserialize(deserializer)? {
             1 => DiagnosticSeverity::Error,
             2 => DiagnosticSeverity::Warning,
             3 => DiagnosticSeverity::Information,
@@ -1439,7 +1438,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match u8::deserialize(deserializer)? {
             0 => TextDocumentSyncKind::None,
             1 => TextDocumentSyncKind::Full,
             2 => TextDocumentSyncKind::Incremental,
@@ -1748,7 +1747,7 @@ impl<'de> serde::Deserialize<'de> for MessageType {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match u8::deserialize(deserializer)? {
             1 => MessageType::Error,
             2 => MessageType::Warning,
             3 => MessageType::Info,
@@ -2009,7 +2008,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match u8::deserialize(deserializer)? {
             1 => TextDocumentSaveReason::Manual,
             2 => TextDocumentSaveReason::AfterDelay,
             3 => TextDocumentSaveReason::FocusOut,
@@ -2070,7 +2069,7 @@ impl<'de> serde::Deserialize<'de> for FileChangeType {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match u8::deserialize(deserializer)? {
             1 => FileChangeType::Created,
             2 => FileChangeType::Changed,
             3 => FileChangeType::Deleted,
@@ -2146,7 +2145,7 @@ impl<'de> serde::Deserialize<'de> for WatchKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = u8::deserialize(deserializer)?;
         WatchKind::from_bits(i).ok_or_else(|| {
             D::Error::invalid_value(de::Unexpected::Unsigned(i as u64), &"Unknown flag")
         })
@@ -2245,7 +2244,7 @@ impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = u8::deserialize(deserializer)?;
         CompletionTriggerKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
@@ -2404,7 +2403,7 @@ impl<'de> serde::Deserialize<'de> for CompletionItemKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = u8::deserialize(deserializer)?;
         CompletionItemKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
@@ -2435,7 +2434,7 @@ impl<'de> serde::Deserialize<'de> for InsertTextFormat {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = u8::deserialize(deserializer)?;
         InsertTextFormat::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
@@ -2626,7 +2625,7 @@ impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match u8::deserialize(deserializer)? {
             1 => DocumentHighlightKind::Text,
             2 => DocumentHighlightKind::Read,
             3 => DocumentHighlightKind::Write,
@@ -2783,7 +2782,7 @@ impl<'de> serde::Deserialize<'de> for SymbolKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = u8::deserialize(deserializer)?;
         Ok(SymbolKind::from_u8(i).unwrap_or(SymbolKind::Unknown))
     }
 }
@@ -3590,18 +3589,20 @@ mod tests {
     #[test]
     fn test_code_action_response() {
         test_serialization(
-            &vec![CodeActionOrCommand::Command(Command {
-                title: "title".to_string(),
-                command: "command".to_string(),
-                arguments: None,
-            }),
-            CodeActionOrCommand::CodeAction(CodeAction {
-                title: "title".to_string(),
-                kind: Some(code_action_kind::QUICKFIX.to_owned()),
-                command: None,
-                diagnostics: None,
-                edit: None,
-            })],
+            &vec![
+                CodeActionOrCommand::Command(Command {
+                    title: "title".to_string(),
+                    command: "command".to_string(),
+                    arguments: None,
+                }),
+                CodeActionOrCommand::CodeAction(CodeAction {
+                    title: "title".to_string(),
+                    kind: Some(code_action_kind::QUICKFIX.to_owned()),
+                    command: None,
+                    diagnostics: None,
+                    edit: None,
+                }),
+            ],
             r#"[{"title":"title","command":"command"},{"title":"title","kind":"quickfix"}]"#,
         )
     }
