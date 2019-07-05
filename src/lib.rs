@@ -26,7 +26,6 @@ use serde;
 extern crate serde_derive;
 use serde_json;
 
-
 use url_serde;
 
 pub use url::Url;
@@ -2856,7 +2855,6 @@ impl From<CodeAction> for CodeActionOrCommand {
     }
 }
 
-
 /**
  * A set of predefined code action kinds
  */
@@ -3567,18 +3565,20 @@ mod tests {
     #[test]
     fn test_code_action_response() {
         test_serialization(
-            &vec![CodeActionOrCommand::Command(Command {
-                title: "title".to_string(),
-                command: "command".to_string(),
-                arguments: None,
-            }),
-            CodeActionOrCommand::CodeAction(CodeAction {
-                title: "title".to_string(),
-                kind: Some(code_action_kind::QUICKFIX.to_owned()),
-                command: None,
-                diagnostics: None,
-                edit: None,
-            })],
+            &vec![
+                CodeActionOrCommand::Command(Command {
+                    title: "title".to_string(),
+                    command: "command".to_string(),
+                    arguments: None,
+                }),
+                CodeActionOrCommand::CodeAction(CodeAction {
+                    title: "title".to_string(),
+                    kind: Some(code_action_kind::QUICKFIX.to_owned()),
+                    command: None,
+                    diagnostics: None,
+                    edit: None,
+                }),
+            ],
             r#"[{"title":"title","command":"command"},{"title":"title","kind":"quickfix"}]"#,
         )
     }
