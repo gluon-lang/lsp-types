@@ -233,7 +233,7 @@ impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match r#try!(u8::deserialize(deserializer)) {
             1 => DiagnosticSeverity::Error,
             2 => DiagnosticSeverity::Warning,
             3 => DiagnosticSeverity::Information,
@@ -1439,7 +1439,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match r#try!(u8::deserialize(deserializer)) {
             0 => TextDocumentSyncKind::None,
             1 => TextDocumentSyncKind::Full,
             2 => TextDocumentSyncKind::Incremental,
@@ -1748,7 +1748,7 @@ impl<'de> serde::Deserialize<'de> for MessageType {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match r#try!(u8::deserialize(deserializer)) {
             1 => MessageType::Error,
             2 => MessageType::Warning,
             3 => MessageType::Info,
@@ -2009,7 +2009,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match r#try!(u8::deserialize(deserializer)) {
             1 => TextDocumentSaveReason::Manual,
             2 => TextDocumentSaveReason::AfterDelay,
             3 => TextDocumentSaveReason::FocusOut,
@@ -2070,7 +2070,7 @@ impl<'de> serde::Deserialize<'de> for FileChangeType {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match r#try!(u8::deserialize(deserializer)) {
             1 => FileChangeType::Created,
             2 => FileChangeType::Changed,
             3 => FileChangeType::Deleted,
@@ -2146,7 +2146,7 @@ impl<'de> serde::Deserialize<'de> for WatchKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = r#try!(u8::deserialize(deserializer));
         WatchKind::from_bits(i).ok_or_else(|| {
             D::Error::invalid_value(de::Unexpected::Unsigned(i as u64), &"Unknown flag")
         })
@@ -2233,7 +2233,7 @@ impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = r#try!(u8::deserialize(deserializer));
         CompletionTriggerKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
@@ -2392,7 +2392,7 @@ impl<'de> serde::Deserialize<'de> for CompletionItemKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = r#try!(u8::deserialize(deserializer));
         CompletionItemKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
@@ -2423,7 +2423,7 @@ impl<'de> serde::Deserialize<'de> for InsertTextFormat {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = r#try!(u8::deserialize(deserializer));
         InsertTextFormat::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
                 de::Unexpected::Unsigned(i as u64),
@@ -2614,7 +2614,7 @@ impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match try!(u8::deserialize(deserializer)) {
+        Ok(match r#try!(u8::deserialize(deserializer)) {
             1 => DocumentHighlightKind::Text,
             2 => DocumentHighlightKind::Read,
             3 => DocumentHighlightKind::Write,
@@ -2759,7 +2759,7 @@ impl<'de> serde::Deserialize<'de> for SymbolKind {
     where
         D: serde::Deserializer<'de>,
     {
-        let i = try!(u8::deserialize(deserializer));
+        let i = r#try!(u8::deserialize(deserializer));
         Ok(SymbolKind::from_u8(i).unwrap_or(SymbolKind::Unknown))
     }
 }
