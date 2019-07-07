@@ -239,7 +239,7 @@ impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
             4 => DiagnosticSeverity::Hint,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2, 3 or 4",
                 ));
             }
@@ -1444,7 +1444,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
             2 => TextDocumentSyncKind::Incremental,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value between 0 and 2 (inclusive)",
                 ));
             }
@@ -1754,7 +1754,7 @@ impl<'de> serde::Deserialize<'de> for MessageType {
             4 => MessageType::Log,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2, 3 or 4",
                 ));
             }
@@ -2014,7 +2014,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
             3 => TextDocumentSaveReason::FocusOut,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2 or 3",
                 ))
             }
@@ -2075,7 +2075,7 @@ impl<'de> serde::Deserialize<'de> for FileChangeType {
             3 => FileChangeType::Deleted,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2 or 3",
                 ))
             }
@@ -2147,7 +2147,7 @@ impl<'de> serde::Deserialize<'de> for WatchKind {
     {
         let i = u8::deserialize(deserializer)?;
         WatchKind::from_bits(i).ok_or_else(|| {
-            D::Error::invalid_value(de::Unexpected::Unsigned(i as u64), &"Unknown flag")
+            D::Error::invalid_value(de::Unexpected::Unsigned(u64::from(i)), &"Unknown flag")
         })
     }
 }
@@ -2247,7 +2247,7 @@ impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
         let i = u8::deserialize(deserializer)?;
         CompletionTriggerKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
-                de::Unexpected::Unsigned(i as u64),
+                de::Unexpected::Unsigned(u64::from(i)),
                 &"value between 1 and 3 (inclusive)",
             )
         })
@@ -2406,7 +2406,7 @@ impl<'de> serde::Deserialize<'de> for CompletionItemKind {
         let i = u8::deserialize(deserializer)?;
         CompletionItemKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
-                de::Unexpected::Unsigned(i as u64),
+                de::Unexpected::Unsigned(u64::from(i)),
                 &"value between 1 and 18 (inclusive)",
             )
         })
@@ -2437,7 +2437,7 @@ impl<'de> serde::Deserialize<'de> for InsertTextFormat {
         let i = u8::deserialize(deserializer)?;
         InsertTextFormat::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
-                de::Unexpected::Unsigned(i as u64),
+                de::Unexpected::Unsigned(u64::from(i)),
                 &"value between 1 and 2 (inclusive)",
             )
         })
@@ -2631,7 +2631,7 @@ impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
             3 => DocumentHighlightKind::Write,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"1, 2, or 3",
                 ))
             }
