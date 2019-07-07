@@ -2887,12 +2887,12 @@ pub mod code_action_kind {
     /**
      * Base kind for quickfix actions: 'quickfix'
      */
-    pub const QUICKFIX: &'static str = "quickfix";
+    pub const QUICKFIX: &str = "quickfix";
 
     /**
      * Base kind for refactoring actions: 'refactor'
      */
-    pub const REFACTOR: &'static str = "refactor";
+    pub const REFACTOR: &str = "refactor";
 
     /**
      * Base kind for refactoring extraction actions: 'refactor.extract'
@@ -2905,7 +2905,7 @@ pub mod code_action_kind {
      * - Extract interface from class
      * - ...
      */
-    pub const REFACTOR_EXTRACT: &'static str = "refactor.extract";
+    pub const REFACTOR_EXTRACT: &str = "refactor.extract";
 
     /**
      * Base kind for refactoring inline actions: 'refactor.inline'
@@ -2917,7 +2917,7 @@ pub mod code_action_kind {
      * - Inline constant
      * - ...
      */
-    pub const REFACTOR_INLINE: &'static str = "refactor.inline";
+    pub const REFACTOR_INLINE: &str = "refactor.inline";
 
     /**
      * Base kind for refactoring rewrite actions: 'refactor.rewrite'
@@ -2931,19 +2931,19 @@ pub mod code_action_kind {
      * - Move method to base class
      * - ...
      */
-    pub const REFACTOR_REWRITE: &'static str = "refactor.rewrite";
+    pub const REFACTOR_REWRITE: &str = "refactor.rewrite";
 
     /**
      * Base kind for source actions: `source`
      *
      * Source code actions apply to the entire file.
      */
-    pub const SOURCE: &'static str = "source";
+    pub const SOURCE: &str = "source";
 
     /**
      * Base kind for an organize imports source action: `source.organizeImports`
      */
-    pub const SOURCE_ORGANIZE_IMPORTS: &'static str = "source.organizeImports";
+    pub const SOURCE_ORGANIZE_IMPORTS: &str = "source.organizeImports";
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
