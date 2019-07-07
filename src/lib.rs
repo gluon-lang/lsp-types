@@ -2202,13 +2202,10 @@ impl From<CompletionList> for CompletionResponse {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionParams {
-    // This field was "mixed-in" from TextDocumentPositionParams
-    /// The text document.
-    pub text_document: TextDocumentIdentifier,
 
     // This field was "mixed-in" from TextDocumentPositionParams
-    /// The position inside the text document.
-    pub position: Position,
+    #[serde(flatten)]
+    pub text_document_position: TextDocumentPositionParams,
 
     // CompletionParams properties:
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2575,13 +2572,9 @@ pub enum ParameterLabel {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReferenceParams {
-    // This field was "mixed-in" from TextDocumentPositionParams
-    /// The text document.
-    pub text_document: TextDocumentIdentifier,
-
-    // This field was "mixed-in" from TextDocumentPositionParams
-    /// The position inside the text document.
-    pub position: Position,
+    // Text Document and Position fields
+    #[serde(flatten)]
+    pub text_document_position: TextDocumentPositionParams,
 
     // ReferenceParams properties:
     pub context: ReferenceContext,
@@ -3101,11 +3094,9 @@ pub struct DocumentRangeFormattingParams {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentOnTypeFormattingParams {
-    /// The document to format.
-    pub text_document: TextDocumentIdentifier,
-
-    /// The position at which this request was sent.
-    pub position: Position,
+    /// Text Document and Position fields.
+    #[serde(flatten)]
+    pub text_document_position: TextDocumentPositionParams,
 
     /// The character that has been typed.
     pub ch: String,
@@ -3139,11 +3130,9 @@ pub struct DocumentOnTypeFormattingRegistrationOptions {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenameParams {
-    /// The document to format.
-    pub text_document: TextDocumentIdentifier,
-
-    /// The position at which this request was sent.
-    pub position: Position,
+    /// Text Document and Position fields
+    #[serde(flatten)]
+    pub text_document_position: TextDocumentPositionParams,
 
     /// The new name of the symbol. If the given name is not valid the
     /// request must return a [ResponseError](#ResponseError) with an
