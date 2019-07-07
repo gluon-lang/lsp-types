@@ -72,8 +72,8 @@ pub struct Position {
 impl Position {
     pub fn new(line: u64, character: u64) -> Position {
         Position {
-            line: line,
-            character: character,
+            line,
+            character,
         }
     }
 }
@@ -91,8 +91,8 @@ pub struct Range {
 impl Range {
     pub fn new(start: Position, end: Position) -> Range {
         Range {
-            start: start,
-            end: end,
+            start,
+            end,
         }
     }
 }
@@ -108,8 +108,8 @@ pub struct Location {
 impl Location {
     pub fn new(uri: Url, range: Range) -> Location {
         Location {
-            uri: uri,
-            range: range,
+            uri,
+            range,
         }
     }
 }
@@ -276,9 +276,9 @@ pub struct Command {
 impl Command {
     pub fn new(title: String, command: String, arguments: Option<Vec<Value>>) -> Command {
         Command {
-            title: title,
-            command: command,
-            arguments: arguments,
+            title,
+            command,
+            arguments,
         }
     }
 }
@@ -302,8 +302,8 @@ pub struct TextEdit {
 impl TextEdit {
     pub fn new(range: Range, new_text: String) -> TextEdit {
         TextEdit {
-            range: range,
-            new_text: new_text,
+            range,
+            new_text,
         }
     }
 }
@@ -641,7 +641,7 @@ pub struct TextDocumentIdentifier {
 
 impl TextDocumentIdentifier {
     pub fn new(uri: Url) -> TextDocumentIdentifier {
-        TextDocumentIdentifier { uri: uri }
+        TextDocumentIdentifier { uri }
     }
 }
 
@@ -667,10 +667,10 @@ pub struct TextDocumentItem {
 impl TextDocumentItem {
     pub fn new(uri: Url, language_id: String, version: u64, text: String) -> TextDocumentItem {
         TextDocumentItem {
-            uri: uri,
-            language_id: language_id,
-            version: version,
-            text: text,
+            uri,
+            language_id,
+            version,
+            text,
         }
     }
 }
@@ -690,7 +690,7 @@ pub struct VersionedTextDocumentIdentifier {
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: u64) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier {
-            uri: uri,
+            uri,
             version: Some(version),
         }
     }
@@ -717,8 +717,8 @@ impl TextDocumentPositionParams {
         position: Position,
     ) -> TextDocumentPositionParams {
         TextDocumentPositionParams {
-            text_document: text_document,
-            position: position,
+            text_document,
+            position,
         }
     }
 }
@@ -2106,7 +2106,7 @@ pub struct FileEvent {
 
 impl FileEvent {
     pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
-        FileEvent { uri: uri, typ: typ }
+        FileEvent { uri, typ }
     }
 }
 
@@ -2174,8 +2174,8 @@ pub struct PublishDiagnosticsParams {
 impl PublishDiagnosticsParams {
     pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
-            uri: uri,
-            diagnostics: diagnostics,
+            uri,
+            diagnostics,
         }
     }
 }
@@ -2361,7 +2361,7 @@ impl CompletionItem {
     /// Create a CompletionItem with the minimum possible info (label and detail).
     pub fn new_simple(label: String, detail: String) -> CompletionItem {
         CompletionItem {
-            label: label,
+            label,
             detail: Some(detail),
             ..Self::default()
         }
@@ -2505,7 +2505,7 @@ impl MarkedString {
 
     pub fn from_language_code(language: String, code_block: String) -> MarkedString {
         MarkedString::LanguageString(LanguageString {
-            language: language,
+            language,
             value: code_block,
         })
     }
