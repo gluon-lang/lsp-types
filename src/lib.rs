@@ -72,8 +72,8 @@ pub struct Position {
 impl Position {
     pub fn new(line: u64, character: u64) -> Position {
         Position {
-            line: line,
-            character: character,
+            line,
+            character,
         }
     }
 }
@@ -91,8 +91,8 @@ pub struct Range {
 impl Range {
     pub fn new(start: Position, end: Position) -> Range {
         Range {
-            start: start,
-            end: end,
+            start,
+            end,
         }
     }
 }
@@ -108,8 +108,8 @@ pub struct Location {
 impl Location {
     pub fn new(uri: Url, range: Range) -> Location {
         Location {
-            uri: uri,
-            range: range,
+            uri,
+            range,
         }
     }
 }
@@ -239,7 +239,7 @@ impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
             4 => DiagnosticSeverity::Hint,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2, 3 or 4",
                 ));
             }
@@ -276,9 +276,9 @@ pub struct Command {
 impl Command {
     pub fn new(title: String, command: String, arguments: Option<Vec<Value>>) -> Command {
         Command {
-            title: title,
-            command: command,
-            arguments: arguments,
+            title,
+            command,
+            arguments,
         }
     }
 }
@@ -302,8 +302,8 @@ pub struct TextEdit {
 impl TextEdit {
     pub fn new(range: Range, new_text: String) -> TextEdit {
         TextEdit {
-            range: range,
-            new_text: new_text,
+            range,
+            new_text,
         }
     }
 }
@@ -641,7 +641,7 @@ pub struct TextDocumentIdentifier {
 
 impl TextDocumentIdentifier {
     pub fn new(uri: Url) -> TextDocumentIdentifier {
-        TextDocumentIdentifier { uri: uri }
+        TextDocumentIdentifier { uri }
     }
 }
 
@@ -667,10 +667,10 @@ pub struct TextDocumentItem {
 impl TextDocumentItem {
     pub fn new(uri: Url, language_id: String, version: u64, text: String) -> TextDocumentItem {
         TextDocumentItem {
-            uri: uri,
-            language_id: language_id,
-            version: version,
-            text: text,
+            uri,
+            language_id,
+            version,
+            text,
         }
     }
 }
@@ -690,7 +690,7 @@ pub struct VersionedTextDocumentIdentifier {
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: u64) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier {
-            uri: uri,
+            uri,
             version: Some(version),
         }
     }
@@ -717,8 +717,8 @@ impl TextDocumentPositionParams {
         position: Position,
     ) -> TextDocumentPositionParams {
         TextDocumentPositionParams {
-            text_document: text_document,
-            position: position,
+            text_document,
+            position,
         }
     }
 }
@@ -1444,7 +1444,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
             2 => TextDocumentSyncKind::Incremental,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value between 0 and 2 (inclusive)",
                 ));
             }
@@ -1754,7 +1754,7 @@ impl<'de> serde::Deserialize<'de> for MessageType {
             4 => MessageType::Log,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2, 3 or 4",
                 ));
             }
@@ -2014,7 +2014,7 @@ impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
             3 => TextDocumentSaveReason::FocusOut,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2 or 3",
                 ))
             }
@@ -2075,7 +2075,7 @@ impl<'de> serde::Deserialize<'de> for FileChangeType {
             3 => FileChangeType::Deleted,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"value of 1, 2 or 3",
                 ))
             }
@@ -2106,7 +2106,7 @@ pub struct FileEvent {
 
 impl FileEvent {
     pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
-        FileEvent { uri: uri, typ: typ }
+        FileEvent { uri, typ }
     }
 }
 
@@ -2147,7 +2147,7 @@ impl<'de> serde::Deserialize<'de> for WatchKind {
     {
         let i = u8::deserialize(deserializer)?;
         WatchKind::from_bits(i).ok_or_else(|| {
-            D::Error::invalid_value(de::Unexpected::Unsigned(i as u64), &"Unknown flag")
+            D::Error::invalid_value(de::Unexpected::Unsigned(u64::from(i)), &"Unknown flag")
         })
     }
 }
@@ -2174,8 +2174,8 @@ pub struct PublishDiagnosticsParams {
 impl PublishDiagnosticsParams {
     pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
-            uri: uri,
-            diagnostics: diagnostics,
+            uri,
+            diagnostics,
         }
     }
 }
@@ -2247,7 +2247,7 @@ impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
         let i = u8::deserialize(deserializer)?;
         CompletionTriggerKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
-                de::Unexpected::Unsigned(i as u64),
+                de::Unexpected::Unsigned(u64::from(i)),
                 &"value between 1 and 3 (inclusive)",
             )
         })
@@ -2361,7 +2361,7 @@ impl CompletionItem {
     /// Create a CompletionItem with the minimum possible info (label and detail).
     pub fn new_simple(label: String, detail: String) -> CompletionItem {
         CompletionItem {
-            label: label,
+            label,
             detail: Some(detail),
             ..Self::default()
         }
@@ -2406,7 +2406,7 @@ impl<'de> serde::Deserialize<'de> for CompletionItemKind {
         let i = u8::deserialize(deserializer)?;
         CompletionItemKind::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
-                de::Unexpected::Unsigned(i as u64),
+                de::Unexpected::Unsigned(u64::from(i)),
                 &"value between 1 and 18 (inclusive)",
             )
         })
@@ -2437,7 +2437,7 @@ impl<'de> serde::Deserialize<'de> for InsertTextFormat {
         let i = u8::deserialize(deserializer)?;
         InsertTextFormat::from_u8(i).ok_or_else(|| {
             D::Error::invalid_value(
-                de::Unexpected::Unsigned(i as u64),
+                de::Unexpected::Unsigned(u64::from(i)),
                 &"value between 1 and 2 (inclusive)",
             )
         })
@@ -2505,7 +2505,7 @@ impl MarkedString {
 
     pub fn from_language_code(language: String, code_block: String) -> MarkedString {
         MarkedString::LanguageString(LanguageString {
-            language: language,
+            language,
             value: code_block,
         })
     }
@@ -2631,7 +2631,7 @@ impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
             3 => DocumentHighlightKind::Write,
             i => {
                 return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(i as u64),
+                    de::Unexpected::Unsigned(u64::from(i)),
                     &"1, 2, or 3",
                 ))
             }
@@ -2887,12 +2887,12 @@ pub mod code_action_kind {
     /**
      * Base kind for quickfix actions: 'quickfix'
      */
-    pub const QUICKFIX: &'static str = "quickfix";
+    pub const QUICKFIX: &str = "quickfix";
 
     /**
      * Base kind for refactoring actions: 'refactor'
      */
-    pub const REFACTOR: &'static str = "refactor";
+    pub const REFACTOR: &str = "refactor";
 
     /**
      * Base kind for refactoring extraction actions: 'refactor.extract'
@@ -2905,7 +2905,7 @@ pub mod code_action_kind {
      * - Extract interface from class
      * - ...
      */
-    pub const REFACTOR_EXTRACT: &'static str = "refactor.extract";
+    pub const REFACTOR_EXTRACT: &str = "refactor.extract";
 
     /**
      * Base kind for refactoring inline actions: 'refactor.inline'
@@ -2917,7 +2917,7 @@ pub mod code_action_kind {
      * - Inline constant
      * - ...
      */
-    pub const REFACTOR_INLINE: &'static str = "refactor.inline";
+    pub const REFACTOR_INLINE: &str = "refactor.inline";
 
     /**
      * Base kind for refactoring rewrite actions: 'refactor.rewrite'
@@ -2931,19 +2931,19 @@ pub mod code_action_kind {
      * - Move method to base class
      * - ...
      */
-    pub const REFACTOR_REWRITE: &'static str = "refactor.rewrite";
+    pub const REFACTOR_REWRITE: &str = "refactor.rewrite";
 
     /**
      * Base kind for source actions: `source`
      *
      * Source code actions apply to the entire file.
      */
-    pub const SOURCE: &'static str = "source";
+    pub const SOURCE: &str = "source";
 
     /**
      * Base kind for an organize imports source action: `source.organizeImports`
      */
-    pub const SOURCE_ORGANIZE_IMPORTS: &'static str = "source.organizeImports";
+    pub const SOURCE_ORGANIZE_IMPORTS: &str = "source.organizeImports";
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
