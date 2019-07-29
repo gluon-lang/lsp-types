@@ -26,8 +26,6 @@ use serde;
 extern crate serde_derive;
 use serde_json;
 
-use url_serde;
-
 pub use url::Url;
 
 use std::collections::HashMap;
@@ -100,7 +98,6 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    #[serde(with = "url_serde")]
     pub uri: Url,
     pub range: Range,
 }
@@ -126,7 +123,6 @@ pub struct LocationLink {
     pub origin_selection_range: Option<Range>,
 
     /// The target resource identifier of this link.
-    #[serde(with = "url_serde")]
     pub target_uri: Url,
 
     /// The full target range of this link.
@@ -356,7 +352,6 @@ pub struct CreateFile {
     /**
      * The resource to create.
      */
-    #[serde(with = "url_serde")]
     pub uri: Url,
     /**
      * Additional options
@@ -392,12 +387,10 @@ pub struct RenameFile {
     /**
      * The old (existing) location.
      */
-    #[serde(with = "url_serde")]
     pub old_uri: Url,
     /**
      * The new location.
      */
-    #[serde(with = "url_serde")]
     pub new_uri: Url,
     /**
      * Rename options.
@@ -433,7 +426,6 @@ pub struct DeleteFile {
     /**
      * The file to delete.
      */
-    #[serde(with = "url_serde")]
     pub uri: Url,
     /**
      * Delete options.
@@ -550,8 +542,8 @@ mod url_map {
 
                 // While there are entries remaining in the input, add them
                 // into our map.
-                while let Some((key, value)) = visitor.next_entry::<url_serde::De<Url>, _>()? {
-                    values.insert(key.into_inner(), value);
+                while let Some((key, value)) = visitor.next_entry::<Url, _>()? {
+                    values.insert(key, value);
                 }
 
                 Ok(values)
@@ -635,7 +627,6 @@ pub struct TextDocumentIdentifier {
     // This modelled by "mixing-in" TextDocumentIdentifier in VersionedTextDocumentIdentifier,
     // so any changes to this type must be effected in the sub-type as well.
     /// The text document's URI.
-    #[serde(with = "url_serde")]
     pub uri: Url,
 }
 
@@ -650,7 +641,6 @@ impl TextDocumentIdentifier {
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentItem {
     /// The text document's URI.
-    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The text document's language identifier.
@@ -680,7 +670,6 @@ impl TextDocumentItem {
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
-    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The version number of this document.
@@ -771,7 +760,6 @@ pub struct InitializeParams {
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
-    #[serde(with = "option_url")]
     #[serde(default)]
     pub root_uri: Option<Url>,
 
@@ -811,27 +799,6 @@ pub enum TraceOption {
 impl Default for TraceOption {
     fn default() -> TraceOption {
         TraceOption::Off
-    }
-}
-
-mod option_url {
-    use serde::{self, Serialize};
-    use url::Url;
-    use url_serde::{De, Ser};
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        serde::Deserialize::deserialize(deserializer)
-            .map(|x: Option<De<Url>>| x.map(|url| url.into_inner()))
-    }
-
-    pub fn serialize<S>(self_: &Option<Url>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        self_.as_ref().map(Ser::new).serialize(serializer)
     }
 }
 
@@ -908,7 +875,6 @@ pub enum WorkspaceFolderCapabilityChangeNotifications {
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceFolder {
     /// The associated URI for this workspace folder.
-    #[serde(with = "url_serde")]
     pub uri: Url,
     /// The name of the workspace folder. Defaults to the uri's basename.
     pub name: String,
@@ -2096,7 +2062,6 @@ impl serde::Serialize for FileChangeType {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct FileEvent {
     /// The file's URI.
-    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// The change type.
@@ -2164,7 +2129,6 @@ impl serde::Serialize for WatchKind {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
-    #[serde(with = "url_serde")]
     pub uri: Url,
 
     /// An array of diagnostic information items.
@@ -3041,7 +3005,6 @@ pub struct DocumentLink {
     /**
      * The uri this link points to.
      */
-    #[serde(with = "url_serde")]
     pub target: Url,
 }
 
