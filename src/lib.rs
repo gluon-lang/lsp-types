@@ -18,19 +18,15 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 
 #[macro_use]
 extern crate bitflags;
-#[macro_use]
-extern crate num_derive;
 
-use serde;
-#[macro_use]
-extern crate serde_derive;
+use serde::{Serialize, Deserialize};
 use serde_json;
+use serde_repr::{Serialize_repr, Deserialize_repr};
 
 pub use url::Url;
 
 use std::collections::HashMap;
 
-use num_traits::FromPrimitive;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
@@ -2193,35 +2189,12 @@ pub struct CompletionContext {
 }
 
 /// How a completion was triggered.
-#[derive(Debug, PartialEq, Clone, Copy, FromPrimitive)]
+#[derive(Debug, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum CompletionTriggerKind {
     Invoked = 1,
     TriggerCharacter = 2,
     TriggerForIncompleteCompletions = 3,
-}
-
-impl<'de> serde::Deserialize<'de> for CompletionTriggerKind {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let i = u8::deserialize(deserializer)?;
-        CompletionTriggerKind::from_u8(i).ok_or_else(|| {
-            D::Error::invalid_value(
-                de::Unexpected::Unsigned(u64::from(i)),
-                &"value between 1 and 3 (inclusive)",
-            )
-        })
-    }
-}
-
-impl serde::Serialize for CompletionTriggerKind {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
@@ -2330,7 +2303,8 @@ impl CompletionItem {
 }
 
 /// The kind of a completion entry.
-#[derive(Debug, Eq, PartialEq, Clone, Copy, FromPrimitive)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
 pub enum CompletionItemKind {
     Text = 1,
     Method = 2,
@@ -2359,59 +2333,12 @@ pub enum CompletionItemKind {
     TypeParameter = 25,
 }
 
-impl<'de> serde::Deserialize<'de> for CompletionItemKind {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let i = u8::deserialize(deserializer)?;
-        CompletionItemKind::from_u8(i).ok_or_else(|| {
-            D::Error::invalid_value(
-                de::Unexpected::Unsigned(u64::from(i)),
-                &"value between 1 and 18 (inclusive)",
-            )
-        })
-    }
-}
-
-impl serde::Serialize for CompletionItemKind {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
-}
-
 /// Defines how to interpret the insert text in a completion item
-#[derive(Debug, Eq, PartialEq, Clone, Copy, FromPrimitive)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
 pub enum InsertTextFormat {
     PlainText = 1,
     Snippet = 2,
-}
-
-impl<'de> serde::Deserialize<'de> for InsertTextFormat {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let i = u8::deserialize(deserializer)?;
-        InsertTextFormat::from_u8(i).ok_or_else(|| {
-            D::Error::invalid_value(
-                de::Unexpected::Unsigned(u64::from(i)),
-                &"value between 1 and 2 (inclusive)",
-            )
-        })
-    }
-}
-
-impl serde::Serialize for InsertTextFormat {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 /// The result of a hover request.
@@ -2701,7 +2628,8 @@ pub struct SymbolInformation {
 }
 
 /// A symbol kind.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, FromPrimitive)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
 pub enum SymbolKind {
     File = 1,
     Module = 2,
@@ -2732,25 +2660,6 @@ pub enum SymbolKind {
 
     // Capturing all unknown enums by this lib.
     Unknown = 255,
-}
-
-impl<'de> serde::Deserialize<'de> for SymbolKind {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let i = u8::deserialize(deserializer)?;
-        Ok(SymbolKind::from_u8(i).unwrap_or(SymbolKind::Unknown))
-    }
-}
-
-impl serde::Serialize for SymbolKind {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 /// The parameters of a Workspace Symbol Request.
