@@ -644,14 +644,14 @@ pub struct TextDocumentItem {
 
     /// The version number of this document (it will strictly increase after each
     /// change, including undo/redo).
-    pub version: u64,
+    pub version: i64,
 
     /// The content of the opened text document.
     pub text: String,
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: Url, language_id: String, version: u64, text: String) -> TextDocumentItem {
+    pub fn new(uri: Url, language_id: String, version: i64, text: String) -> TextDocumentItem {
         TextDocumentItem {
             uri,
             language_id,
@@ -669,11 +669,11 @@ pub struct VersionedTextDocumentIdentifier {
     pub uri: Url,
 
     /// The version number of this document.
-    pub version: Option<u64>,
+    pub version: Option<i64>,
 }
 
 impl VersionedTextDocumentIdentifier {
-    pub fn new(uri: Url, version: u64) -> VersionedTextDocumentIdentifier {
+    pub fn new(uri: Url, version: i64) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier {
             uri,
             version: Some(version),
