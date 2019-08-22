@@ -1665,6 +1665,10 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rename_provider: Option<RenameProviderCapability>,
 
+    /// The server provides document link support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub document_link_provider: Option<DocumentLinkOptions>,
+
     /// The server provides color provider support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color_provider: Option<ColorProviderCapability>,
@@ -3044,6 +3048,14 @@ pub struct RenameCapability {
 pub enum PrepareRenameResponse {
     Range(Range),
     RangeWithPlaceholder { range: Range, placeholder: String },
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentLinkOptions {
+    /// Document links have a resolve provider as well.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolve_provider: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
