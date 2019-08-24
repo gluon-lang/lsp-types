@@ -1328,10 +1328,10 @@ pub struct TextDocumentClientCapabilities {
 #[serde(rename_all = "camelCase")]
 pub struct WindowClientCapabilities {
     /**
-     * Whether `window/progress` server notifications are supported.
+     * Whether client supports create a work done progress UI from the server side.
      */
     #[cfg(feature = "proposed")]
-    pub progress: Option<bool>,
+    pub work_done_progress: Option<bool>,
 }
 
 /**
@@ -3307,18 +3307,61 @@ pub struct MarkupContent {
 }
 
 #[cfg(feature = "proposed")]
+pub type ProgressToken = NumberOrString;
+
+#[cfg(feature = "proposed")]
 /// The progress notification is sent from the server to the client to ask
 /// the client to indicate progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct ProgressParams {
-    /// A unique identifier to associate multiple progress notifications
-    /// with the same progress.
-    pub id: String,
+    /// The progress token provided by the client.
+    pub token: ProgressToken,
 
+    /// The progress data.
+    pub value: ProgressParamsValue,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(untagged)]
+pub enum ProgressParamsValue {
+    WorkDone(WorkDoneProgress)
+}
+
+#[cfg(feature = "proposed")]
+/// The `window/workDoneProgress/create` request is sent from the server 
+/// to the clientto ask the client to create a work done progress.
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressCreateParams {
+    /// The token to be used to report progress.
+    pub token: ProgressToken,
+}
+
+#[cfg(feature = "proposed")]
+/// The `window/workDoneProgress/cancel` is sent from the client to the server 
+/// to indicate that the user has pressed cancel on a server initiated work done progress.
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressCancelParams {
+    /// The token to be used to report progress.
+    pub token: ProgressToken,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressBegin {
     /// Mandatory title of the progress operation. Used to briefly inform
     /// about the kind of operation being performed.
     /// Examples: "Indexing" or "Linking dependencies".
     pub title: String,
+
+    /// Controls if a cancel button should show to allow the user to cancel the
+	/// long running operation. Clients that don't support cancellation are allowed
+	/// to ignore the setting.
+    pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
     /// complementary information to the `title`.
@@ -3329,10 +3372,46 @@ pub struct ProgressParams {
     /// Optional progress percentage to display (value 100 is considered 100%).
     /// If unset, the previous progress percentage (if any) is still valid.
     pub percentage: Option<f64>,
+}
 
-    /// Set to true on the final progress update.
-    /// No more progress notifications with the same ID should be sent.
-    pub done: Option<bool>,
+#[cfg(feature = "proposed")]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressReport {
+    /// Controls if a cancel button should show to allow the user to cancel the
+	/// long running operation. Clients that don't support cancellation are allowed
+	/// to ignore the setting.
+    pub cancellable: Option<bool>,
+
+    /// Optional, more detailed associated progress message. Contains
+    /// complementary information to the `title`.
+    /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
+    /// If unset, the previous progress message (if any) is still valid.
+    pub message: Option<String>,
+
+    /// Optional progress percentage to display (value 100 is considered 100%).
+    /// If unset, the previous progress percentage (if any) is still valid.
+    pub percentage: Option<f64>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressDone {
+    /// Optional, more detailed associated progress message. Contains
+    /// complementary information to the `title`.
+    /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
+    /// If unset, the previous progress message (if any) is still valid.
+    pub message: Option<String>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(tag = "kind", rename_all = "lowercase")]
+pub enum WorkDoneProgress {
+    Begin(WorkDoneProgressBegin),
+    Report(WorkDoneProgressReport),
+    Done(WorkDoneProgressDone),
 }
 
 #[cfg(test)]

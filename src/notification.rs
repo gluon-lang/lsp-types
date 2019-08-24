@@ -61,8 +61,13 @@ macro_rules! lsp_notification {
     };
 
     // Requires #[cfg(feature = "proposed")]
-    ("window/progress") => {
+    ("$/progress") => {
         $crate::notification::Progress
+    };
+
+    // Requires #[cfg(feature = "proposed")]
+    ("window/workDoneProgress/cancel") => {
+        $crate::notification::WorkDoneProgressCancel
     };
 }
 
@@ -266,7 +271,19 @@ pub enum Progress {}
 #[cfg(feature = "proposed")]
 impl Notification for Progress {
     type Params = ProgressParams;
-    const METHOD: &'static str = "window/progress";
+    const METHOD: &'static str = "$/progress";
+}
+
+#[cfg(feature = "proposed")]
+/// The `window/workDoneProgress/cancel` is sent from the client to the server 
+/// to indicate that the user has pressed cancel on a server initiated work done progress.
+#[derive(Debug)]
+pub enum WorkDoneProgressCancel {}
+
+#[cfg(feature = "proposed")]
+impl Notification for WorkDoneProgressCancel {
+    type Params = WorkDoneProgressCancelParams;
+    const METHOD: &'static str = "window/workDoneProgress/cancel";
 }
 
 #[cfg(test)]
@@ -307,8 +324,12 @@ mod test {
         check_macro!("workspace/didChangeConfiguration");
         check_macro!("workspace/didChangeWatchedFiles");
         check_macro!("workspace/didChangeWorkspaceFolders");
+    }
 
-        #[cfg(feature = "proposed")]
-        check_macro!("window/progress");
+    #[test]
+    #[cfg(feature = "proposed")]
+    fn check_proposed_macro_definitions() {
+        check_macro!("$/progress");
+        check_macro!("window/workDoneProgress/cancel");
     }
 }

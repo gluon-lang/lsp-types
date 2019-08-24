@@ -117,6 +117,11 @@ macro_rules! lsp_request {
     ("workspace/configuration") => {
         $crate::request::WorkspaceConfiguration
     };
+
+    // Requires #[cfg(feature = "proposed")]
+    ("window/workDoneProgress/create") => {
+        $crate::request::WorkDoneProgressCreate
+    };
 }
 
 /**
@@ -581,6 +586,19 @@ impl Request for WorkspaceFoldersRequest {
     const METHOD: &'static str = "workspace/workspaceFolders";
 }
 
+/// The `window/workDoneProgress/create` request is sent from the server 
+/// to the clientto ask the client to create a work done progress.
+#[cfg(feature = "proposed")]
+#[derive(Debug)]
+pub enum WorkDoneProgressCreate {}
+
+#[cfg(feature = "proposed")]
+impl Request for WorkDoneProgressCreate {
+    type Params = WorkDoneProgressCreateParams;
+    type Result = ();
+    const METHOD: &'static str = "window/workDoneProgress/create";
+}
+
 ///The selection range request is sent from the client to the server to return
 ///suggested selection ranges at given positions. A selection range is a range
 ///around the cursor position which the user might be interested in selecting.
@@ -662,5 +680,6 @@ mod test {
     #[cfg(feature = "proposed")]
     fn check_proposed_macro_definitions() {
         check_macro!("textDocument/selectionRange");
+        check_macro!("window/workDoneProgress/create");
     }
 }
