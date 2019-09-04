@@ -19,9 +19,9 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 #[macro_use]
 extern crate bitflags;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
-use serde_repr::{Serialize_repr, Deserialize_repr};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 pub use url::Url;
 
@@ -65,10 +65,7 @@ pub struct Position {
 
 impl Position {
     pub fn new(line: u64, character: u64) -> Position {
-        Position {
-            line,
-            character,
-        }
+        Position { line, character }
     }
 }
 
@@ -84,10 +81,7 @@ pub struct Range {
 
 impl Range {
     pub fn new(start: Position, end: Position) -> Range {
-        Range {
-            start,
-            end,
-        }
+        Range { start, end }
     }
 }
 
@@ -100,10 +94,7 @@ pub struct Location {
 
 impl Location {
     pub fn new(uri: Url, range: Range) -> Location {
-        Location {
-            uri,
-            range,
-        }
+        Location { uri, range }
     }
 }
 
@@ -293,10 +284,7 @@ pub struct TextEdit {
 
 impl TextEdit {
     pub fn new(range: Range, new_text: String) -> TextEdit {
-        TextEdit {
-            range,
-            new_text,
-        }
+        TextEdit { range, new_text }
     }
 }
 
@@ -1331,6 +1319,7 @@ pub struct WindowClientCapabilities {
      * Whether client supports create a work done progress UI from the server side.
      */
     #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_progress: Option<bool>,
 }
 
@@ -2137,10 +2126,7 @@ pub struct PublishDiagnosticsParams {
 
 impl PublishDiagnosticsParams {
     pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
-        PublishDiagnosticsParams {
-            uri,
-            diagnostics,
-        }
+        PublishDiagnosticsParams { uri, diagnostics }
     }
 }
 
@@ -2166,7 +2152,6 @@ impl From<CompletionList> for CompletionResponse {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionParams {
-
     // This field was "mixed-in" from TextDocumentPositionParams
     #[serde(flatten)]
     pub text_document_position: TextDocumentPositionParams,
@@ -3326,11 +3311,11 @@ pub struct ProgressParams {
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum ProgressParamsValue {
-    WorkDone(WorkDoneProgress)
+    WorkDone(WorkDoneProgress),
 }
 
 #[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/create` request is sent from the server 
+/// The `window/workDoneProgress/create` request is sent from the server
 /// to the clientto ask the client to create a work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3340,7 +3325,7 @@ pub struct WorkDoneProgressCreateParams {
 }
 
 #[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/cancel` is sent from the client to the server 
+/// The `window/workDoneProgress/cancel` is sent from the client to the server
 /// to indicate that the user has pressed cancel on a server initiated work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3359,18 +3344,21 @@ pub struct WorkDoneProgressBegin {
     pub title: String,
 
     /// Controls if a cancel button should show to allow the user to cancel the
-	/// long running operation. Clients that don't support cancellation are allowed
-	/// to ignore the setting.
+    /// long running operation. Clients that don't support cancellation are allowed
+    /// to ignore the setting.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 
     /// Optional progress percentage to display (value 100 is considered 100%).
     /// If unset, the previous progress percentage (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub percentage: Option<f64>,
 }
 
@@ -3379,18 +3367,21 @@ pub struct WorkDoneProgressBegin {
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressReport {
     /// Controls if a cancel button should show to allow the user to cancel the
-	/// long running operation. Clients that don't support cancellation are allowed
-	/// to ignore the setting.
+    /// long running operation. Clients that don't support cancellation are allowed
+    /// to ignore the setting.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 
     /// Optional progress percentage to display (value 100 is considered 100%).
     /// If unset, the previous progress percentage (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub percentage: Option<f64>,
 }
 
@@ -3402,6 +3393,7 @@ pub struct WorkDoneProgressDone {
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 

@@ -275,7 +275,7 @@ impl Notification for Progress {
 }
 
 #[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/cancel` is sent from the client to the server 
+/// The `window/workDoneProgress/cancel` is sent from the client to the server
 /// to indicate that the user has pressed cancel on a server initiated work done progress.
 #[derive(Debug)]
 pub enum WorkDoneProgressCancel {}
