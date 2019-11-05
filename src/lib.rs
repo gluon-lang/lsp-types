@@ -3518,7 +3518,6 @@ pub struct WorkDoneProgressCancelParams {
     pub token: ProgressToken,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressBegin {
@@ -3544,7 +3543,6 @@ pub struct WorkDoneProgressBegin {
     pub percentage: Option<f64>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressReport {
@@ -3565,10 +3563,9 @@ pub struct WorkDoneProgressReport {
     pub percentage: Option<f64>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct WorkDoneProgressDone {
+pub struct WorkDoneProgressEnd {
     /// Optional, more detailed associated progress message. Contains
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
@@ -3576,13 +3573,12 @@ pub struct WorkDoneProgressDone {
     pub message: Option<String>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum WorkDoneProgress {
     Begin(WorkDoneProgressBegin),
     Report(WorkDoneProgressReport),
-    Done(WorkDoneProgressDone),
+    Done(WorkDoneProgressEnd),
 }
 
 #[cfg(test)]
