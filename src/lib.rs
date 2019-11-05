@@ -1103,6 +1103,7 @@ pub struct CompletionItemCapability {
      * preserve unknown tags when sending a completion item back to the server in
      * a resolve call.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tag_support: Option<TagSupport<CompletionItemTag>>,
 }
 
@@ -1219,6 +1220,7 @@ pub struct SignatureHelpCapability {
      * contextSupport will also support the `retriggerCharacters` on
      * `SignatureHelpOptions`.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub context_support: Option<bool>,
 }
 
@@ -1233,6 +1235,7 @@ pub struct PublishDiagnosticsCapability {
 
     /// Client supports the tag property to provide meta data about a diagnostic.
     /// Clients supporting tags have to handle unknown tags gracefully.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tag_support: Option<TagSupport<DiagnosticTag>>,
 }
 
@@ -1421,6 +1424,7 @@ pub struct InitializeResult {
     pub capabilities: ServerCapabilities,
 
     /// The capabilities the language server provides.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub server_info: Option<ServerInfo>,
 }
 
@@ -1539,6 +1543,7 @@ pub struct SignatureHelpContext {
 
     /// Character that caused signature help to be triggered.
     /// This is undefined when `triggerKind !== SignatureHelpTriggerKind.TriggerCharacter`
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_character: Option<String>,
 
     /// `true` if signature help was already showing when it was triggered.
@@ -1679,6 +1684,7 @@ pub struct CodeActionCapability {
     pub code_action_literal_support: Option<CodeActionLiteralSupport>,
 
     /// Whether code action supports the `isPreferred` property.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_preferred_support: Option<bool>,
 }
 
@@ -2257,6 +2263,7 @@ pub struct PublishDiagnosticsParams {
     pub diagnostics: Vec<Diagnostic>,
 
     /// Optional the version number of the document the diagnostics are published for.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<i64>,
 }
 
@@ -3523,6 +3530,7 @@ pub struct WorkDoneProgressBegin {
     /// Controls if a cancel button should show to allow the user to cancel the
     /// long running operation. Clients that don't support cancellation are allowed
     /// to ignore the setting.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
@@ -3543,6 +3551,7 @@ pub struct WorkDoneProgressReport {
     /// Controls if a cancel button should show to allow the user to cancel the
     /// long running operation. Clients that don't support cancellation are allowed
     /// to ignore the setting.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
