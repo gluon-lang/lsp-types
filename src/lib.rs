@@ -1385,6 +1385,7 @@ pub struct WindowClientCapabilities {
     /**
      * Whether client supports create a work done progress UI from the server side.
      */
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_progress: Option<bool>,
 }
 
