@@ -3596,6 +3596,13 @@ pub enum WorkDoneProgress {
     Done(WorkDoneProgressEnd),
 }
 
+/// A parameter literal used to pass a partial result token.
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+pub struct PartialResultParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub partial_result_token: Option<ProgressToken>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
