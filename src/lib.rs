@@ -786,6 +786,7 @@ pub struct InitializeParams {
     pub workspace_folders: Option<Vec<WorkspaceFolder>>,
 
     /// Information about the client.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub client_info: Option<ClientInfo>,
 }
 
@@ -794,6 +795,7 @@ pub struct ClientInfo {
     /// The name of the client as defined by the client.
     pub name: String,
     /// The client's version as defined by the client.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
 }
 
@@ -1383,7 +1385,6 @@ pub struct WindowClientCapabilities {
     /**
      * Whether client supports create a work done progress UI from the server side.
      */
-    #[cfg(feature = "proposed")]
     pub work_done_progress: Option<bool>,
 }
 
@@ -1433,6 +1434,7 @@ pub struct ServerInfo {
     /// The name of the server as defined by the server.
     pub name: String,
     /// The servers's version as defined by the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
 }
 
@@ -1554,6 +1556,7 @@ pub struct SignatureHelpContext {
     /// The currently active `SignatureHelp`.
     /// The `activeSignatureHelp` has its `SignatureHelp.activeSignature` field updated based on
     /// the user navigating through available signatures.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_signature_help: Option<SignatureHelp>,
 }
 
@@ -3475,10 +3478,8 @@ pub struct MarkupContent {
     pub value: String,
 }
 
-#[cfg(feature = "proposed")]
 pub type ProgressToken = NumberOrString;
 
-#[cfg(feature = "proposed")]
 /// The progress notification is sent from the server to the client to ask
 /// the client to indicate progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -3491,14 +3492,12 @@ pub struct ProgressParams {
     pub value: ProgressParamsValue,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum ProgressParamsValue {
     WorkDone(WorkDoneProgress),
 }
 
-#[cfg(feature = "proposed")]
 /// The `window/workDoneProgress/create` request is sent from the server
 /// to the clientto ask the client to create a work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -3508,7 +3507,6 @@ pub struct WorkDoneProgressCreateParams {
     pub token: ProgressToken,
 }
 
-#[cfg(feature = "proposed")]
 /// The `window/workDoneProgress/cancel` is sent from the client to the server
 /// to indicate that the user has pressed cancel on a server initiated work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -3516,6 +3514,22 @@ pub struct WorkDoneProgressCreateParams {
 pub struct WorkDoneProgressCancelParams {
     /// The token to be used to report progress.
     pub token: ProgressToken,
+}
+
+/// Options to signal work done progress support in server capabilities.
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub work_done_progress: Option<bool>,
+}
+
+/// An optional token that a server can use to report work done progress
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub work_done_token: Option<ProgressToken>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -3570,6 +3584,7 @@ pub struct WorkDoneProgressEnd {
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
