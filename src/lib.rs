@@ -1421,6 +1421,7 @@ pub struct ClientCapabilities {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InitializeResult {
     /// The capabilities the language server provides.
     pub capabilities: ServerCapabilities,
@@ -3599,6 +3600,7 @@ pub enum WorkDoneProgress {
 
 /// A parameter literal used to pass a partial result token.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PartialResultParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub partial_result_token: Option<ProgressToken>,
