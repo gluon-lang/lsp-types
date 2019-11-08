@@ -3657,7 +3657,7 @@ pub struct WorkDoneProgressOptions {
 }
 
 /// An optional token that a server can use to report work done progress
-#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressParams {
     #[serde(skip_serializing_if = "Option::is_none")]
