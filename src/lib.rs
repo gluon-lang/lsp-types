@@ -1579,6 +1579,7 @@ pub enum SignatureHelpTriggerKind {
 pub struct SignatureHelpParams {
     /// The signature help context. This is only available if the client specifies
     /// to send this using the client capability  `textDocument.signatureHelp.contextSupport === true`
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<SignatureHelpContext>,
 
     #[serde(flatten)]
