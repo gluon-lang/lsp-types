@@ -755,6 +755,12 @@ pub struct InitializeParams {
     /// If the parent process is not alive then the server should exit (see exit notification) its process.
     pub process_id: Option<u64>,
 
+    /// The rootPath of the workspace. Is null
+    /// if no folder is open.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[deprecated]
+    pub root_path: Option<String>,
+
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
