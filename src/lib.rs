@@ -755,11 +755,6 @@ pub struct InitializeParams {
     /// If the parent process is not alive then the server should exit (see exit notification) its process.
     pub process_id: Option<u64>,
 
-    /// The rootPath of the workspace. Is null
-    /// if no folder is open.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub root_path: Option<String>,
-
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
@@ -816,6 +811,36 @@ impl Default for TraceOption {
     fn default() -> TraceOption {
         TraceOption::Off
     }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct GenericRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub options: GenericOptions,
+
+    #[serde(flatten)]
+    pub static_registration_options: StaticRegistrationOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct GenericOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct GenericParams {
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
@@ -1503,6 +1528,9 @@ pub struct CompletionOptions {
     /// The characters that trigger completion automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_characters: Option<Vec<String>>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 /// Signature help options.
@@ -1518,8 +1546,17 @@ pub struct SignatureHelpOptions {
     /// are also counted as re-trigger characters.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retrigger_characters: Option<Vec<String>>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
+/// Signature help options.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct SignatureHelpRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+}
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub enum SignatureHelpTriggerKind {
@@ -1531,12 +1568,18 @@ pub enum SignatureHelpTriggerKind {
     ContentChange = 3,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignatureHelpParams {
     /// The signature help context. This is only available if the client specifies
     /// to send this using the client capability  `textDocument.signatureHelp.contextSupport === true`
     pub context: Option<SignatureHelpContext>,
+
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -1588,6 +1631,9 @@ pub struct DocumentOnTypeFormattingOptions {
 pub struct ExecuteCommandOptions {
     /// The commands to be executed on the server
     pub commands: Vec<String>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 /**
@@ -1931,7 +1977,7 @@ pub struct RegistrationParams {
 
 /// Since most of the registration options require to specify a document selector there is a base
 /// interface that can be used.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentRegistrationOptions {
     /**
@@ -2287,6 +2333,15 @@ impl PublishDiagnosticsParams {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct CompletionRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub completion_options: CompletionOptions,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum CompletionResponse {
     Array(Vec<CompletionItem>),
@@ -2311,6 +2366,12 @@ pub struct CompletionParams {
     // This field was "mixed-in" from TextDocumentPositionParams
     #[serde(flatten)]
     pub text_document_position: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 
     // CompletionParams properties:
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2616,6 +2677,9 @@ pub struct ReferenceParams {
     #[serde(flatten)]
     pub text_document_position: TextDocumentPositionParams,
 
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
     // ReferenceParams properties:
     pub context: ReferenceContext,
 }
@@ -2814,6 +2878,12 @@ pub enum SymbolKind {
 /// The parameters of a Workspace Symbol Request.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct WorkspaceSymbolParams {
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
     /// A non-empty query string
     pub query: String,
 }
@@ -2829,6 +2899,9 @@ pub struct ExecuteCommandParams {
      */
     #[serde(default)]
     pub arguments: Vec<Value>,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 /**
@@ -2840,6 +2913,9 @@ pub struct ExecuteCommandRegistrationOptions {
      * The commands to be executed on the server
      */
     pub commands: Vec<String>,
+
+    #[serde(flatten)]
+    pub execute_command_options: ExecuteCommandOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2870,6 +2946,12 @@ pub struct CodeActionParams {
 
     /// Context carrying additional information.
     pub context: CodeActionContext,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// response for CodeActionRequest
@@ -3019,6 +3101,9 @@ pub struct CodeActionOptions {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_action_kinds: Option<Vec<String>>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3026,6 +3111,12 @@ pub struct CodeActionOptions {
 pub struct CodeLensParams {
     /// The document to request code lens for.
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// A code lens represents a command that should be shown along with
@@ -3091,6 +3182,9 @@ pub struct DocumentFormattingParams {
 
     /// The format options.
     pub options: FormattingOptions,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 /// Value-object describing what options formatting should use.
@@ -3139,6 +3233,9 @@ pub struct DocumentRangeFormattingParams {
 
     /// The format options
     pub options: FormattingOptions,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -3188,6 +3285,9 @@ pub struct RenameParams {
     /// request must return a [ResponseError](#ResponseError) with an
     /// appropriate message set.
     pub new_name: String,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3203,6 +3303,9 @@ pub struct RenameOptions {
     /// Renames should be checked and tested before being executed.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_provider: Option<bool>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -3230,6 +3333,9 @@ pub struct DocumentLinkOptions {
     /// Document links have a resolve provider as well.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_provider: Option<bool>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3237,6 +3343,12 @@ pub struct DocumentLinkOptions {
 pub struct DocumentColorParams {
     /// The text document
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -3323,6 +3435,12 @@ pub struct ColorPresentation {
 pub struct FoldingRangeParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3407,6 +3525,12 @@ pub struct SelectionRangeParams {
     pub text_document: TextDocumentIdentifier,
     /// The positions inside the text document.
     pub positions: Vec<Position>,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// Represents a selection range.
@@ -3519,7 +3643,7 @@ pub struct WorkDoneProgressCancelParams {
 }
 
 /// Options to signal work done progress support in server capabilities.
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3527,7 +3651,7 @@ pub struct WorkDoneProgressOptions {
 }
 
 /// An optional token that a server can use to report work done progress
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressParams {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3599,7 +3723,7 @@ pub enum WorkDoneProgress {
 }
 
 /// A parameter literal used to pass a partial result token.
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PartialResultParams {
     #[serde(skip_serializing_if = "Option::is_none")]
