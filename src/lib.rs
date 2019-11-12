@@ -1140,7 +1140,7 @@ pub struct CompletionItemCapability {
     pub tag_support: Option<TagSupport<CompletionItemTag>>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
 pub enum CompletionItemTag {
     Deprecated = 1,
 }
