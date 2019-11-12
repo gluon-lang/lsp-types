@@ -1141,6 +1141,7 @@ pub struct CompletionItemCapability {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum CompletionItemTag {
     Deprecated = 1,
 }
@@ -1565,6 +1566,7 @@ pub struct SignatureHelpRegistrationOptions {
 }
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
     Invoked = 1,
