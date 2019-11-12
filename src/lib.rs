@@ -1564,7 +1564,7 @@ pub struct SignatureHelpRegistrationOptions {
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 }
 /// Signature help options.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
 pub enum SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
     Invoked = 1,
