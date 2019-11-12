@@ -758,7 +758,7 @@ pub struct InitializeParams {
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[deprecated]
+    #[deprecated(note = "Use `root_uri` instead when possible")]
     pub root_path: Option<String>,
 
     /// The rootUri of the workspace. Is null if no
