@@ -3212,15 +3212,15 @@ pub struct FormattingOptions {
 
     /// Trim trailing whitespaces on a line.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub trailing_whitespace: Option<bool>,
+    pub trim_trailing_whitespace: Option<bool>,
 
     /// Insert a newline character at the end of the file if one does not exist.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub insert_final_new_line: Option<bool>,
+    pub insert_final_newline: Option<bool>,
 
     /// Trim all newlines after the final newline at the end of the file.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub trim_final_new_lines: Option<bool>,
+    pub trim_final_newlines: Option<bool>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -3820,9 +3820,9 @@ mod tests {
                 tab_size: 123,
                 insert_spaces: true,
                 properties: HashMap::new(),
-                trailing_whitespace: None,
-                insert_final_new_line: None,
-                trim_final_new_lines: None,
+                trim_trailing_whitespace: None,
+                insert_final_newline: None,
+                trim_final_newlines: None,
             },
             r#"{"tabSize":123,"insertSpaces":true}"#,
         );
@@ -3834,9 +3834,9 @@ mod tests {
                 properties: vec![("prop".to_string(), FormattingProperty::Number(1.0))]
                     .into_iter()
                     .collect(),
-                trailing_whitespace: None,
-                insert_final_new_line: None,
-                trim_final_new_lines: None,
+                trim_trailing_whitespace: None,
+                insert_final_newline: None,
+                trim_final_newlines: None,
             },
             r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#,
         );
