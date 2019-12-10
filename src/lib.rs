@@ -1853,6 +1853,10 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub folding_range_provider: Option<FoldingRangeProviderCapability>,
 
+    /// The server provides go to declaration support.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub declaration_provider: Option<bool>,
+
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub execute_command_provider: Option<ExecuteCommandOptions>,
