@@ -19,9 +19,9 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 #[macro_use]
 extern crate bitflags;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
-use serde_repr::{Serialize_repr, Deserialize_repr};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 pub use url::Url;
 
@@ -65,10 +65,7 @@ pub struct Position {
 
 impl Position {
     pub fn new(line: u64, character: u64) -> Position {
-        Position {
-            line,
-            character,
-        }
+        Position { line, character }
     }
 }
 
@@ -84,10 +81,7 @@ pub struct Range {
 
 impl Range {
     pub fn new(start: Position, end: Position) -> Range {
-        Range {
-            start,
-            end,
-        }
+        Range { start, end }
     }
 }
 
@@ -100,10 +94,7 @@ pub struct Location {
 
 impl Location {
     pub fn new(uri: Url, range: Range) -> Location {
-        Location {
-            uri,
-            range,
-        }
+        Location { uri, range }
     }
 }
 
@@ -157,6 +148,10 @@ pub struct Diagnostic {
     /// a scope collide all definitions can be marked via this property.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub related_information: Option<Vec<DiagnosticRelatedInformation>>,
+
+    /// Additional metadata about the diagnostic.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<DiagnosticTag>>,
 }
 
 impl Diagnostic {
@@ -167,6 +162,7 @@ impl Diagnostic {
         source: Option<String>,
         message: String,
         related_information: Option<Vec<DiagnosticRelatedInformation>>,
+        tags: Option<Vec<DiagnosticTag>>,
     ) -> Diagnostic {
         Diagnostic {
             range,
@@ -175,11 +171,12 @@ impl Diagnostic {
             source,
             message,
             related_information,
+            tags,
         }
     }
 
     pub fn new_simple(range: Range, message: String) -> Diagnostic {
-        Self::new(range, None, None, None, message, None)
+        Self::new(range, None, None, None, message, None, None)
     }
 
     pub fn new_with_code_number(
@@ -190,7 +187,7 @@ impl Diagnostic {
         message: String,
     ) -> Diagnostic {
         let code = Some(NumberOrString::Number(code_number));
-        Self::new(range, Some(severity), code, source, message, None)
+        Self::new(range, Some(severity), code, source, message, None, None)
     }
 }
 
@@ -217,6 +214,19 @@ pub struct DiagnosticRelatedInformation {
 
     /// The message of this related diagnostic information.
     pub message: String,
+}
+
+/// The diagnostic tags.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub enum DiagnosticTag {
+    /// Unused or unnecessary code.
+    /// Clients are allowed to render diagnostics with this tag faded out instead of having
+    /// an error squiggle.
+    Unnecessary = 1,
+
+    /// Deprecated or obsolete code.
+    /// Clients are allowed to rendered diagnostics with this tag strike through.
+    Deprecated = 2,
 }
 
 impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
@@ -293,10 +303,7 @@ pub struct TextEdit {
 
 impl TextEdit {
     pub fn new(range: Range, new_text: String) -> TextEdit {
-        TextEdit {
-            range,
-            new_text,
-        }
+        TextEdit { range, new_text }
     }
 }
 
@@ -751,6 +758,7 @@ pub struct InitializeParams {
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[deprecated(note = "Use `root_uri` instead when possible")]
     pub root_path: Option<String>,
 
     /// The rootUri of the workspace. Is null if no
@@ -777,6 +785,19 @@ pub struct InitializeParams {
     /// configured.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace_folders: Option<Vec<WorkspaceFolder>>,
+
+    /// Information about the client.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub client_info: Option<ClientInfo>,
+}
+
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub struct ClientInfo {
+    /// The name of the client as defined by the client.
+    pub name: String,
+    /// The client's version as defined by the client.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
@@ -796,6 +817,36 @@ impl Default for TraceOption {
     fn default() -> TraceOption {
         TraceOption::Off
     }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct GenericRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub options: GenericOptions,
+
+    #[serde(flatten)]
+    pub static_registration_options: StaticRegistrationOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct GenericOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct GenericParams {
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
@@ -1078,6 +1129,21 @@ pub struct CompletionItemCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preselect_support: Option<bool>,
+
+    /**
+     * Client supports the tag property on a completion item. Clients supporting
+     * tags have to handle unknown tags gracefully. Clients especially need to
+     * preserve unknown tags when sending a completion item back to the server in
+     * a resolve call.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tag_support: Option<TagSupport<CompletionItemTag>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
+pub enum CompletionItemTag {
+    Deprecated = 1,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1181,6 +1247,15 @@ pub struct SignatureHelpCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub signature_information: Option<SignatureInformationSettings>,
+
+    /**
+     * The client supports to send additional context information for a
+     * `textDocument/signatureHelp` request. A client that opts into
+     * contextSupport will also support the `retriggerCharacters` on
+     * `SignatureHelpOptions`.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1191,6 +1266,18 @@ pub struct PublishDiagnosticsCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub related_information: Option<bool>,
+
+    /// Client supports the tag property to provide meta data about a diagnostic.
+    /// Clients supporting tags have to handle unknown tags gracefully.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tag_support: Option<TagSupport<DiagnosticTag>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TagSupport<T> {
+    /// The tags supported by the client.
+    pub value_set: Vec<T>,
 }
 
 /**
@@ -1330,7 +1417,7 @@ pub struct WindowClientCapabilities {
     /**
      * Whether client supports create a work done progress UI from the server side.
      */
-    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_progress: Option<bool>,
 }
 
@@ -1366,9 +1453,23 @@ pub struct ClientCapabilities {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InitializeResult {
     /// The capabilities the language server provides.
     pub capabilities: ServerCapabilities,
+
+    /// The capabilities the language server provides.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub server_info: Option<ServerInfo>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+pub struct ServerInfo {
+    /// The name of the server as defined by the server.
+    pub name: String,
+    /// The servers's version as defined by the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1434,6 +1535,9 @@ pub struct CompletionOptions {
     /// The characters that trigger completion automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_characters: Option<Vec<String>>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 /// Signature help options.
@@ -1443,6 +1547,71 @@ pub struct SignatureHelpOptions {
     /// The characters that trigger signature help automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_characters: Option<Vec<String>>,
+
+    ///  List of characters that re-trigger signature help.
+    /// These trigger characters are only active when signature help is already showing. All trigger characters
+    /// are also counted as re-trigger characters.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retrigger_characters: Option<Vec<String>>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+/// Signature help options.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct SignatureHelpRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+}
+/// Signature help options.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
+pub enum SignatureHelpTriggerKind {
+    /// Signature help was invoked manually by the user or by a command.
+    Invoked = 1,
+    ///  Signature help was triggered by a trigger character.
+    TriggerCharacter = 2,
+    /// Signature help was triggered by the cursor moving or by the document content changing.
+    ContentChange = 3,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignatureHelpParams {
+    /// The signature help context. This is only available if the client specifies
+    /// to send this using the client capability  `textDocument.signatureHelp.contextSupport === true`
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<SignatureHelpContext>,
+
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignatureHelpContext {
+    ///  Action that caused signature help to be triggered.
+    pub trigger_kind: SignatureHelpTriggerKind,
+
+    /// Character that caused signature help to be triggered.
+    /// This is undefined when `triggerKind !== SignatureHelpTriggerKind.TriggerCharacter`
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trigger_character: Option<String>,
+
+    /// `true` if signature help was already showing when it was triggered.
+    /// Retriggers occur when the signature help is already active and can be caused by actions such as
+    /// typing a trigger character, a cursor move, or document content changes.
+    pub is_retrigger: bool,
+
+    /// The currently active `SignatureHelp`.
+    /// The `activeSignatureHelp` has its `SignatureHelp.activeSignature` field updated based on
+    /// the user navigating through available signatures.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_signature_help: Option<SignatureHelp>,
 }
 
 /// Code Lens options.
@@ -1471,6 +1640,9 @@ pub struct DocumentOnTypeFormattingOptions {
 pub struct ExecuteCommandOptions {
     /// The commands to be executed on the server
     pub commands: Vec<String>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 /**
@@ -1570,6 +1742,10 @@ pub struct CodeActionCapability {
     /// response of the `textDocument/codeAction` request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_action_literal_support: Option<CodeActionLiteralSupport>,
+
+    /// Whether code action supports the `isPreferred` property.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_preferred_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1687,6 +1863,18 @@ pub struct ServerCapabilities {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentLinkCapabilities {
+    /// Whether document link supports dynamic registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Whether the client support the `tooltip` property on `DocumentLink`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tooltip_support: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct ShowMessageParams {
     /// The message type. See {@link MessageType}.
     #[serde(rename = "type")]
@@ -1798,7 +1986,7 @@ pub struct RegistrationParams {
 
 /// Since most of the registration options require to specify a document selector there is a base
 /// interface that can be used.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentRegistrationOptions {
     /**
@@ -2133,15 +2321,33 @@ pub struct PublishDiagnosticsParams {
 
     /// An array of diagnostic information items.
     pub diagnostics: Vec<Diagnostic>,
+
+    /// Optional the version number of the document the diagnostics are published for.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<i64>,
 }
 
 impl PublishDiagnosticsParams {
-    pub fn new(uri: Url, diagnostics: Vec<Diagnostic>) -> PublishDiagnosticsParams {
+    pub fn new(
+        uri: Url,
+        diagnostics: Vec<Diagnostic>,
+        version: Option<i64>,
+    ) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri,
             diagnostics,
+            version,
         }
     }
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct CompletionRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub completion_options: CompletionOptions,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -2166,10 +2372,15 @@ impl From<CompletionList> for CompletionResponse {
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionParams {
-
     // This field was "mixed-in" from TextDocumentPositionParams
     #[serde(flatten)]
     pub text_document_position: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 
     // CompletionParams properties:
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2293,6 +2504,10 @@ pub struct CompletionItem {
     /// a completion and a completion resolve request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
+
+    /// Tags for this completion item.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<CompletionItemTag>>,
 }
 
 impl CompletionItem {
@@ -2470,6 +2685,9 @@ pub struct ReferenceParams {
     // Text Document and Position fields
     #[serde(flatten)]
     pub text_document_position: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 
     // ReferenceParams properties:
     pub context: ReferenceContext,
@@ -2669,6 +2887,12 @@ pub enum SymbolKind {
 /// The parameters of a Workspace Symbol Request.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct WorkspaceSymbolParams {
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
     /// A non-empty query string
     pub query: String,
 }
@@ -2684,6 +2908,9 @@ pub struct ExecuteCommandParams {
      */
     #[serde(default)]
     pub arguments: Vec<Value>,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 /**
@@ -2695,6 +2922,9 @@ pub struct ExecuteCommandRegistrationOptions {
      * The commands to be executed on the server
      */
     pub commands: Vec<String>,
+
+    #[serde(flatten)]
+    pub execute_command_options: ExecuteCommandOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2725,6 +2955,12 @@ pub struct CodeActionParams {
 
     /// Context carrying additional information.
     pub context: CodeActionContext,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// response for CodeActionRequest
@@ -2839,6 +3075,13 @@ pub struct CodeAction {
     /// executed and then the command.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub command: Option<Command>,
+
+    /// Marks this as a preferred action. Preferred actions are used by the `auto fix` command and can be targeted
+    /// by keybindings.
+    /// A quick fix should be marked preferred if it properly addresses the underlying error.
+    /// A refactoring should be marked preferred if it is the most reasonable choice of actions to take.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_preferred: Option<bool>,
 }
 
 /// Contains additional diagnostic information about the context in which
@@ -2867,6 +3110,9 @@ pub struct CodeActionOptions {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_action_kinds: Option<Vec<String>>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2874,6 +3120,12 @@ pub struct CodeActionOptions {
 pub struct CodeLensParams {
     /// The document to request code lens for.
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// A code lens represents a command that should be shown along with
@@ -2919,6 +3171,16 @@ pub struct DocumentLink {
      * The uri this link points to.
      */
     pub target: Url,
+
+    /**
+     * The tooltip text when you hover over this link.
+     *
+     * If a tooltip is provided, is will be displayed in a string that includes instructions on how to
+     * trigger the link, such as `{0} (ctrl + click)`. The specific instructions vary depending on OS,
+     * user settings, and localization.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tooltip: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -2929,6 +3191,9 @@ pub struct DocumentFormattingParams {
 
     /// The format options.
     pub options: FormattingOptions,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 /// Value-object describing what options formatting should use.
@@ -2944,6 +3209,18 @@ pub struct FormattingOptions {
     /// Signature for further properties.
     #[serde(flatten)]
     pub properties: HashMap<String, FormattingProperty>,
+
+    /// Trim trailing whitespaces on a line.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trim_trailing_whitespace: Option<bool>,
+
+    /// Insert a newline character at the end of the file if one does not exist.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub insert_final_newline: Option<bool>,
+
+    /// Trim all newlines after the final newline at the end of the file.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trim_final_newlines: Option<bool>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -2965,6 +3242,9 @@ pub struct DocumentRangeFormattingParams {
 
     /// The format options
     pub options: FormattingOptions,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -3014,6 +3294,9 @@ pub struct RenameParams {
     /// request must return a [ResponseError](#ResponseError) with an
     /// appropriate message set.
     pub new_name: String,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3029,6 +3312,9 @@ pub struct RenameOptions {
     /// Renames should be checked and tested before being executed.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_provider: Option<bool>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -3056,6 +3342,9 @@ pub struct DocumentLinkOptions {
     /// Document links have a resolve provider as well.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_provider: Option<bool>,
+
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3063,6 +3352,12 @@ pub struct DocumentLinkOptions {
 pub struct DocumentColorParams {
     /// The text document
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -3149,6 +3444,12 @@ pub struct ColorPresentation {
 pub struct FoldingRangeParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -3233,6 +3534,12 @@ pub struct SelectionRangeParams {
     pub text_document: TextDocumentIdentifier,
     /// The positions inside the text document.
     pub positions: Vec<Position>,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// Represents a selection range.
@@ -3306,10 +3613,8 @@ pub struct MarkupContent {
     pub value: String,
 }
 
-#[cfg(feature = "proposed")]
 pub type ProgressToken = NumberOrString;
 
-#[cfg(feature = "proposed")]
 /// The progress notification is sent from the server to the client to ask
 /// the client to indicate progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -3322,15 +3627,13 @@ pub struct ProgressParams {
     pub value: ProgressParamsValue,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum ProgressParamsValue {
-    WorkDone(WorkDoneProgress)
+    WorkDone(WorkDoneProgress),
 }
 
-#[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/create` request is sent from the server 
+/// The `window/workDoneProgress/create` request is sent from the server
 /// to the clientto ask the client to create a work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3339,8 +3642,7 @@ pub struct WorkDoneProgressCreateParams {
     pub token: ProgressToken,
 }
 
-#[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/cancel` is sent from the client to the server 
+/// The `window/workDoneProgress/cancel` is sent from the client to the server
 /// to indicate that the user has pressed cancel on a server initiated work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3349,7 +3651,22 @@ pub struct WorkDoneProgressCancelParams {
     pub token: ProgressToken,
 }
 
-#[cfg(feature = "proposed")]
+/// Options to signal work done progress support in server capabilities.
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub work_done_progress: Option<bool>,
+}
+
+/// An optional token that a server can use to report work done progress
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub work_done_token: Option<ProgressToken>,
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressBegin {
@@ -3359,8 +3676,9 @@ pub struct WorkDoneProgressBegin {
     pub title: String,
 
     /// Controls if a cancel button should show to allow the user to cancel the
-	/// long running operation. Clients that don't support cancellation are allowed
-	/// to ignore the setting.
+    /// long running operation. Clients that don't support cancellation are allowed
+    /// to ignore the setting.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
@@ -3374,13 +3692,13 @@ pub struct WorkDoneProgressBegin {
     pub percentage: Option<f64>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressReport {
     /// Controls if a cancel button should show to allow the user to cancel the
-	/// long running operation. Clients that don't support cancellation are allowed
-	/// to ignore the setting.
+    /// long running operation. Clients that don't support cancellation are allowed
+    /// to ignore the setting.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cancellable: Option<bool>,
 
     /// Optional, more detailed associated progress message. Contains
@@ -3394,24 +3712,31 @@ pub struct WorkDoneProgressReport {
     pub percentage: Option<f64>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct WorkDoneProgressDone {
+pub struct WorkDoneProgressEnd {
     /// Optional, more detailed associated progress message. Contains
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum WorkDoneProgress {
     Begin(WorkDoneProgressBegin),
     Report(WorkDoneProgressReport),
-    Done(WorkDoneProgressDone),
+    Done(WorkDoneProgressEnd),
+}
+
+/// A parameter literal used to pass a partial result token.
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PartialResultParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub partial_result_token: Option<ProgressToken>,
 }
 
 #[cfg(test)]
@@ -3495,6 +3820,9 @@ mod tests {
                 tab_size: 123,
                 insert_spaces: true,
                 properties: HashMap::new(),
+                trim_trailing_whitespace: None,
+                insert_final_newline: None,
+                trim_final_newlines: None,
             },
             r#"{"tabSize":123,"insertSpaces":true}"#,
         );
@@ -3506,6 +3834,9 @@ mod tests {
                 properties: vec![("prop".to_string(), FormattingProperty::Number(1.0))]
                     .into_iter()
                     .collect(),
+                trim_trailing_whitespace: None,
+                insert_final_newline: None,
+                trim_final_newlines: None,
             },
             r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#,
         );
@@ -3553,6 +3884,7 @@ mod tests {
                     command: None,
                     diagnostics: None,
                     edit: None,
+                    is_preferred: None,
                 }),
             ],
             r#"[{"title":"title","command":"command"},{"title":"title","kind":"quickfix"}]"#,
