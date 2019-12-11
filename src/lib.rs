@@ -217,7 +217,8 @@ pub struct DiagnosticRelatedInformation {
 }
 
 /// The diagnostic tags.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum DiagnosticTag {
     /// Unused or unnecessary code.
     /// Clients are allowed to render diagnostics with this tag faded out instead of having
