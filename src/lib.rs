@@ -192,7 +192,8 @@ impl Diagnostic {
 }
 
 /// The protocol currently supports the following diagnostic severities:
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum DiagnosticSeverity {
     /// Reports an error.
     Error = 1,
@@ -228,35 +229,6 @@ pub enum DiagnosticTag {
     /// Deprecated or obsolete code.
     /// Clients are allowed to rendered diagnostics with this tag strike through.
     Deprecated = 2,
-}
-
-impl<'de> serde::Deserialize<'de> for DiagnosticSeverity {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(match u8::deserialize(deserializer)? {
-            1 => DiagnosticSeverity::Error,
-            2 => DiagnosticSeverity::Warning,
-            3 => DiagnosticSeverity::Information,
-            4 => DiagnosticSeverity::Hint,
-            i => {
-                return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(u64::from(i)),
-                    &"value of 1, 2, 3 or 4",
-                ));
-            }
-        })
-    }
-}
-
-impl serde::Serialize for DiagnosticSeverity {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 /**
@@ -1484,7 +1456,8 @@ pub struct InitializeError {
 // The server can signal the following capabilities:
 
 /// Defines how the host (editor) should sync document changes to the language server.
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum TextDocumentSyncKind {
     /// Documents should not be synced at all.
     None = 0,
@@ -1495,34 +1468,6 @@ pub enum TextDocumentSyncKind {
     /// Documents are synced by sending the full content on open. After that only
     /// incremental updates to the document are sent.
     Incremental = 2,
-}
-
-impl<'de> serde::Deserialize<'de> for TextDocumentSyncKind {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(match u8::deserialize(deserializer)? {
-            0 => TextDocumentSyncKind::None,
-            1 => TextDocumentSyncKind::Full,
-            2 => TextDocumentSyncKind::Incremental,
-            i => {
-                return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(u64::from(i)),
-                    &"value between 0 and 2 (inclusive)",
-                ));
-            }
-        })
-    }
-}
-
-impl serde::Serialize for TextDocumentSyncKind {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 /// Completion options.
@@ -1889,7 +1834,8 @@ pub struct ShowMessageParams {
     pub message: String,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum MessageType {
     /// An error message.
     Error = 1,
@@ -1899,35 +1845,6 @@ pub enum MessageType {
     Info = 3,
     /// A log message.
     Log = 4,
-}
-
-impl<'de> serde::Deserialize<'de> for MessageType {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(match u8::deserialize(deserializer)? {
-            1 => MessageType::Error,
-            2 => MessageType::Warning,
-            3 => MessageType::Info,
-            4 => MessageType::Log,
-            i => {
-                return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(u64::from(i)),
-                    &"value of 1, 2, 3 or 4",
-                ));
-            }
-        })
-    }
-}
-
-impl serde::Serialize for MessageType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2143,7 +2060,8 @@ pub struct WillSaveTextDocumentParams {
 /**
  * Represents reasons why a text document is saved.
  */
-#[derive(Copy, Debug, Eq, PartialEq, Clone)]
+#[derive(Copy, Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum TextDocumentSaveReason {
     /**
      * Manually triggered, e.g. by the user pressing save, by starting debugging,
@@ -2160,34 +2078,6 @@ pub enum TextDocumentSaveReason {
      * When the editor lost focus.
      */
     FocusOut = 3,
-}
-
-impl<'de> serde::Deserialize<'de> for TextDocumentSaveReason {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(match u8::deserialize(deserializer)? {
-            1 => TextDocumentSaveReason::Manual,
-            2 => TextDocumentSaveReason::AfterDelay,
-            3 => TextDocumentSaveReason::FocusOut,
-            i => {
-                return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(u64::from(i)),
-                    &"value of 1, 2 or 3",
-                ))
-            }
-        })
-    }
-}
-
-impl serde::Serialize for TextDocumentSaveReason {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2211,7 +2101,8 @@ pub struct DidChangeWatchedFilesParams {
 }
 
 /// The file event type.
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum FileChangeType {
     /// The file got created.
     Created = 1,
@@ -2221,34 +2112,6 @@ pub enum FileChangeType {
 
     /// The file got deleted.
     Deleted = 3,
-}
-
-impl<'de> serde::Deserialize<'de> for FileChangeType {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(match u8::deserialize(deserializer)? {
-            1 => FileChangeType::Created,
-            2 => FileChangeType::Changed,
-            3 => FileChangeType::Deleted,
-            i => {
-                return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(u64::from(i)),
-                    &"value of 1, 2 or 3",
-                ))
-            }
-        })
-    }
-}
-
-impl serde::Serialize for FileChangeType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 /// An event describing a file change.
@@ -2719,7 +2582,8 @@ pub struct DocumentHighlight {
 }
 
 /// A document highlight kind.
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum DocumentHighlightKind {
     /// A textual occurrance.
     Text = 1,
@@ -2729,34 +2593,6 @@ pub enum DocumentHighlightKind {
 
     /// Write-access of a symbol, like writing to a variable.
     Write = 3,
-}
-
-impl<'de> serde::Deserialize<'de> for DocumentHighlightKind {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(match u8::deserialize(deserializer)? {
-            1 => DocumentHighlightKind::Text,
-            2 => DocumentHighlightKind::Read,
-            3 => DocumentHighlightKind::Write,
-            i => {
-                return Err(D::Error::invalid_value(
-                    de::Unexpected::Unsigned(u64::from(i)),
-                    &"1, 2, or 3",
-                ))
-            }
-        })
-    }
-}
-
-impl serde::Serialize for DocumentHighlightKind {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u8(*self as u8)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
