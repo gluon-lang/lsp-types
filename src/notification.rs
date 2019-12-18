@@ -274,18 +274,6 @@ impl Notification for Progress {
     const METHOD: &'static str = "$/progress";
 }
 
-#[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/cancel` is sent from the client to the server 
-/// to indicate that the user has pressed cancel on a server initiated work done progress.
-#[derive(Debug)]
-pub enum WorkDoneProgressCancel {}
-
-#[cfg(feature = "proposed")]
-impl Notification for WorkDoneProgressCancel {
-    type Params = WorkDoneProgressCancelParams;
-    const METHOD: &'static str = "window/workDoneProgress/cancel";
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
