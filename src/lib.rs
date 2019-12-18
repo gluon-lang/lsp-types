@@ -3569,7 +3569,7 @@ pub struct WorkDoneProgressEnd {
 pub enum WorkDoneProgress {
     Begin(WorkDoneProgressBegin),
     Report(WorkDoneProgressReport),
-    Done(WorkDoneProgressEnd),
+    End(WorkDoneProgressEnd),
 }
 
 /// A parameter literal used to pass a partial result token.
