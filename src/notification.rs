@@ -64,11 +64,6 @@ macro_rules! lsp_notification {
     ("$/progress") => {
         $crate::notification::Progress
     };
-
-    // Requires #[cfg(feature = "proposed")]
-    ("window/workDoneProgress/cancel") => {
-        $crate::notification::WorkDoneProgressCancel
-    };
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -274,18 +269,6 @@ impl Notification for Progress {
     const METHOD: &'static str = "$/progress";
 }
 
-#[cfg(feature = "proposed")]
-/// The `window/workDoneProgress/cancel` is sent from the client to the server 
-/// to indicate that the user has pressed cancel on a server initiated work done progress.
-#[derive(Debug)]
-pub enum WorkDoneProgressCancel {}
-
-#[cfg(feature = "proposed")]
-impl Notification for WorkDoneProgressCancel {
-    type Params = WorkDoneProgressCancelParams;
-    const METHOD: &'static str = "window/workDoneProgress/cancel";
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -330,6 +313,5 @@ mod test {
     #[cfg(feature = "proposed")]
     fn check_proposed_macro_definitions() {
         check_macro!("$/progress");
-        check_macro!("window/workDoneProgress/cancel");
     }
 }

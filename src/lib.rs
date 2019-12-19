@@ -3486,15 +3486,6 @@ pub struct WorkDoneProgressCreateParams {
     pub token: ProgressToken,
 }
 
-/// The `window/workDoneProgress/cancel` is sent from the client to the server
-/// to indicate that the user has pressed cancel on a server initiated work done progress.
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct WorkDoneProgressCancelParams {
-    /// The token to be used to report progress.
-    pub token: ProgressToken,
-}
-
 /// Options to signal work done progress support in server capabilities.
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3576,7 +3567,7 @@ pub struct WorkDoneProgressEnd {
 pub enum WorkDoneProgress {
     Begin(WorkDoneProgressBegin),
     Report(WorkDoneProgressReport),
-    Done(WorkDoneProgressEnd),
+    End(WorkDoneProgressEnd),
 }
 
 /// A parameter literal used to pass a partial result token.
