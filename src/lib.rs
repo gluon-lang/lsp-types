@@ -2726,7 +2726,7 @@ pub enum SymbolKind {
 }
 
 /// The parameters of a Workspace Symbol Request.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct WorkspaceSymbolParams {
     #[serde(flatten)]
     pub partial_result_params: PartialResultParams,
@@ -2738,7 +2738,7 @@ pub struct WorkspaceSymbolParams {
     pub query: String,
 }
 
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct ExecuteCommandParams {
     /**
      * The identifier of the actual command handler.
@@ -2893,7 +2893,7 @@ pub mod code_action_kind {
     pub const SOURCE_ORGANIZE_IMPORTS: &str = "source.organizeImports";
 }
 
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct CodeAction {
     /// A short, human-readable, title for this code action.
     pub title: String,
@@ -2927,7 +2927,7 @@ pub struct CodeAction {
 
 /// Contains additional diagnostic information about the context in which
 /// a code action is run.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct CodeActionContext {
     /// An array of diagnostics.
     pub diagnostics: Vec<Diagnostic>,
@@ -3038,7 +3038,7 @@ pub struct DocumentFormattingParams {
 }
 
 /// Value-object describing what options formatting should use.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FormattingOptions {
     /// Size of a tab in spaces.
@@ -3103,7 +3103,7 @@ pub struct DocumentOnTypeFormattingParams {
 }
 
 /// Extends TextDocumentRegistrationOptions
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentOnTypeFormattingRegistrationOptions {
     /**
@@ -3373,6 +3373,7 @@ pub struct FoldingRange {
 pub struct SelectionRangeParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
+
     /// The positions inside the text document.
     pub positions: Vec<Position>,
 
@@ -3390,7 +3391,9 @@ pub struct SelectionRangeParams {
 pub struct SelectionRange {
     /// Range of the selection.
     pub range: Range,
+
     /// The parent selection range containing this range.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent: Option<Box<SelectionRange>>,
 }
 
@@ -3508,7 +3511,7 @@ pub struct WorkDoneProgressParams {
     pub work_done_token: Option<ProgressToken>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressBegin {
     /// Mandatory title of the progress operation. Used to briefly inform
@@ -3526,14 +3529,16 @@ pub struct WorkDoneProgressBegin {
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 
     /// Optional progress percentage to display (value 100 is considered 100%).
     /// If unset, the previous progress percentage (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub percentage: Option<f64>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressReport {
     /// Controls if a cancel button should show to allow the user to cancel the
@@ -3546,14 +3551,16 @@ pub struct WorkDoneProgressReport {
     /// complementary information to the `title`.
     /// Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".
     /// If unset, the previous progress message (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 
     /// Optional progress percentage to display (value 100 is considered 100%).
     /// If unset, the previous progress percentage (if any) is still valid.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub percentage: Option<f64>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressEnd {
     /// Optional, more detailed associated progress message. Contains
