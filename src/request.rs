@@ -599,14 +599,15 @@ impl Request for WorkDoneProgressCreate {
     const METHOD: &'static str = "window/workDoneProgress/create";
 }
 
-///The selection range request is sent from the client to the server to return
-///suggested selection ranges at given positions. A selection range is a range
-///around the cursor position which the user might be interested in selecting.
-///Typically, but not necessary, selection ranges correspond to the nodes of the
-///syntax tree.
-/// Selection ranges should be computed independently for each position. Ranges
-/// for a specific position should form hierarchy: each range has an optional,
-/// strictly larger, parent range.
+/// The selection range request is sent from the client to the server to return
+/// suggested selection ranges at given positions. A selection range is a range
+/// around the cursor position which the user might be interested in selecting.
+///
+/// A selection range in the return array is for the position in the provided parameters at the same index.
+/// Therefore positions[i] must be contained in result[i].range.
+///
+/// Typically, but not necessary, selection ranges correspond to the nodes of the
+/// syntax tree.
 #[cfg(feature = "proposed")]
 pub enum SelectionRangeRequest {}
 
