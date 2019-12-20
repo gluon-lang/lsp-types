@@ -1721,7 +1721,7 @@ pub struct ServerCapabilities {
     /// Capabilities specific to `textDocument/selectionRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub selection_range_provider: Option<GenericCapability>,
+    pub selection_range_provider: Option<SelectionRangeProviderCapability>,
 
     /// The server provides hover support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3364,6 +3364,33 @@ pub struct FoldingRange {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<FoldingRangeKind>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct SelectionRangeOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct SelectionRangeRegistrationOptions {
+    #[serde(flatten)]
+    pub selection_range_options: SelectionRangeOptions,
+
+    #[serde(flatten)]
+    pub registration_options: StaticTextDocumentRegistrationOptions,
+}
+
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum SelectionRangeProviderCapability {
+    Simple(bool),
+    Options(SelectionRangeOptions),
+    RegistrationOptions(SelectionRangeRegistrationOptions),
 }
 
 /// A parameter literal used in selection range requests.
