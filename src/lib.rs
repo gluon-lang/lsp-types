@@ -1109,7 +1109,10 @@ pub struct CompletionItemCapability {
      * preserve unknown tags when sending a completion item back to the server in
      * a resolve call.
      */
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "TagSupport::deserialize_compat"
+    )]
     pub tag_support: Option<TagSupport<CompletionItemTag>>,
 }
 
@@ -1242,7 +1245,10 @@ pub struct PublishDiagnosticsCapability {
 
     /// Client supports the tag property to provide meta data about a diagnostic.
     /// Clients supporting tags have to handle unknown tags gracefully.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "TagSupport::deserialize_compat"
+    )]
     pub tag_support: Option<TagSupport<DiagnosticTag>>,
 }
 
@@ -1251,6 +1257,27 @@ pub struct PublishDiagnosticsCapability {
 pub struct TagSupport<T> {
     /// The tags supported by the client.
     pub value_set: Vec<T>,
+}
+
+impl<T> TagSupport<T> {
+    /// Support for deserializing a boolean tag Support, in case it's present.
+    ///
+    /// This is currently the case for vscode 1.41.1
+    fn deserialize_compat<'de, S>(serializer: S) -> Result<Option<TagSupport<T>>, S::Error>
+    where
+        S: serde::Deserializer<'de>,
+        T: serde::Deserialize<'de>,
+    {
+        Ok(
+            match Value::deserialize(serializer).map_err(serde::de::Error::custom)? {
+                Value::Bool(false) | Value::Null => None,
+                Value::Bool(true) => Some(TagSupport { value_set: vec![] }),
+                other => {
+                    Some(TagSupport::<T>::deserialize(other).map_err(serde::de::Error::custom)?)
+                }
+            },
+        )
+    }
 }
 
 /**
@@ -3382,7 +3409,6 @@ pub struct SelectionRangeRegistrationOptions {
     #[serde(flatten)]
     pub registration_options: StaticTextDocumentRegistrationOptions,
 }
-
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
