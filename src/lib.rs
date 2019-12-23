@@ -30,7 +30,7 @@ use std::collections::HashMap;
 #[cfg(feature = "proposed")]
 use base64;
 #[cfg(feature = "proposed")]
-use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use std::convert::TryFrom;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
@@ -3687,13 +3687,13 @@ impl SemanticHighlightingToken {
     {
         let s = String::deserialize(deserializer)?;
         let bytes =
-            base64::decode(s.as_str()).map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
+            base64::decode_config(s.as_str(), base64::STANDARD).map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
         let mut res = Vec::new();
         for chunk in bytes.chunks_exact(8) {
             res.push(SemanticHighlightingToken {
-                character: (&chunk[0..4]).read_u32::<BigEndian>().unwrap(),
-                length: (&chunk[4..6]).read_u16::<BigEndian>().unwrap(),
-                scope: (&chunk[6..8]).read_u16::<BigEndian>().unwrap(),
+                character: u32::from_be_bytes(<[u8; 4]>::try_from(&chunk[0..4]).unwrap()),
+                length: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[4..6]).unwrap()),
+                scope: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[6..8]).unwrap()),
             });
         }
         Result::Ok(res)
@@ -3709,11 +3709,11 @@ impl SemanticHighlightingToken {
     {
         let mut bytes = vec![];
         for token in tokens {
-            bytes.write_u32::<BigEndian>(token.character).unwrap();
-            bytes.write_u16::<BigEndian>(token.length).unwrap();
-            bytes.write_u16::<BigEndian>(token.scope).unwrap();
+            bytes.extend_from_slice(&token.character.to_be_bytes());
+            bytes.extend_from_slice(&token.length.to_be_bytes());
+            bytes.extend_from_slice(&token.scope.to_be_bytes());
         }
-        serializer.serialize_str(base64::encode(&bytes).as_str())
+        serializer.collect_str(&base64::display::Base64Display::with_config(&bytes, base64::STANDARD))
     }
 }
 
