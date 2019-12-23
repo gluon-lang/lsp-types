@@ -27,6 +27,10 @@ pub use url::Url;
 
 use std::collections::HashMap;
 
+#[cfg(feature = "proposed")]
+use base64;
+#[cfg(feature = "proposed")]
+use std::convert::TryFrom;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
@@ -232,10 +236,10 @@ pub enum DiagnosticTag {
 }
 
 /**
- Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
- Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of
- well known commands. So executing a command requires some tool extension code.
-*/
+ * Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
+ * Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of
+ * well known commands. So executing a command requires some tool extension code.
+ */
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct Command {
     /// Title of the command, like `save`.
@@ -1406,6 +1410,13 @@ pub struct TextDocumentClientCapabilities {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     pub folding_range: Option<FoldingRangeCapability>,
+
+    /**
+     * The client's semantic highlighting capability.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub semantic_highlighting_capabilities: Option<SemanticHighlightingClientCapability>,
 }
 
 /**
@@ -1837,6 +1848,11 @@ pub struct ServerCapabilities {
     /// Workspace specific server capabilities
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace: Option<WorkspaceCapability>,
+
+    /// Semantic highlighting server capabilities.
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub semantic_highlighting: Option<SemanticHighlightingServerCapability>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2478,15 +2494,15 @@ pub enum HoverContents {
 }
 
 /**
-The marked string is rendered:
-- as markdown if it is represented as a string
-- as code block of the given langauge if it is represented as a pair of a language and a value
-
-The pair of a language and a value is an equivalent to markdown:
-    ```${language}
-    ${value}
-    ```
-*/
+ * The marked string is rendered:
+ * - as markdown if it is represented as a string
+ * - as code block of the given langauge if it is represented as a pair of a language and a value
+ * 
+ * The pair of a language and a value is an equivalent to markdown:
+ *     ```${language}
+ *     ${value}
+ *     ```
+ */
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
@@ -3631,6 +3647,115 @@ pub struct PartialResultParams {
     pub partial_result_token: Option<ProgressToken>,
 }
 
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticHighlightingClientCapability {
+    /**
+     * `true` if the client supports semantic highlighting support text documents. Otherwise, `false`. It is `false` by default.
+     */
+    pub semantic_highlighting: bool,
+}
+
+#[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[cfg(feature = "proposed")]
+pub struct SemanticHighlightingServerCapability {
+    /**
+     * A "lookup table" of semantic highlighting [TextMate scopes](https://manual.macromates.com/en/language_grammars)
+     * supported by the language server. If not defined or empty, then the server does not support the semantic highlighting
+     * feature. Otherwise, clients should reuse this "lookup table" when receiving semantic highlighting notifications from
+     * the server.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scopes: Option<Vec<Vec<String>>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+#[cfg(feature = "proposed")]
+pub struct SemanticHighlightingToken {
+    pub character: u32,
+    pub length: u16,
+    pub scope: u16,
+}
+
+#[cfg(feature = "proposed")]
+impl SemanticHighlightingToken {
+    /// Deserializes the tokens from a base64 encoded string
+    fn deserialize_tokens<'de, D>(deserializer: D) -> Result<Vec<SemanticHighlightingToken>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let bytes =
+            base64::decode_config(s.as_str(), base64::STANDARD).map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
+        let mut res = Vec::new();
+        for chunk in bytes.chunks_exact(8) {
+            res.push(SemanticHighlightingToken {
+                character: u32::from_be_bytes(<[u8; 4]>::try_from(&chunk[0..4]).unwrap()),
+                length: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[4..6]).unwrap()),
+                scope: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[6..8]).unwrap()),
+            });
+        }
+        Result::Ok(res)
+    }
+
+    /// Serialize the tokens to a base64 encoded string
+    fn serialize_tokens<S>(
+        tokens: &Vec<SemanticHighlightingToken>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut bytes = vec![];
+        for token in tokens {
+            bytes.extend_from_slice(&token.character.to_be_bytes());
+            bytes.extend_from_slice(&token.length.to_be_bytes());
+            bytes.extend_from_slice(&token.scope.to_be_bytes());
+        }
+        serializer.collect_str(&base64::display::Base64Display::with_config(&bytes, base64::STANDARD))
+    }
+}
+
+/**
+ * Represents a semantic highlighting information that has to be applied on a specific line of the text document.
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct SemanticHighlightingInformation {
+    /**
+     * The zero-based line position in the text document.
+     */
+    pub line: i32,
+
+    /**
+     * A base64 encoded string representing every single highlighted characters with its start position, length and the "lookup table" index of
+     * of the semantic highlighting [TextMate scopes](https://manual.macromates.com/en/language_grammars).
+     * If the `tokens` is empty or not defined, then no highlighted positions are available for the line.
+     */
+    #[serde(deserialize_with = "SemanticHighlightingToken::deserialize_tokens")]
+    #[serde(serialize_with = "SemanticHighlightingToken::serialize_tokens")]
+    pub tokens: Vec<SemanticHighlightingToken>,
+}
+
+/**
+ * Parameters for the semantic highlighting (server-side) push notification.
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticHighlightingParams {
+    /**
+     * The text document that has to be decorated with the semantic highlighting information.
+     */
+    pub text_document: VersionedTextDocumentIdentifier,
+
+    /**
+     * An array of semantic highlighting information.
+     */
+    pub lines: Vec<SemanticHighlightingInformation>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3781,5 +3906,28 @@ mod tests {
             ],
             r#"[{"title":"title","command":"command"},{"title":"title","kind":"quickfix"}]"#,
         )
+    }
+
+    #[cfg(feature = "proposed")]
+    #[test]
+    fn test_semantic_highlighting_information_serialization() {
+        test_serialization(
+            &SemanticHighlightingInformation {
+                line: 10,
+                tokens: vec![
+                    SemanticHighlightingToken {
+                        character: 0x00000001,
+                        length: 0x0002,
+                        scope: 0x0003,
+                    },
+                    SemanticHighlightingToken {
+                        character: 0x00112222,
+                        length: 0x0FF0,
+                        scope: 0x0202,
+                    },
+                ],
+            },
+            r#"{"line":10,"tokens":"AAAAAQACAAMAESIiD/ACAg=="}"#,
+        );
     }
 }

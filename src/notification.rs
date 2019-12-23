@@ -64,6 +64,10 @@ macro_rules! lsp_notification {
     ("$/progress") => {
         $crate::notification::Progress
     };
+    // Requires #[cfg(feature = "proposed")]
+    ("textDocument/semanticHighlighting") => {
+        $crate::notification::SemanticHighlighting
+    };
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -269,6 +273,19 @@ impl Notification for Progress {
     const METHOD: &'static str = "$/progress";
 }
 
+#[cfg(feature = "proposed")]
+/**
+ * Diagnostics notification are sent from the server to the client to signal results of validation runs.
+ */
+#[derive(Debug)]
+pub enum SemanticHighlighting {}
+
+#[cfg(feature = "proposed")]
+impl Notification for SemanticHighlighting {
+  type Params = SemanticHighlightingParams;
+  const METHOD: &'static str = "textDocument/semanticHighlighting";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -313,5 +330,6 @@ mod test {
     #[cfg(feature = "proposed")]
     fn check_proposed_macro_definitions() {
         check_macro!("$/progress");
+        check_macro!("textDocument/semanticHighlighting");
     }
 }
