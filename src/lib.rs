@@ -1114,6 +1114,7 @@ pub struct CompletionItemCapability {
      * a resolve call.
      */
     #[serde(
+        default,
         skip_serializing_if = "Option::is_none",
         deserialize_with = "TagSupport::deserialize_compat"
     )]
@@ -1250,6 +1251,7 @@ pub struct PublishDiagnosticsCapability {
     /// Client supports the tag property to provide meta data about a diagnostic.
     /// Clients supporting tags have to handle unknown tags gracefully.
     #[serde(
+        default,
         skip_serializing_if = "Option::is_none",
         deserialize_with = "TagSupport::deserialize_compat"
     )]
@@ -1273,12 +1275,13 @@ impl<T> TagSupport<T> {
         T: serde::Deserialize<'de>,
     {
         Ok(
-            match Value::deserialize(serializer).map_err(serde::de::Error::custom)? {
-                Value::Bool(false) | Value::Null => None,
-                Value::Bool(true) => Some(TagSupport { value_set: vec![] }),
-                other => {
+            match Option::<Value>::deserialize(serializer).map_err(serde::de::Error::custom)? {
+                Some(Value::Bool(false)) => None,
+                Some(Value::Bool(true)) => Some(TagSupport { value_set: vec![] }),
+                Some(other) => {
                     Some(TagSupport::<T>::deserialize(other).map_err(serde::de::Error::custom)?)
                 }
+                None => None,
             },
         )
     }
@@ -3771,6 +3774,14 @@ mod tests {
         assert_eq!(&deserialized, ms);
     }
 
+    fn test_deserialization<T>(json: &str, expected: &T)
+    where
+        T: for<'de> Deserialize<'de> + PartialEq + std::fmt::Debug,
+    {
+        let value = serde_json::from_str::<T>(json).unwrap();
+        assert_eq!(&value, expected);
+    }
+
     #[test]
     fn number_or_string() {
         test_serialization(&NumberOrString::Number(123), r#"123"#);
@@ -3929,5 +3940,22 @@ mod tests {
             },
             r#"{"line":10,"tokens":"AAAAAQACAAMAESIiD/ACAg=="}"#,
         );
+    }
+
+    #[test]
+    fn test_tag_support_deserialization() {
+        let mut empty = CompletionItemCapability::default();
+        empty.tag_support = None;
+
+        test_deserialization(r#"{}"#, &empty);
+        test_deserialization(r#"{"tagSupport": false}"#, &empty);
+
+        let mut t = CompletionItemCapability::default();
+        t.tag_support = Some(TagSupport { value_set: vec![] });
+        test_deserialization(r#"{"tagSupport": true}"#, &t);
+
+        let mut t = CompletionItemCapability::default();
+        t.tag_support = Some(TagSupport { value_set: vec![CompletionItemTag::Deprecated] });
+        test_deserialization(r#"{"tagSupport": {"valueSet": [1]}}"#, &t);
     }
 }
