@@ -282,8 +282,8 @@ pub enum SemanticHighlighting {}
 
 #[cfg(feature = "proposed")]
 impl Notification for SemanticHighlighting {
-  type Params = SemanticHighlightingParams;
-  const METHOD: &'static str = "textDocument/semanticHighlighting";
+    type Params = SemanticHighlightingParams;
+    const METHOD: &'static str = "textDocument/semanticHighlighting";
 }
 
 #[cfg(test)]

@@ -29,11 +29,11 @@ use std::collections::HashMap;
 
 #[cfg(feature = "proposed")]
 use base64;
-#[cfg(feature = "proposed")]
-use std::convert::TryFrom;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
+#[cfg(feature = "proposed")]
+use std::convert::TryFrom;
 
 pub mod notification;
 pub mod request;
@@ -1466,7 +1466,7 @@ pub struct ClientCapabilities {
     pub experimental: Option<Value>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InitializeResult {
     /// The capabilities the language server provides.
@@ -1752,7 +1752,7 @@ pub struct CodeActionKindLiteralSupport {
     pub value_set: Vec<String>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerCapabilities {
     /// Defines how text documents are synced.
@@ -1856,6 +1856,10 @@ pub struct ServerCapabilities {
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_highlighting: Option<SemanticHighlightingServerCapability>,
+
+    /// Experimental server capabilities.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub experimental: Option<Value>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2500,7 +2504,7 @@ pub enum HoverContents {
  * The marked string is rendered:
  * - as markdown if it is represented as a string
  * - as code block of the given langauge if it is represented as a pair of a language and a value
- * 
+ *
  * The pair of a language and a value is an equivalent to markdown:
  *     ```${language}
  *     ${value}
@@ -3684,13 +3688,15 @@ pub struct SemanticHighlightingToken {
 #[cfg(feature = "proposed")]
 impl SemanticHighlightingToken {
     /// Deserializes the tokens from a base64 encoded string
-    fn deserialize_tokens<'de, D>(deserializer: D) -> Result<Vec<SemanticHighlightingToken>, D::Error>
+    fn deserialize_tokens<'de, D>(
+        deserializer: D,
+    ) -> Result<Vec<SemanticHighlightingToken>, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let bytes =
-            base64::decode_config(s.as_str(), base64::STANDARD).map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
+        let bytes = base64::decode_config(s.as_str(), base64::STANDARD)
+            .map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
         let mut res = Vec::new();
         for chunk in bytes.chunks_exact(8) {
             res.push(SemanticHighlightingToken {
@@ -3716,7 +3722,10 @@ impl SemanticHighlightingToken {
             bytes.extend_from_slice(&token.length.to_be_bytes());
             bytes.extend_from_slice(&token.scope.to_be_bytes());
         }
-        serializer.collect_str(&base64::display::Base64Display::with_config(&bytes, base64::STANDARD))
+        serializer.collect_str(&base64::display::Base64Display::with_config(
+            &bytes,
+            base64::STANDARD,
+        ))
     }
 }
 
@@ -3955,7 +3964,9 @@ mod tests {
         test_deserialization(r#"{"tagSupport": true}"#, &t);
 
         let mut t = CompletionItemCapability::default();
-        t.tag_support = Some(TagSupport { value_set: vec![CompletionItemTag::Deprecated] });
+        t.tag_support = Some(TagSupport {
+            value_set: vec![CompletionItemTag::Deprecated],
+        });
         test_deserialization(r#"{"tagSupport": {"valueSet": [1]}}"#, &t);
     }
 }
