@@ -586,7 +586,7 @@ impl Request for WorkspaceFoldersRequest {
     const METHOD: &'static str = "workspace/workspaceFolders";
 }
 
-/// The `window/workDoneProgress/create` request is sent from the server 
+/// The `window/workDoneProgress/create` request is sent from the server
 /// to the clientto ask the client to create a work done progress.
 #[cfg(feature = "proposed")]
 #[derive(Debug)]
