@@ -122,6 +122,18 @@ macro_rules! lsp_request {
     ("window/workDoneProgress/create") => {
         $crate::request::WorkDoneProgressCreate
     };
+    // Requires #[cfg(feature = "proposed")]
+    ("callHierarchy/incomingCalls") => {
+        $crate::request::CallHierarchyIncomingCalls
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("callHierarchy/outgoingCalls") => {
+        $crate::request::CallHierarchyOutgoingCalls
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("textDocument/prepareCallHierarchy") => {
+        $crate::request::CallHierarchyPrepare
+    };
 }
 
 /**
@@ -618,6 +630,36 @@ impl Request for SelectionRangeRequest {
     const METHOD: &'static str = "textDocument/selectionRange";
 }
 
+#[cfg(feature = "proposed")]
+pub enum CallHierarchyPrepare {}
+
+#[cfg(feature = "proposed")]
+impl Request for CallHierarchyPrepare {
+    type Params = CallHierarchyPrepareParams;
+    type Result = Option<Vec<CallHierarchyItem>>;
+    const METHOD: &'static str = "textDocument/prepareCallHierarchy";
+}
+
+#[cfg(feature = "proposed")]
+pub enum CallHierarchyIncomingCalls {}
+
+#[cfg(feature = "proposed")]
+impl Request for CallHierarchyIncomingCalls {
+    type Params = CallHierarchyIncomingCallsParams;
+    type Result = Option<Vec<CallHierarchyIncomingCall>>;
+    const METHOD: &'static str = "callHierarchy/incomingCalls";
+}
+
+#[cfg(feature = "proposed")]
+pub enum CallHierarchyOutgoingCalls {}
+
+#[cfg(feature = "proposed")]
+impl Request for CallHierarchyOutgoingCalls {
+    type Params = CallHierarchyOutgoingCallsParams;
+    type Result = Option<Vec<CallHierarchyOutgoingCall>>;
+    const METHOD: &'static str = "callHierarchy/outgoingCalls";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -680,6 +722,9 @@ mod test {
     #[test]
     #[cfg(feature = "proposed")]
     fn check_proposed_macro_definitions() {
+        check_macro!("callHierarchy/incomingCalls");
+        check_macro!("callHierarchy/outgoingCalls");
+        check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/selectionRange");
         check_macro!("window/workDoneProgress/create");
     }
