@@ -1860,7 +1860,7 @@ pub struct ServerCapabilities {
     /// Call hierarchy provider capabilities.
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub call_hierarchy_provider: Option<bool>,
+    pub call_hierarchy_provider: Option<CallHierarchyServerCapability>,
 
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3781,6 +3781,22 @@ pub struct SemanticHighlightingParams {
 pub enum SymbolTag {
     /// Render a symbol as obsolete, usually using a strike-out.
     Deprecated = 1,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct CallHierarchyOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum CallHierarchyServerCapability {
+    Simple(bool),
+    Options(CallHierarchyOptions),
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
