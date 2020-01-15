@@ -117,8 +117,6 @@ macro_rules! lsp_request {
     ("workspace/configuration") => {
         $crate::request::WorkspaceConfiguration
     };
-
-    // Requires #[cfg(feature = "proposed")]
     ("window/workDoneProgress/create") => {
         $crate::request::WorkDoneProgressCreate
     };
@@ -600,11 +598,9 @@ impl Request for WorkspaceFoldersRequest {
 
 /// The `window/workDoneProgress/create` request is sent from the server
 /// to the clientto ask the client to create a work done progress.
-#[cfg(feature = "proposed")]
 #[derive(Debug)]
 pub enum WorkDoneProgressCreate {}
 
-#[cfg(feature = "proposed")]
 impl Request for WorkDoneProgressCreate {
     type Params = WorkDoneProgressCreateParams;
     type Result = ();
@@ -620,10 +616,8 @@ impl Request for WorkDoneProgressCreate {
 ///
 /// Typically, but not necessary, selection ranges correspond to the nodes of the
 /// syntax tree.
-#[cfg(feature = "proposed")]
 pub enum SelectionRangeRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for SelectionRangeRequest {
     type Params = SelectionRangeParams;
     type Result = Vec<SelectionRange>;
@@ -686,6 +680,7 @@ mod test {
         check_macro!("initialize");
         check_macro!("shutdown");
         check_macro!("window/showMessageRequest");
+        check_macro!("window/workDoneProgress/create");
         check_macro!("client/registerCapability");
         check_macro!("client/unregisterCapability");
         check_macro!("workspace/symbol");
@@ -715,6 +710,7 @@ mod test {
         check_macro!("textDocument/prepareRename");
         check_macro!("workspace/workspaceFolders");
         check_macro!("textDocument/implementation");
+        check_macro!("textDocument/selectionRange");
         check_macro!("textDocument/typeDefinition");
         check_macro!("workspace/configuration");
     }
@@ -725,7 +721,5 @@ mod test {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("textDocument/prepareCallHierarchy");
-        check_macro!("textDocument/selectionRange");
-        check_macro!("window/workDoneProgress/create");
     }
 }

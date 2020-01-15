@@ -1761,7 +1761,6 @@ pub struct ServerCapabilities {
 
     /// Capabilities specific to `textDocument/selectionRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub selection_range_provider: Option<SelectionRangeProviderCapability>,
 
     /// The server provides hover support.
@@ -3422,14 +3421,12 @@ pub struct FoldingRange {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 pub struct SelectionRangeOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 pub struct SelectionRangeRegistrationOptions {
     #[serde(flatten)]
     pub selection_range_options: SelectionRangeOptions,
@@ -3440,7 +3437,6 @@ pub struct SelectionRangeRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
-#[cfg(feature = "proposed")]
 pub enum SelectionRangeProviderCapability {
     Simple(bool),
     Options(SelectionRangeOptions),
@@ -3450,7 +3446,6 @@ pub enum SelectionRangeProviderCapability {
 /// A parameter literal used in selection range requests.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct SelectionRangeParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
@@ -3468,7 +3463,6 @@ pub struct SelectionRangeParams {
 /// Represents a selection range.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct SelectionRange {
     /// Range of the selection.
     pub range: Range,

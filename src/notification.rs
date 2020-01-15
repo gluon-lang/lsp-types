@@ -59,8 +59,6 @@ macro_rules! lsp_notification {
     ("workspace/didChangeWorkspaceFolders") => {
         $crate::notification::DidChangeWorkspaceFolders
     };
-
-    // Requires #[cfg(feature = "proposed")]
     ("$/progress") => {
         $crate::notification::Progress
     };
@@ -261,13 +259,11 @@ impl Notification for PublishDiagnostics {
     const METHOD: &'static str = "textDocument/publishDiagnostics";
 }
 
-#[cfg(feature = "proposed")]
 /// The progress notification is sent from the server to the client to ask
 /// the client to indicate progress.
 #[derive(Debug)]
 pub enum Progress {}
 
-#[cfg(feature = "proposed")]
 impl Notification for Progress {
     type Params = ProgressParams;
     const METHOD: &'static str = "$/progress";
@@ -309,6 +305,7 @@ mod test {
     #[test]
     fn check_macro_definitions() {
         check_macro!("$/cancelRequest");
+        check_macro!("$/progress");
         check_macro!("initialized");
         check_macro!("exit");
         check_macro!("window/showMessage");
@@ -329,7 +326,6 @@ mod test {
     #[test]
     #[cfg(feature = "proposed")]
     fn check_proposed_macro_definitions() {
-        check_macro!("$/progress");
         check_macro!("textDocument/semanticHighlighting");
     }
 }
