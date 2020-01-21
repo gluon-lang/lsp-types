@@ -3689,42 +3689,51 @@ impl SemanticHighlightingToken {
     /// Deserializes the tokens from a base64 encoded string
     fn deserialize_tokens<'de, D>(
         deserializer: D,
-    ) -> Result<Vec<SemanticHighlightingToken>, D::Error>
+    ) -> Result<Option<Vec<SemanticHighlightingToken>>, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        let s = String::deserialize(deserializer)?;
-        let bytes = base64::decode_config(s.as_str(), base64::STANDARD)
-            .map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
-        let mut res = Vec::new();
-        for chunk in bytes.chunks_exact(8) {
-            res.push(SemanticHighlightingToken {
-                character: u32::from_be_bytes(<[u8; 4]>::try_from(&chunk[0..4]).unwrap()),
-                length: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[4..6]).unwrap()),
-                scope: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[6..8]).unwrap()),
-            });
+        let opt_s = Option::<String>::deserialize(deserializer)?;
+
+        if let Some(s) = opt_s {
+            let bytes = base64::decode_config(s.as_str(), base64::STANDARD)
+                .map_err(|_| serde::de::Error::custom("Error parsing base64 string"))?;
+            let mut res = Vec::new();
+            for chunk in bytes.chunks_exact(8) {
+                res.push(SemanticHighlightingToken {
+                    character: u32::from_be_bytes(<[u8; 4]>::try_from(&chunk[0..4]).unwrap()),
+                    length: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[4..6]).unwrap()),
+                    scope: u16::from_be_bytes(<[u8; 2]>::try_from(&chunk[6..8]).unwrap()),
+                });
+            }
+            Result::Ok(Some(res))
+        } else {
+            Result::Ok(None)
         }
-        Result::Ok(res)
     }
 
     /// Serialize the tokens to a base64 encoded string
     fn serialize_tokens<S>(
-        tokens: &Vec<SemanticHighlightingToken>,
+        tokens: &Option<Vec<SemanticHighlightingToken>>,
         serializer: S,
     ) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let mut bytes = vec![];
-        for token in tokens {
-            bytes.extend_from_slice(&token.character.to_be_bytes());
-            bytes.extend_from_slice(&token.length.to_be_bytes());
-            bytes.extend_from_slice(&token.scope.to_be_bytes());
+        if let Some(tokens) = tokens {
+            let mut bytes = vec![];
+            for token in tokens {
+                bytes.extend_from_slice(&token.character.to_be_bytes());
+                bytes.extend_from_slice(&token.length.to_be_bytes());
+                bytes.extend_from_slice(&token.scope.to_be_bytes());
+            }
+            serializer.collect_str(&base64::display::Base64Display::with_config(
+                    &bytes,
+                    base64::STANDARD,
+            ))
+        } else {
+            serializer.serialize_none()
         }
-        serializer.collect_str(&base64::display::Base64Display::with_config(
-            &bytes,
-            base64::STANDARD,
-        ))
     }
 }
 
@@ -3744,9 +3753,13 @@ pub struct SemanticHighlightingInformation {
      * of the semantic highlighting [TextMate scopes](https://manual.macromates.com/en/language_grammars).
      * If the `tokens` is empty or not defined, then no highlighted positions are available for the line.
      */
-    #[serde(deserialize_with = "SemanticHighlightingToken::deserialize_tokens")]
-    #[serde(serialize_with = "SemanticHighlightingToken::serialize_tokens")]
-    pub tokens: Vec<SemanticHighlightingToken>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "SemanticHighlightingToken::deserialize_tokens",
+        serialize_with = "SemanticHighlightingToken::serialize_tokens"
+    )]
+    pub tokens: Option<Vec<SemanticHighlightingToken>>,
 }
 
 /**
@@ -4052,7 +4065,7 @@ mod tests {
         test_serialization(
             &SemanticHighlightingInformation {
                 line: 10,
-                tokens: vec![
+                tokens: Some(vec![
                     SemanticHighlightingToken {
                         character: 0x00000001,
                         length: 0x0002,
@@ -4063,9 +4076,18 @@ mod tests {
                         length: 0x0FF0,
                         scope: 0x0202,
                     },
-                ],
+                ]),
             },
             r#"{"line":10,"tokens":"AAAAAQACAAMAESIiD/ACAg=="}"#,
+        );
+
+        test_serialization(
+            &SemanticHighlightingInformation {
+                line: 22,
+                tokens: None,
+
+            },
+            r#"{"line":22}"#,
         );
     }
 
