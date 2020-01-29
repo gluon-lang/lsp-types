@@ -3737,8 +3737,8 @@ impl SemanticHighlightingToken {
                 bytes.extend_from_slice(&token.scope.to_be_bytes());
             }
             serializer.collect_str(&base64::display::Base64Display::with_config(
-                    &bytes,
-                    base64::STANDARD,
+                &bytes,
+                base64::STANDARD,
             ))
         } else {
             serializer.serialize_none()
@@ -4094,7 +4094,6 @@ mod tests {
             &SemanticHighlightingInformation {
                 line: 22,
                 tokens: None,
-
             },
             r#"{"line":22}"#,
         );
