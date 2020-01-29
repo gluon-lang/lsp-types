@@ -23,6 +23,9 @@ macro_rules! lsp_notification {
     ("window/logMessage") => {
         $crate::notification::LogMessage
     };
+    ("window/workDoneProgress/cancel") => {
+        $crate::notification::WorkDoneProgressCancel
+    };
 
     ("telemetry/event") => {
         $crate::notification::TelemetryEvent
@@ -269,6 +272,16 @@ impl Notification for Progress {
     const METHOD: &'static str = "$/progress";
 }
 
+/// The `window/workDoneProgress/cancel` notification is sent from the client
+/// to the server to cancel a progress initiated on the server side using the `window/workDoneProgress/create`.
+#[derive(Debug)]
+pub enum WorkDoneProgressCancel {}
+
+impl Notification for WorkDoneProgressCancel {
+    type Params = WorkDoneProgressCancelParams;
+    const METHOD: &'static str = "window/workDoneProgress/cancel";
+}
+
 #[cfg(feature = "proposed")]
 /**
  * Diagnostics notification are sent from the server to the client to signal results of validation runs.
@@ -310,6 +323,7 @@ mod test {
         check_macro!("exit");
         check_macro!("window/showMessage");
         check_macro!("window/logMessage");
+        check_macro!("window/workDoneProgress/cancel");
         check_macro!("telemetry/event");
         check_macro!("textDocument/didOpen");
         check_macro!("textDocument/didChange");
