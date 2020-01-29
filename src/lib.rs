@@ -3561,6 +3561,15 @@ pub struct WorkDoneProgressCreateParams {
     pub token: ProgressToken,
 }
 
+/// The `window/workDoneProgress/cancel` notification is sent from the client
+/// to the server to cancel a progress initiated on the server side using the `window/workDoneProgress/create`.
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressCancelParams {
+    /// The token to be used to report progress.
+    pub token: ProgressToken,
+}
+
 /// Options to signal work done progress support in server capabilities.
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
