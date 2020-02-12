@@ -32,8 +32,12 @@ use base64;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
+
 #[cfg(feature = "proposed")]
-use std::convert::TryFrom;
+use serde::ser::SerializeSeq;
+
+#[cfg(feature = "proposed")]
+use std::{borrow::Cow, convert::TryFrom};
 
 pub mod notification;
 pub mod request;
@@ -1420,6 +1424,13 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub semantic_highlighting_capabilities: Option<SemanticHighlightingClientCapability>,
+
+    /**
+     * Capabilities specific to the `textDocument/semanticTokens`
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub semantic_tokens: Option<SemanticTokensClientCapabilities>,
 }
 
 /**
@@ -1861,6 +1872,11 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub call_hierarchy_provider: Option<CallHierarchyServerCapability>,
 
+    /// Semantic tokens server capabilities.
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub semantic_tokens_provider: Option<SemanticTokensServerCapabilities>,
+
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
@@ -1972,7 +1988,7 @@ pub struct TextDocumentRegistrationOptions {
     pub document_selector: Option<DocumentSelector>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StaticRegistrationOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3789,6 +3805,556 @@ pub struct SemanticHighlightingParams {
     pub lines: Vec<SemanticHighlightingInformation>,
 }
 
+/**
+ * A set of predefined token types. This set is not fixed
+ * and clients can specify additional token types via the
+ * corresponding client capabilities.
+ *
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokenType(Cow<'static, str>);
+
+#[cfg(feature = "proposed")]
+impl SemanticTokenType {
+    pub const COMMENT: SemanticTokenType = SemanticTokenType::new("comment");
+    pub const KEYWORD: SemanticTokenType = SemanticTokenType::new("keyword");
+    pub const STRING: SemanticTokenType = SemanticTokenType::new("string");
+    pub const NUMBER: SemanticTokenType = SemanticTokenType::new("number");
+    pub const REGEXP: SemanticTokenType = SemanticTokenType::new("regexp");
+    pub const OPERATOR: SemanticTokenType = SemanticTokenType::new("operator");
+    pub const NAMESPACE: SemanticTokenType = SemanticTokenType::new("namespace");
+    pub const TYPE: SemanticTokenType = SemanticTokenType::new("type");
+    pub const STRUCT: SemanticTokenType = SemanticTokenType::new("struct");
+    pub const CLASS: SemanticTokenType = SemanticTokenType::new("class");
+    pub const INTERFACE: SemanticTokenType = SemanticTokenType::new("interface");
+    pub const ENUM: SemanticTokenType = SemanticTokenType::new("enum");
+    pub const TYPE_PARAMETER: SemanticTokenType = SemanticTokenType::new("typeParameter");
+    pub const FUNCTION: SemanticTokenType = SemanticTokenType::new("function");
+    pub const MEMBER: SemanticTokenType = SemanticTokenType::new("member");
+    pub const PROPERTY: SemanticTokenType = SemanticTokenType::new("property");
+    pub const MACRO: SemanticTokenType = SemanticTokenType::new("macro");
+    pub const VARIABLE: SemanticTokenType = SemanticTokenType::new("variable");
+    pub const PARAMETER: SemanticTokenType = SemanticTokenType::new("parameter");
+    pub const LABEL: SemanticTokenType = SemanticTokenType::new("label");
+
+    pub const fn new(tag: &'static str) -> Self {
+        SemanticTokenType(Cow::Borrowed(tag))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<String> for SemanticTokenType {
+    fn from(from: String) -> Self {
+        SemanticTokenType(Cow::from(from))
+    }
+}
+#[cfg(feature = "proposed")]
+impl From<&'static str> for SemanticTokenType {
+    fn from(from: &'static str) -> Self {
+        SemanticTokenType::new(from)
+    }
+}
+
+/**
+ * A set of predefined token modifiers. This set is not fixed
+ * and clients can specify additional token types via the
+ * corresponding client capabilities.
+ *
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokenModifier(Cow<'static, str>);
+
+#[cfg(feature = "proposed")]
+impl SemanticTokenModifier {
+    pub const DOCUMENTATION: SemanticTokenModifier = SemanticTokenModifier::new("documentation");
+    pub const DECLARATION: SemanticTokenModifier = SemanticTokenModifier::new("declaration");
+    pub const DEFINITION: SemanticTokenModifier = SemanticTokenModifier::new("definition");
+    pub const REFERENCE: SemanticTokenModifier = SemanticTokenModifier::new("reference");
+    pub const STATIC: SemanticTokenModifier = SemanticTokenModifier::new("static");
+    pub const ABSTRACT: SemanticTokenModifier = SemanticTokenModifier::new("abstract");
+    pub const DEPRECATED: SemanticTokenModifier = SemanticTokenModifier::new("deprecated");
+    pub const ASYNC: SemanticTokenModifier = SemanticTokenModifier::new("async");
+    pub const VOLATILE: SemanticTokenModifier = SemanticTokenModifier::new("volatile");
+    pub const READONLY: SemanticTokenModifier = SemanticTokenModifier::new("readonly");
+
+    pub const fn new(tag: &'static str) -> Self {
+        SemanticTokenModifier(Cow::Borrowed(tag))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<String> for SemanticTokenModifier {
+    fn from(from: String) -> Self {
+        SemanticTokenModifier(Cow::from(from))
+    }
+}
+#[cfg(feature = "proposed")]
+impl From<&'static str> for SemanticTokenModifier {
+    fn from(from: &'static str) -> Self {
+        SemanticTokenModifier::new(from)
+    }
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensLegend {
+    /**
+     * The token types a server uses.
+     */
+    pub token_types: Vec<SemanticTokenType>,
+
+    /**
+     * The token modifiers a server uses.
+     */
+    pub token_modifiers: Vec<SemanticTokenModifier>,
+}
+
+/**
+ * The actual tokens. For a detailed description about how the data is
+ * structured please see
+ * https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71
+ */
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Default)]
+#[cfg(feature = "proposed")]
+pub struct SemanticToken {
+    pub delta_line: u32,
+    pub delta_start: u32,
+    pub length: u32,
+    pub token_type: u32,
+    pub token_modifiers_bitset: u32,
+}
+
+#[cfg(feature = "proposed")]
+impl SemanticToken {
+    fn deserialize_tokens<'de, D>(deserializer: D) -> Result<Vec<SemanticToken>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let data = Vec::<u32>::deserialize(deserializer)?;
+        let chunks = data.chunks_exact(5);
+
+        if !chunks.remainder().is_empty() {
+            return Result::Err(serde::de::Error::custom("Length is not divisible by 5"));
+        }
+
+        Result::Ok(
+            chunks
+                .map(|chunk| SemanticToken {
+                    delta_line: chunk[0],
+                    delta_start: chunk[1],
+                    length: chunk[2],
+                    token_type: chunk[3],
+                    token_modifiers_bitset: chunk[4],
+                })
+                .collect(),
+        )
+    }
+
+    fn serialize_tokens<S>(tokens: &Vec<SemanticToken>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(tokens.len() * 5))?;
+        for token in tokens.iter() {
+            seq.serialize_element(&token.delta_line)?;
+            seq.serialize_element(&token.delta_start)?;
+            seq.serialize_element(&token.length)?;
+            seq.serialize_element(&token.token_type)?;
+            seq.serialize_element(&token.token_modifiers_bitset)?;
+        }
+        seq.end()
+    }
+
+    fn deserialize_tokens_opt<'de, D>(
+        deserializer: D,
+    ) -> Result<Option<Vec<SemanticToken>>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(transparent)]
+        struct Wrapper {
+            #[serde(deserialize_with = "SemanticToken::deserialize_tokens")]
+            tokens: Vec<SemanticToken>,
+        }
+
+        Ok(Option::<Wrapper>::deserialize(deserializer)?.map(|wrapper| wrapper.tokens))
+    }
+
+    fn serialize_tokens_opt<S>(
+        data: &Option<Vec<SemanticToken>>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        #[derive(Serialize)]
+        #[serde(transparent)]
+        struct Wrapper {
+            #[serde(serialize_with = "SemanticToken::serialize_tokens")]
+            tokens: Vec<SemanticToken>,
+        }
+
+        let opt = data.as_ref().map(|t| Wrapper { tokens: t.to_vec() });
+
+        opt.serialize(serializer)
+    }
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokens {
+    /**
+     * An optional result id. If provided and clients support delta updating
+     * the client will include the result id in the next semantic token request.
+     * A server can then instead of computing all sematic tokens again simply
+     * send a delta.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result_id: Option<String>,
+
+    /**
+     * The actual tokens. For a detailed description about how the data is
+     * structured please see
+     * https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71
+     */
+    #[serde(
+        deserialize_with = "SemanticToken::deserialize_tokens",
+        serialize_with = "SemanticToken::serialize_tokens"
+    )]
+    pub data: Vec<SemanticToken>,
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensPartialResult {
+    #[serde(
+        deserialize_with = "SemanticToken::deserialize_tokens",
+        serialize_with = "SemanticToken::serialize_tokens"
+    )]
+    pub data: Vec<SemanticToken>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensResult {
+    Tokens(SemanticTokens),
+    Partial(SemanticTokensPartialResult),
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokens> for SemanticTokensResult {
+    fn from(from: SemanticTokens) -> Self {
+        SemanticTokensResult::Tokens(from)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensPartialResult> for SemanticTokensResult {
+    fn from(from: SemanticTokensPartialResult) -> Self {
+        SemanticTokensResult::Partial(from)
+    }
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensEdit {
+    pub start: u32,
+    pub delete_count: u32,
+
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "SemanticToken::deserialize_tokens_opt",
+        serialize_with = "SemanticToken::serialize_tokens_opt"
+    )]
+    pub data: Option<Vec<SemanticToken>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensEditResult {
+    Tokens(SemanticTokens),
+    TokensEdits(SemanticTokensEdit),
+    PartialTokens(SemanticTokensPartialResult),
+    PartialTokensEdit(SemanticTokensEditsPartialResult),
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokens> for SemanticTokensEditResult {
+    fn from(from: SemanticTokens) -> Self {
+        SemanticTokensEditResult::Tokens(from)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensEdit> for SemanticTokensEditResult {
+    fn from(from: SemanticTokensEdit) -> Self {
+        SemanticTokensEditResult::TokensEdits(from)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensPartialResult> for SemanticTokensEditResult {
+    fn from(from: SemanticTokensPartialResult) -> Self {
+        SemanticTokensEditResult::PartialTokens(from)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensEditsPartialResult> for SemanticTokensEditResult {
+    fn from(from: SemanticTokensEditsPartialResult) -> Self {
+        SemanticTokensEditResult::PartialTokensEdit(from)
+    }
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensEdits {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result_id: Option<String>,
+    /**
+     * For a detailed description how these edits are structured pls see
+     * https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L131
+     */
+    pub edits: Vec<SemanticTokensEdit>,
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensEditsPartialResult {
+    pub edits: Vec<SemanticTokensEdit>,
+}
+
+/**
+* Capabilities specific to the `textDocument/semanticTokens`
+*
+* @since 3.16.0 - Proposed state
+*/
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensClientCapabilities {
+    /**
+     * Whether implementation supports dynamic registration. If this is set to `true`
+     * the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
+     * return value for the corresponding server capability as well.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /**
+     * The token types known by the client.
+     */
+    pub token_types: Vec<SemanticTokenType>,
+
+    /**
+     * The token modifiers known by the client.
+     */
+    pub token_modifiers: Vec<SemanticTokenModifier>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensDocumentProvider {
+    Bool(bool),
+
+    /// The server supports deltas for full documents.
+    Edits {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        edits: Option<bool>,
+    },
+}
+
+/**
+ * @since 3.16.0 - Proposed state
+ */
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+
+    /**
+     * The legend used by the server
+     */
+    pub legend: SemanticTokensLegend,
+
+    /**
+     * Server supports providing semantic tokens for a sepcific range
+     * of a document.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range_provider: Option<bool>,
+
+    /**
+     * Server supports providing semantic tokens for a full document.
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub document_provider: Option<SemanticTokensDocumentProvider>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub semantic_tokens_options: SemanticTokensOptions,
+
+    #[serde(flatten)]
+    pub static_registration_options: StaticRegistrationOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensServerCapabilities {
+    SemanticTokensOptions(SemanticTokensOptions),
+    SemanticTokensRegistrationOptions(SemanticTokensRegistrationOptions),
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensOptions> for SemanticTokensServerCapabilities {
+    fn from(from: SemanticTokensOptions) -> Self {
+        SemanticTokensServerCapabilities::SemanticTokensOptions(from)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensRegistrationOptions> for SemanticTokensServerCapabilities {
+    fn from(from: SemanticTokensRegistrationOptions) -> Self {
+        SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(from)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensParams {
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
+
+    /**
+     * The text document.
+     */
+    pub text_document: TextDocumentIdentifier,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensEditsParams {
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
+
+    /**
+     * The text document.
+     */
+    pub text_document: TextDocumentIdentifier,
+
+    /**
+     * The previous result id.
+     */
+    pub previous_result_id: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensRangeParams {
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
+
+    /**
+     * The text document.
+     */
+    pub text_document: TextDocumentIdentifier,
+
+    /**
+     * The range the semantic tokens are requested for.
+     */
+    pub range: Range,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensRangeResult {
+    Tokens(SemanticTokens),
+    Partial(SemanticTokensPartialResult),
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokens> for SemanticTokensRangeResult {
+    fn from(tokens: SemanticTokens) -> Self {
+        SemanticTokensRangeResult::Tokens(tokens)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<SemanticTokensPartialResult> for SemanticTokensRangeResult {
+    fn from(partial: SemanticTokensPartialResult) -> Self {
+        SemanticTokensRangeResult::Partial(partial)
+    }
+}
+
 /// Symbol tags are extra annotations that tweak the rendering of a symbol.
 /// Since 3.15
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
@@ -4116,5 +4682,190 @@ mod tests {
             value_set: vec![CompletionItemTag::Deprecated],
         });
         test_deserialization(r#"{"tagSupport": {"valueSet": [1]}}"#, &t);
+    }
+
+    #[cfg(feature = "proposed")]
+    #[test]
+    fn test_semantic_tokens_support_serialization() {
+        test_serialization(
+            &SemanticTokens {
+                result_id: None,
+                data: vec![],
+            },
+            r#"{"data":[]}"#,
+        );
+
+        test_serialization(
+            &SemanticTokens {
+                result_id: None,
+                data: vec![SemanticToken {
+                    delta_line: 2,
+                    delta_start: 5,
+                    length: 3,
+                    token_type: 0,
+                    token_modifiers_bitset: 3,
+                }],
+            },
+            r#"{"data":[2,5,3,0,3]}"#,
+        );
+
+        test_serialization(
+            &SemanticTokens {
+                result_id: None,
+                data: vec![
+                    SemanticToken {
+                        delta_line: 2,
+                        delta_start: 5,
+                        length: 3,
+                        token_type: 0,
+                        token_modifiers_bitset: 3,
+                    },
+                    SemanticToken {
+                        delta_line: 0,
+                        delta_start: 5,
+                        length: 4,
+                        token_type: 1,
+                        token_modifiers_bitset: 0,
+                    },
+                ],
+            },
+            r#"{"data":[2,5,3,0,3,0,5,4,1,0]}"#,
+        );
+    }
+
+    #[cfg(feature = "proposed")]
+    #[test]
+    fn test_semantic_tokens_support_deserialization() {
+        test_deserialization(
+            r#"{"data":[]}"#,
+            &SemanticTokens {
+                result_id: None,
+                data: vec![],
+            },
+        );
+
+        test_deserialization(
+            r#"{"data":[2,5,3,0,3]}"#,
+            &SemanticTokens {
+                result_id: None,
+                data: vec![SemanticToken {
+                    delta_line: 2,
+                    delta_start: 5,
+                    length: 3,
+                    token_type: 0,
+                    token_modifiers_bitset: 3,
+                }],
+            },
+        );
+
+        test_deserialization(
+            r#"{"data":[2,5,3,0,3,0,5,4,1,0]}"#,
+            &SemanticTokens {
+                result_id: None,
+                data: vec![
+                    SemanticToken {
+                        delta_line: 2,
+                        delta_start: 5,
+                        length: 3,
+                        token_type: 0,
+                        token_modifiers_bitset: 3,
+                    },
+                    SemanticToken {
+                        delta_line: 0,
+                        delta_start: 5,
+                        length: 4,
+                        token_type: 1,
+                        token_modifiers_bitset: 0,
+                    },
+                ],
+            },
+        );
+    }
+
+    #[cfg(feature = "proposed")]
+    #[test]
+    #[should_panic]
+    fn test_semantic_tokens_support_deserialization_err() {
+        test_deserialization(
+            r#"{"data":[1]}"#,
+            &SemanticTokens {
+                result_id: None,
+                data: vec![],
+            },
+        );
+    }
+
+    #[cfg(feature = "proposed")]
+    #[test]
+    fn test_semantic_tokens_edit_support_deserialization() {
+        test_deserialization(
+            r#"{"start":0,"deleteCount":1,"data":[2,5,3,0,3,0,5,4,1,0]}"#,
+            &SemanticTokensEdit {
+                start: 0,
+                delete_count: 1,
+                data: Some(vec![
+                    SemanticToken {
+                        delta_line: 2,
+                        delta_start: 5,
+                        length: 3,
+                        token_type: 0,
+                        token_modifiers_bitset: 3,
+                    },
+                    SemanticToken {
+                        delta_line: 0,
+                        delta_start: 5,
+                        length: 4,
+                        token_type: 1,
+                        token_modifiers_bitset: 0,
+                    },
+                ]),
+            },
+        );
+
+        test_deserialization(
+            r#"{"start":0,"deleteCount":1}"#,
+            &SemanticTokensEdit {
+                start: 0,
+                delete_count: 1,
+                data: None,
+            },
+        );
+    }
+
+    #[cfg(feature = "proposed")]
+    #[test]
+    fn test_semantic_tokens_edit_support_serialization() {
+        test_serialization(
+            &SemanticTokensEdit {
+                start: 0,
+                delete_count: 1,
+                data: Some(vec![
+                    SemanticToken {
+                        delta_line: 2,
+                        delta_start: 5,
+                        length: 3,
+                        token_type: 0,
+                        token_modifiers_bitset: 3,
+                    },
+                    SemanticToken {
+                        delta_line: 0,
+                        delta_start: 5,
+                        length: 4,
+                        token_type: 1,
+                        token_modifiers_bitset: 0,
+                    },
+                ]),
+            },
+            r#"{"start":0,"deleteCount":1,"data":[2,5,3,0,3,0,5,4,1,0]}"#,
+        );
+
+        test_serialization(
+            &SemanticTokensEdit {
+                start: 0,
+                delete_count: 1,
+                data: None,
+            },
+            r#"{"start":0,"deleteCount":1}"#,
+        );
     }
 }
