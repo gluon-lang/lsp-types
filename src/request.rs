@@ -132,6 +132,18 @@ macro_rules! lsp_request {
     ("textDocument/prepareCallHierarchy") => {
         $crate::request::CallHierarchyPrepare
     };
+    // Requires #[cfg(feature = "proposed")]
+    ("textDocument/semanticTokens") => {
+        $crate::request::SemanticTokensRequest
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("textDocument/semanticTokens/edits") => {
+        $crate::request::SemanticTokensEditsRequest
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("textDocument/semanticTokens/range") => {
+        $crate::request::SemanticTokensRangeRequest
+    };
 }
 
 /**
@@ -654,6 +666,36 @@ impl Request for CallHierarchyOutgoingCalls {
     const METHOD: &'static str = "callHierarchy/outgoingCalls";
 }
 
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for SemanticTokensRequest {
+    type Params = SemanticTokensParams;
+    type Result = Option<SemanticTokensResult>;
+    const METHOD: &'static str = "textDocument/semanticTokens";
+}
+
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensEditsRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for SemanticTokensEditsRequest {
+    type Params = SemanticTokensEditsParams;
+    type Result = Option<SemanticTokensResult>;
+    const METHOD: &'static str = "textDocument/semanticTokens/edits";
+}
+
+#[cfg(feature = "proposed")]
+pub enum SemanticTokensRangeRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for SemanticTokensRangeRequest {
+    type Params = SemanticTokensRangeParams;
+    type Result = Option<SemanticTokensRangeResult>;
+    const METHOD: &'static str = "textDocument/semanticTokens/range";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -721,5 +763,8 @@ mod test {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("textDocument/prepareCallHierarchy");
+        check_macro!("textDocument/semanticTokens");
+        check_macro!("textDocument/semanticTokens/edits");
+        check_macro!("textDocument/semanticTokens/range");
     }
 }
