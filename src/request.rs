@@ -682,7 +682,7 @@ pub enum SemanticTokensEditsRequest {}
 #[cfg(feature = "proposed")]
 impl Request for SemanticTokensEditsRequest {
     type Params = SemanticTokensEditsParams;
-    type Result = Option<SemanticTokensResult>;
+    type Result = Option<SemanticTokensEditResult>;
     const METHOD: &'static str = "textDocument/semanticTokens/edits";
 }
 
