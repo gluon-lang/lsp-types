@@ -40,9 +40,6 @@ macro_rules! lsp_notification {
     ("textDocument/willSave") => {
         $crate::notification::WillSaveTextDocument
     };
-    ("textDocument/willSaveWaitUntil") => {
-        $crate::notification::WillSaveWaitUntil
-    };
     ("textDocument/didSave") => {
         $crate::notification::DidSaveTextDocument
     };
@@ -190,19 +187,6 @@ impl Notification for WillSaveTextDocument {
     const METHOD: &'static str = "textDocument/willSave";
 }
 
-/// The document will save request is sent from the client to the server before the document is
-/// actually saved. The request can return an array of TextEdits which will be applied to the text
-/// document before it is saved. Please note that clients might drop results if computing the text
-/// edits took too long or if a server constantly fails on this request. This is done to keep the
-/// save fast and reliable.
-#[derive(Debug)]
-pub enum WillSaveWaitUntil {}
-
-impl Notification for WillSaveWaitUntil {
-    type Params = WillSaveTextDocumentParams;
-    const METHOD: &'static str = "textDocument/willSaveWaitUntil";
-}
-
 /**
  * The document close notification is sent from the client to the server when the document got closed in the client.
  * The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
@@ -328,7 +312,6 @@ mod test {
         check_macro!("textDocument/didOpen");
         check_macro!("textDocument/didChange");
         check_macro!("textDocument/willSave");
-        check_macro!("textDocument/willSaveWaitUntil");
         check_macro!("textDocument/didSave");
         check_macro!("textDocument/didClose");
         check_macro!("textDocument/publishDiagnostics");
