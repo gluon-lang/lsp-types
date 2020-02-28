@@ -312,7 +312,6 @@ mod test {
         check_macro!("textDocument/didOpen");
         check_macro!("textDocument/didChange");
         check_macro!("textDocument/willSave");
-        check_macro!("textDocument/willSaveWaitUntil");
         check_macro!("textDocument/didSave");
         check_macro!("textDocument/didClose");
         check_macro!("textDocument/publishDiagnostics");

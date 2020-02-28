@@ -745,6 +745,7 @@ mod test {
         check_macro!("client/unregisterCapability");
         check_macro!("workspace/symbol");
         check_macro!("workspace/executeCommand");
+        check_macro!("textDocument/willSaveWaitUntil");
         check_macro!("textDocument/completion");
         check_macro!("completionItem/resolve");
         check_macro!("textDocument/hover");
