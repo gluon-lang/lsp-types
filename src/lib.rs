@@ -3878,7 +3878,6 @@ impl SemanticTokenModifier {
     pub const DOCUMENTATION: SemanticTokenModifier = SemanticTokenModifier::new("documentation");
     pub const DECLARATION: SemanticTokenModifier = SemanticTokenModifier::new("declaration");
     pub const DEFINITION: SemanticTokenModifier = SemanticTokenModifier::new("definition");
-    pub const REFERENCE: SemanticTokenModifier = SemanticTokenModifier::new("reference");
     pub const STATIC: SemanticTokenModifier = SemanticTokenModifier::new("static");
     pub const ABSTRACT: SemanticTokenModifier = SemanticTokenModifier::new("abstract");
     pub const DEPRECATED: SemanticTokenModifier = SemanticTokenModifier::new("deprecated");
