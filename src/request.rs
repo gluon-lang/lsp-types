@@ -33,6 +33,10 @@ macro_rules! lsp_request {
         $crate::request::ExecuteCommand
     };
 
+    ("textDocument/willSaveWaitUntil") => {
+        $crate::request::WillSaveWaitUntil
+    };
+
     ("textDocument/completion") => {
         $crate::request::Completion
     };
@@ -409,6 +413,20 @@ impl Request for ExecuteCommand {
     type Params = ExecuteCommandParams;
     type Result = Option<Value>;
     const METHOD: &'static str = "workspace/executeCommand";
+}
+
+/// The document will save request is sent from the client to the server before the document is
+/// actually saved. The request can return an array of TextEdits which will be applied to the text
+/// document before it is saved. Please note that clients might drop results if computing the text
+/// edits took too long or if a server constantly fails on this request. This is done to keep the
+/// save fast and reliable.
+#[derive(Debug)]
+pub enum WillSaveWaitUntil {}
+
+impl Request for WillSaveWaitUntil {
+    type Params = WillSaveTextDocumentParams;
+    type Result = Option<Vec<TextEdit>>;
+    const METHOD: &'static str = "textDocument/willSaveWaitUntil";
 }
 
 /// The workspace/applyEdit request is sent from the server to the client to modify resource on the
