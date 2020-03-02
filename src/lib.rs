@@ -3881,8 +3881,6 @@ impl SemanticTokenModifier {
     pub const STATIC: SemanticTokenModifier = SemanticTokenModifier::new("static");
     pub const ABSTRACT: SemanticTokenModifier = SemanticTokenModifier::new("abstract");
     pub const DEPRECATED: SemanticTokenModifier = SemanticTokenModifier::new("deprecated");
-    pub const ASYNC: SemanticTokenModifier = SemanticTokenModifier::new("async");
-    pub const VOLATILE: SemanticTokenModifier = SemanticTokenModifier::new("volatile");
     pub const READONLY: SemanticTokenModifier = SemanticTokenModifier::new("readonly");
 
     pub const fn new(tag: &'static str) -> Self {
