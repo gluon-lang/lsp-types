@@ -1393,7 +1393,7 @@ pub struct TextDocumentClientCapabilities {
      * Capabilities specific to the `textDocument/documentLink`
      */
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_link: Option<GenericCapability>,
+    pub document_link: Option<DocumentLinkCapabilities>,
 
     /**
      * Capabilities specific to the `textDocument/documentColor` and the
