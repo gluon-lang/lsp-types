@@ -652,7 +652,7 @@ pub enum SelectionRangeRequest {}
 
 impl Request for SelectionRangeRequest {
     type Params = SelectionRangeParams;
-    type Result = Vec<SelectionRange>;
+    type Result = Option<Vec<SelectionRange>>;
     const METHOD: &'static str = "textDocument/selectionRange";
 }
 
