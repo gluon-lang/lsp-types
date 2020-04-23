@@ -259,7 +259,7 @@ impl Request for ResolveCompletionItem {
 pub enum HoverRequest {}
 
 impl Request for HoverRequest {
-    type Params = TextDocumentPositionParams;
+    type Params = HoverParams;
     type Result = Option<Hover>;
     const METHOD: &'static str = "textDocument/hover";
 }
@@ -270,19 +270,21 @@ impl Request for HoverRequest {
 pub enum SignatureHelpRequest {}
 
 impl Request for SignatureHelpRequest {
-    type Params = TextDocumentPositionParams;
+    type Params = SignatureHelpParams;
     type Result = Option<SignatureHelp>;
     const METHOD: &'static str = "textDocument/signatureHelp";
 }
 
 #[derive(Debug)]
 pub enum GotoDeclaration {}
+pub type GotoDeclarationParams = GotoDefinitionParams;
+pub type GotoDeclarationResponse = GotoDefinitionResponse;
 
 /// The goto declaration request is sent from the client to the server to resolve the declaration location of
 /// a symbol at a given text document position.
 impl Request for GotoDeclaration {
-    type Params = TextDocumentPositionParams;
-    type Result = Option<GotoDefinitionResponse>;
+    type Params = GotoDeclarationParams;
+    type Result = Option<GotoDeclarationResponse>;
     const METHOD: &'static str = "textDocument/declaration";
 }
 
@@ -292,36 +294,9 @@ impl Request for GotoDeclaration {
 pub enum GotoDefinition {}
 
 impl Request for GotoDefinition {
-    type Params = TextDocumentPositionParams;
+    type Params = GotoDefinitionParams;
     type Result = Option<GotoDefinitionResponse>;
     const METHOD: &'static str = "textDocument/definition";
-}
-
-/// GotoDefinition response can be single location, or multiple Locations or a link.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GotoDefinitionResponse {
-    Scalar(Location),
-    Array(Vec<Location>),
-    Link(Vec<LocationLink>),
-}
-
-impl From<Location> for GotoDefinitionResponse {
-    fn from(location: Location) -> Self {
-        GotoDefinitionResponse::Scalar(location)
-    }
-}
-
-impl From<Vec<Location>> for GotoDefinitionResponse {
-    fn from(locations: Vec<Location>) -> Self {
-        GotoDefinitionResponse::Array(locations)
-    }
-}
-
-impl From<Vec<LocationLink>> for GotoDefinitionResponse {
-    fn from(locations: Vec<LocationLink>) -> Self {
-        GotoDefinitionResponse::Link(locations)
-    }
 }
 
 /// The references request is sent from the client to the server to resolve project-wide references for the
@@ -341,10 +316,11 @@ impl Request for References {
 #[derive(Debug)]
 pub enum GotoTypeDefinition {}
 
+pub type GotoTypeDefinitionParams = GotoDefinitionParams;
 pub type GotoTypeDefinitionResponse = GotoDefinitionResponse;
 
 impl Request for GotoTypeDefinition {
-    type Params = TextDocumentPositionParams;
+    type Params = GotoTypeDefinitionParams;
     type Result = Option<GotoTypeDefinitionResponse>;
     const METHOD: &'static str = "textDocument/typeDefinition";
 }
@@ -355,10 +331,11 @@ impl Request for GotoTypeDefinition {
 #[derive(Debug)]
 pub enum GotoImplementation {}
 
+pub type GotoImplementationParams = GotoTypeDefinitionParams;
 pub type GotoImplementationResponse = GotoDefinitionResponse;
 
 impl Request for GotoImplementation {
-    type Params = TextDocumentPositionParams;
+    type Params = GotoImplementationParams;
     type Result = Option<GotoImplementationResponse>;
     const METHOD: &'static str = "textDocument/implementation";
 }
@@ -376,7 +353,7 @@ impl Request for GotoImplementation {
 pub enum DocumentHighlightRequest {}
 
 impl Request for DocumentHighlightRequest {
-    type Params = TextDocumentPositionParams;
+    type Params = DocumentHighlightParams;
     type Result = Option<Vec<DocumentHighlight>>;
     const METHOD: &'static str = "textDocument/documentHighlight";
 }
