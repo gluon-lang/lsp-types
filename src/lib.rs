@@ -1171,7 +1171,7 @@ pub struct CompletionItemCapability {
      */
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    insert_replace_support: Option<bool>,
+    pub insert_replace_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
