@@ -310,6 +310,44 @@ pub struct TextDocumentEdit {
     pub edits: Vec<TextEdit>,
 }
 
+/// A special text edit to provide an insert and a replace operation.
+///
+/// @since 3.16.0 - Proposed state
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct InsertReplaceEdit {
+    /// The string to be inserted.
+    pub new_text: String,
+
+    /// The range if the insert is requested
+    pub insert: Range,
+
+    /// The range if the replace is requested.
+    pub replace: Range,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum CompletionTextEdit {
+    Edit(TextEdit),
+    #[cfg(feature = "proposed")]
+    InsertAndReplace(InsertReplaceEdit),
+}
+
+impl From<TextEdit> for CompletionTextEdit {
+    fn from(edit: TextEdit) -> Self {
+        CompletionTextEdit::Edit(edit)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<InsertReplaceEdit> for CompletionTextEdit {
+    fn from(edit: InsertReplaceEdit) -> Self {
+        CompletionTextEdit::InsertAndReplace(edit)
+    }
+}
+
 /**
  * Options to create a file.
  */
@@ -1124,6 +1162,16 @@ pub struct CompletionItemCapability {
         deserialize_with = "TagSupport::deserialize_compat"
     )]
     pub tag_support: Option<TagSupport<CompletionItemTag>>,
+
+    /**
+     * Client support insert replace edit to control different behavior if a
+     * completion item is inserted in the text or should replace text.
+     *
+     * @since 3.16.0 - Proposed state
+     */
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub insert_replace_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
@@ -2424,8 +2472,21 @@ pub struct CompletionItem {
     /// An edit which is applied to a document when selecting
     /// this completion. When an edit is provided the value of
     /// insertText is ignored.
+    ///
+    /// Most editors support two different operation when accepting a completion item. One is to insert a
+    /// completion text and the other is to replace an existing text with a competion text. Since this can
+    /// usually not predetermend by a server it can report both ranges. Clients need to signal support for
+    /// `InsertReplaceEdits` via the `textDocument.completion.insertReplaceSupport` client capability
+    /// property.
+    ///
+    /// *Note 1:* The text edit's range as well as both ranges from a insert replace edit must be a
+    /// [single line] and they must contain the position at which completion has been requested.
+    /// *Note 2:* If an `InsertReplaceEdit` is returned the edit's insert range must be a prefix of
+    /// the edit's replace range, that means it must be contained and starting at the same position.
+    ///
+    /// @since 3.16.0 additional type `InsertReplaceEdit` - Proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text_edit: Option<TextEdit>,
+    pub text_edit: Option<CompletionTextEdit>,
 
     /// An optional array of additional text edits that are applied when
     /// selecting this completion. Edits must not overlap with the main edit
