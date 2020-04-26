@@ -2560,6 +2560,16 @@ pub enum InsertTextFormat {
     Snippet = 2,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HoverParams {
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+}
+
 /// The result of a hover request.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Hover {
@@ -2681,6 +2691,46 @@ pub enum ParameterLabel {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct GotoDefinitionParams {
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
+}
+
+/// GotoDefinition response can be single location, or multiple Locations or a link.
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GotoDefinitionResponse {
+    Scalar(Location),
+    Array(Vec<Location>),
+    Link(Vec<LocationLink>),
+}
+
+impl From<Location> for GotoDefinitionResponse {
+    fn from(location: Location) -> Self {
+        GotoDefinitionResponse::Scalar(location)
+    }
+}
+
+impl From<Vec<Location>> for GotoDefinitionResponse {
+    fn from(locations: Vec<Location>) -> Self {
+        GotoDefinitionResponse::Array(locations)
+    }
+}
+
+impl From<Vec<LocationLink>> for GotoDefinitionResponse {
+    fn from(locations: Vec<LocationLink>) -> Self {
+        GotoDefinitionResponse::Link(locations)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ReferenceParams {
     // Text Document and Position fields
     #[serde(flatten)]
@@ -2688,6 +2738,9 @@ pub struct ReferenceParams {
 
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 
     // ReferenceParams properties:
     pub context: ReferenceContext,
@@ -2698,6 +2751,19 @@ pub struct ReferenceParams {
 pub struct ReferenceContext {
     /// Include the declaration of the current symbol.
     pub include_declaration: bool,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentHighlightParams {
+    #[serde(flatten)]
+    pub text_document_position_params: TextDocumentPositionParams,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// A document highlight is a range inside a text document which deserves
@@ -2767,6 +2833,12 @@ impl From<Vec<DocumentSymbol>> for DocumentSymbolResponse {
 pub struct DocumentSymbolParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /// Represents programming constructs like variables, classes, interfaces etc.
@@ -3128,6 +3200,12 @@ pub struct DocumentLinkParams {
      * The document to provide document links for.
      */
     pub text_document: TextDocumentIdentifier,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 /**
@@ -3384,6 +3462,12 @@ pub struct ColorPresentationParams {
      * The range where the color would be inserted. Serves as a context.
      */
     pub range: Range,
+
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
+
+    #[serde(flatten)]
+    pub partial_result_params: PartialResultParams,
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Default, Clone)]
