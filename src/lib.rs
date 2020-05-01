@@ -3036,6 +3036,11 @@ impl From<CodeAction> for CodeActionOrCommand {
 pub mod code_action_kind {
 
     /**
+     * Empty kind.
+     */
+    pub const EMPTY: &str = "";
+
+    /**
      * Base kind for quickfix actions: 'quickfix'
      */
     pub const QUICKFIX: &str = "quickfix";
