@@ -96,11 +96,9 @@ impl Notification for Initialized {
     const METHOD: &'static str = "initialized";
 }
 
-/**
- * A notification to ask the server to exit its process.
- * The server should exit with success code 0 if the shutdown request has been received before;
- * otherwise with error code 1.
- */
+/// A notification to ask the server to exit its process.
+/// The server should exit with success code 0 if the shutdown request has been received before;
+/// otherwise with error code 1.
 #[derive(Debug)]
 pub enum Exit {}
 
@@ -109,10 +107,8 @@ impl Notification for Exit {
     const METHOD: &'static str = "exit";
 }
 
-/**
- * The show message notification is sent from a server to a client to ask the client to display a particular message
- * in the user interface.
- */
+/// The show message notification is sent from a server to a client to ask the client to display a particular message
+/// in the user interface.
 #[derive(Debug)]
 pub enum ShowMessage {}
 
@@ -121,9 +117,7 @@ impl Notification for ShowMessage {
     const METHOD: &'static str = "window/showMessage";
 }
 
-/**
- * The log message notification is sent from the server to the client to ask the client to log a particular message.
- */
+/// The log message notification is sent from the server to the client to ask the client to log a particular message.
 #[derive(Debug)]
 pub enum LogMessage {}
 
@@ -132,9 +126,7 @@ impl Notification for LogMessage {
     const METHOD: &'static str = "window/logMessage";
 }
 
-/**
- * The telemetry notification is sent from the server to the client to ask the client to log a telemetry event.
- */
+/// The telemetry notification is sent from the server to the client to ask the client to log a telemetry event.
 #[derive(Debug)]
 pub enum TelemetryEvent {}
 
@@ -143,9 +135,7 @@ impl Notification for TelemetryEvent {
     const METHOD: &'static str = "telemetry/event";
 }
 
-/**
- * A notification sent from the client to the server to signal the change of configuration settings.
- */
+/// A notification sent from the client to the server to signal the change of configuration settings.
 #[derive(Debug)]
 pub enum DidChangeConfiguration {}
 
@@ -154,11 +144,9 @@ impl Notification for DidChangeConfiguration {
     const METHOD: &'static str = "workspace/didChangeConfiguration";
 }
 
-/**
- * The document open notification is sent from the client to the server to signal newly opened text documents.
- * The document's truth is now managed by the client and the server must not try to read the document's truth
- * using the document's uri.
- */
+/// The document open notification is sent from the client to the server to signal newly opened text documents.
+/// The document's truth is now managed by the client and the server must not try to read the document's truth
+/// using the document's uri.
 #[derive(Debug)]
 pub enum DidOpenTextDocument {}
 
@@ -167,10 +155,8 @@ impl Notification for DidOpenTextDocument {
     const METHOD: &'static str = "textDocument/didOpen";
 }
 
-/**
- * The document change notification is sent from the client to the server to signal changes to a text document.
- * In 2.0 the shape of the params has changed to include proper version numbers and language ids.
- */
+/// The document change notification is sent from the client to the server to signal changes to a text document.
+/// In 2.0 the shape of the params has changed to include proper version numbers and language ids.
 #[derive(Debug)]
 pub enum DidChangeTextDocument {}
 
@@ -189,11 +175,9 @@ impl Notification for WillSaveTextDocument {
     const METHOD: &'static str = "textDocument/willSave";
 }
 
-/**
- * The document close notification is sent from the client to the server when the document got closed in the client.
- * The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
- * the truth now exists on disk).
- */
+/// The document close notification is sent from the client to the server when the document got closed in the client.
+/// The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
+/// the truth now exists on disk).
 #[derive(Debug)]
 pub enum DidCloseTextDocument {}
 
@@ -202,9 +186,7 @@ impl Notification for DidCloseTextDocument {
     const METHOD: &'static str = "textDocument/didClose";
 }
 
-/**
- * The document save notification is sent from the client to the server when the document was saved in the client.
- */
+/// The document save notification is sent from the client to the server when the document was saved in the client.
 #[derive(Debug)]
 pub enum DidSaveTextDocument {}
 
@@ -213,10 +195,8 @@ impl Notification for DidSaveTextDocument {
     const METHOD: &'static str = "textDocument/didSave";
 }
 
-/**
- * The watched files notification is sent from the client to the server when the client detects changes to files
- * watched by the language client.
- */
+/// The watched files notification is sent from the client to the server when the client detects changes to files
+/// watched by the language client.
 #[derive(Debug)]
 pub enum DidChangeWatchedFiles {}
 
@@ -225,10 +205,8 @@ impl Notification for DidChangeWatchedFiles {
     const METHOD: &'static str = "workspace/didChangeWatchedFiles";
 }
 
-/**
- * The workspace/didChangeWorkspaceFolders notification is sent from the client to the server to inform the server
- * about workspace folder configuration changes
- */
+/// The workspace/didChangeWorkspaceFolders notification is sent from the client to the server to inform the server
+/// about workspace folder configuration changes
 #[derive(Debug)]
 pub enum DidChangeWorkspaceFolders {}
 
@@ -237,9 +215,7 @@ impl Notification for DidChangeWorkspaceFolders {
     const METHOD: &'static str = "workspace/didChangeWorkspaceFolders";
 }
 
-/**
- * Diagnostics notification are sent from the server to the client to signal results of validation runs.
- */
+/// Diagnostics notification are sent from the server to the client to signal results of validation runs.
 #[derive(Debug)]
 pub enum PublishDiagnostics {}
 
@@ -269,9 +245,7 @@ impl Notification for WorkDoneProgressCancel {
 }
 
 #[cfg(feature = "proposed")]
-/**
- * Diagnostics notification are sent from the server to the client to signal results of validation runs.
- */
+/// Diagnostics notification are sent from the server to the client to signal results of validation runs.
 #[derive(Debug)]
 pub enum SemanticHighlighting {}
 
