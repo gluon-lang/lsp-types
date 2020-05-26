@@ -152,15 +152,11 @@ macro_rules! lsp_request {
     };
 }
 
-/**
-
- The initialize request is sent as the first request from the client to the server.
- If the server receives request or notification before the `initialize` request it should act as follows:
-
- * for a request the respond should be errored with `code: -32001`. The message can be picked by the server.
- * notifications should be dropped.
-
-*/
+/// The initialize request is sent as the first request from the client to the server.
+/// If the server receives request or notification before the `initialize` request it should act as follows:
+///
+/// * for a request the respond should be errored with `code: -32001`. The message can be picked by the server.
+/// * notifications should be dropped.
 #[derive(Debug)]
 pub enum Initialize {}
 
@@ -170,11 +166,9 @@ impl Request for Initialize {
     const METHOD: &'static str = "initialize";
 }
 
-/**
- * The shutdown request is sent from the client to the server. It asks the server to shut down,
- * but to not exit (otherwise the response might not be delivered correctly to the client).
- * There is a separate exit notification that asks the server to exit.
- */
+/// The shutdown request is sent from the client to the server. It asks the server to shut down,
+/// but to not exit (otherwise the response might not be delivered correctly to the client).
+/// There is a separate exit notification that asks the server to exit.
 #[derive(Debug)]
 pub enum Shutdown {}
 
@@ -184,11 +178,9 @@ impl Request for Shutdown {
     const METHOD: &'static str = "shutdown";
 }
 
-/**
- * The show message request is sent from a server to a client to ask the client to display a particular message
- * in the user interface. In addition to the show message notification the request allows to pass actions and to
- * wait for an answer from the client.
- */
+/// The show message request is sent from a server to a client to ask the client to display a particular message
+/// in the user interface. In addition to the show message notification the request allows to pass actions and to
+/// wait for an answer from the client.
 #[derive(Debug)]
 pub enum ShowMessageRequest {}
 
@@ -198,9 +190,9 @@ impl Request for ShowMessageRequest {
     const METHOD: &'static str = "window/showMessageRequest";
 }
 
-/**
- * The client/registerCapability request is sent from the server to the client to register for a new capability on the client side. Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.GenericCapability property.
- */
+/// The client/registerCapability request is sent from the server to the client to register for a new capability
+/// on the client side. Not all clients need to support dynamic capability registration. A client opts in via the
+/// ClientCapabilities.GenericCapability property.
 #[derive(Debug)]
 pub enum RegisterCapability {}
 
@@ -221,19 +213,16 @@ impl Request for UnregisterCapability {
     const METHOD: &'static str = "client/unregisterCapability";
 }
 
-/**
- The Completion request is sent from the client to the server to compute completion items at a given cursor position.
- Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive,
- servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve').
- This request is sent when a completion item is selected in the user interface. A typical use case is for example:
- the 'textDocument/completion' request doesn’t fill in the documentation property for returned completion items
- since it is expensive to compute. When the item is selected in the user interface then a ‘completionItem/resolve’
- request is sent with the selected completion item as a param. The returned completion item should have the
- documentation property filled in. The request can delay the computation of the detail and documentation properties.
- However, properties that are needed for the initial sorting and filtering, like sortText, filterText, insertText,
- and textEdit must be provided in the textDocument/completion request and must not be changed during resolve.
-
-*/
+/// The Completion request is sent from the client to the server to compute completion items at a given cursor position.
+/// Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive,
+/// servers can additionally provide a handler for the completion item resolve request ('completionItem/resolve').
+/// This request is sent when a completion item is selected in the user interface. A typical use case is for example:
+/// the 'textDocument/completion' request doesn’t fill in the documentation property for returned completion items
+/// since it is expensive to compute. When the item is selected in the user interface then a ‘completionItem/resolve’
+/// request is sent with the selected completion item as a param. The returned completion item should have the
+/// documentation property filled in. The request can delay the computation of the detail and documentation properties.
+/// However, properties that are needed for the initial sorting and filtering, like sortText, filterText, insertText,
+/// and textEdit must be provided in the textDocument/completion request and must not be changed during resolve.
 #[derive(Debug)]
 pub enum Completion {}
 
@@ -340,15 +329,13 @@ impl Request for GotoImplementation {
     const METHOD: &'static str = "textDocument/implementation";
 }
 
-/**
- The document highlight request is sent from the client to the server to resolve a document highlights
- for a given text document position.
- For programming languages this usually highlights all references to the symbol scoped to this file.
- However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since
- the first one is allowed to be more fuzzy.
- Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
- use Text as the kind.
-*/
+/// The document highlight request is sent from the client to the server to resolve a document highlights
+/// for a given text document position.
+/// For programming languages this usually highlights all references to the symbol scoped to this file.
+/// However we kept 'textDocument/documentHighlight' and 'textDocument/references' separate requests since
+/// the first one is allowed to be more fuzzy.
+/// Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
+/// use Text as the kind.
 #[derive(Debug)]
 pub enum DocumentHighlightRequest {}
 
@@ -358,10 +345,8 @@ impl Request for DocumentHighlightRequest {
     const METHOD: &'static str = "textDocument/documentHighlight";
 }
 
-/**
- * The document symbol request is sent from the client to the server to list all symbols found in a given
- * text document.
- */
+/// The document symbol request is sent from the client to the server to list all symbols found in a given
+/// text document.
 #[derive(Debug)]
 pub enum DocumentSymbolRequest {}
 
@@ -371,10 +356,8 @@ impl Request for DocumentSymbolRequest {
     const METHOD: &'static str = "textDocument/documentSymbol";
 }
 
-/**
- * The workspace symbol request is sent from the client to the server to list project-wide symbols
- * matching the query string.
- */
+/// The workspace symbol request is sent from the client to the server to list project-wide symbols
+/// matching the query string.
 #[derive(Debug)]
 pub enum WorkspaceSymbol {}
 
@@ -384,7 +367,9 @@ impl Request for WorkspaceSymbol {
     const METHOD: &'static str = "workspace/symbol";
 }
 
-/// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server. In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit which is sent from the server to the client.
+/// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server.
+/// In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request
+/// workspace/applyEdit which is sent from the server to the client.
 #[derive(Debug)]
 pub enum ExecuteCommand {}
 
@@ -441,11 +426,9 @@ impl Request for WorkspaceConfiguration {
     const METHOD: &'static str = "workspace/configuration";
 }
 
-/**
- * The code action request is sent from the client to the server to compute commands for a given text document
- * and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
- * presses the lightbulb associated with a marker.
- */
+/// The code action request is sent from the client to the server to compute commands for a given text document
+/// and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
+/// presses the lightbulb associated with a marker.
 #[derive(Debug)]
 pub enum CodeActionRequest {}
 
@@ -455,9 +438,7 @@ impl Request for CodeActionRequest {
     const METHOD: &'static str = "textDocument/codeAction";
 }
 
-/**
- * The code lens request is sent from the client to the server to compute code lenses for a given text document.
- */
+/// The code lens request is sent from the client to the server to compute code lenses for a given text document.
 #[derive(Debug)]
 pub enum CodeLensRequest {}
 
@@ -467,10 +448,8 @@ impl Request for CodeLensRequest {
     const METHOD: &'static str = "textDocument/codeLens";
 }
 
-/**
- * The code lens resolve request is sent from the client to the server to resolve the command for a
- * given code lens item.
- */
+/// The code lens resolve request is sent from the client to the server to resolve the command for a
+/// given code lens item.
 #[derive(Debug)]
 pub enum CodeLensResolve {}
 
@@ -490,10 +469,8 @@ impl Request for DocumentLinkRequest {
     const METHOD: &'static str = "textDocument/documentLink";
 }
 
-/**
- The document link resolve request is sent from the client to the server to resolve the target of
- a given document link.
-*/
+/// The document link resolve request is sent from the client to the server to resolve the target of
+/// a given document link.
 #[derive(Debug)]
 pub enum DocumentLinkResolve {}
 
@@ -503,9 +480,7 @@ impl Request for DocumentLinkResolve {
     const METHOD: &'static str = "documentLink/resolve";
 }
 
-/**
- * The document formatting request is sent from the server to the client to format a whole document.
- */
+/// The document formatting request is sent from the server to the client to format a whole document.
 #[derive(Debug)]
 pub enum Formatting {}
 
@@ -525,10 +500,8 @@ impl Request for RangeFormatting {
     const METHOD: &'static str = "textDocument/rangeFormatting";
 }
 
-/**
- * The document on type formatting request is sent from the client to the server to format parts of
- * the document during typing.
- */
+/// The document on type formatting request is sent from the client to the server to format parts of
+/// the document during typing.
 #[derive(Debug)]
 pub enum OnTypeFormatting {}
 
@@ -538,9 +511,7 @@ impl Request for OnTypeFormatting {
     const METHOD: &'static str = "textDocument/onTypeFormatting";
 }
 
-/**
- * The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
- */
+/// The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
 #[derive(Debug)]
 pub enum Rename {}
 
