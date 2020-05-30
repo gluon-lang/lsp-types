@@ -1269,6 +1269,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/documentColor` and the
     /// `textDocument/colorPresentation` request.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub color_provider: Option<GenericCapability>,
 
     /// Capabilities specific to the `textDocument/rename`
