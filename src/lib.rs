@@ -2923,7 +2923,8 @@ pub struct DocumentLink {
     /// The range this link applies to.
     pub range: Range,
     /// The uri this link points to.
-    pub target: Url,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target: Option<Url>,
 
     /// The tooltip text when you hover over this link.
     ///
@@ -2932,6 +2933,11 @@ pub struct DocumentLink {
     /// user settings, and localization.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tooltip: Option<String>,
+
+    /// A data entry field that is preserved on a document link between a DocumentLinkRequest
+    /// and a DocumentLinkResolveRequest.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Value>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
