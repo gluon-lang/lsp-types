@@ -26,6 +26,11 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 pub use url::Url;
 
+use std::borrow::Cow;
+
+#[cfg(feature = "proposed")]
+use std::convert::TryFrom;
+
 use std::collections::HashMap;
 
 #[cfg(feature = "proposed")]
@@ -36,9 +41,6 @@ use serde_json::Value;
 
 #[cfg(feature = "proposed")]
 use serde::ser::SerializeSeq;
-
-#[cfg(feature = "proposed")]
-use std::{borrow::Cow, convert::TryFrom};
 
 pub mod notification;
 pub mod request;
@@ -2755,17 +2757,18 @@ impl From<CodeAction> for CodeActionOrCommand {
     }
 }
 
-/// A set of predefined code action kinds
-pub mod code_action_kind {
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+pub struct CodeActionKind(Cow<'static, str>);
 
+impl CodeActionKind {
     /// Empty kind.
-    pub const EMPTY: &str = "";
+    pub const EMPTY: CodeActionKind = CodeActionKind::new("");
 
     /// Base kind for quickfix actions: 'quickfix'
-    pub const QUICKFIX: &str = "quickfix";
+    pub const QUICKFIX: CodeActionKind = CodeActionKind::new("quickfix");
 
     /// Base kind for refactoring actions: 'refactor'
-    pub const REFACTOR: &str = "refactor";
+    pub const REFACTOR: CodeActionKind = CodeActionKind::new("refactor");
 
     /// Base kind for refactoring extraction actions: 'refactor.extract'
     ///
@@ -2776,7 +2779,7 @@ pub mod code_action_kind {
     /// - Extract variable
     /// - Extract interface from class
     /// - ...
-    pub const REFACTOR_EXTRACT: &str = "refactor.extract";
+    pub const REFACTOR_EXTRACT: CodeActionKind = CodeActionKind::new("refactor.extract");
 
     /// Base kind for refactoring inline actions: 'refactor.inline'
     ///
@@ -2786,7 +2789,7 @@ pub mod code_action_kind {
     /// - Inline variable
     /// - Inline constant
     /// - ...
-    pub const REFACTOR_INLINE: &str = "refactor.inline";
+    pub const REFACTOR_INLINE: CodeActionKind = CodeActionKind::new("refactor.inline");
 
     /// Base kind for refactoring rewrite actions: 'refactor.rewrite'
     ///
@@ -2798,15 +2801,36 @@ pub mod code_action_kind {
     /// - Make method static
     /// - Move method to base class
     /// - ...
-    pub const REFACTOR_REWRITE: &str = "refactor.rewrite";
+    pub const REFACTOR_REWRITE: CodeActionKind = CodeActionKind::new("refactor.rewrite");
 
     /// Base kind for source actions: `source`
     ///
     /// Source code actions apply to the entire file.
-    pub const SOURCE: &str = "source";
+    pub const SOURCE: CodeActionKind = CodeActionKind::new("source");
 
     /// Base kind for an organize imports source action: `source.organizeImports`
-    pub const SOURCE_ORGANIZE_IMPORTS: &str = "source.organizeImports";
+    pub const SOURCE_ORGANIZE_IMPORTS: CodeActionKind =
+        CodeActionKind::new("source.organizeImports");
+
+    pub const fn new(tag: &'static str) -> Self {
+        CodeActionKind(Cow::Borrowed(tag))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl From<String> for CodeActionKind {
+    fn from(from: String) -> Self {
+        CodeActionKind(Cow::from(from))
+    }
+}
+
+impl From<&'static str> for CodeActionKind {
+    fn from(from: &'static str) -> Self {
+        CodeActionKind::new(from)
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -2817,7 +2841,7 @@ pub struct CodeAction {
     /// The kind of the code action.
     /// Used to filter code actions.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub kind: Option<String>,
+    pub kind: Option<CodeActionKind>,
 
     /// The diagnostics that this code action resolves.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2853,7 +2877,7 @@ pub struct CodeActionContext {
     /// Actions not of this kind are filtered out by the client before being shown. So servers
     /// can omit computing them.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub only: Option<Vec<String>>,
+    pub only: Option<Vec<CodeActionKind>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2864,7 +2888,7 @@ pub struct CodeActionOptions {
     /// The list of kinds may be generic, such as `CodeActionKind.Refactor`, or the server
     /// may list out every specific kind they provide.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action_kinds: Option<Vec<String>>,
+    pub code_action_kinds: Option<Vec<CodeActionKind>>,
 
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -4348,7 +4372,7 @@ mod tests {
                 }),
                 CodeActionOrCommand::CodeAction(CodeAction {
                     title: "title".to_string(),
-                    kind: Some(code_action_kind::QUICKFIX.to_owned()),
+                    kind: Some(CodeActionKind::QUICKFIX),
                     command: None,
                     diagnostics: None,
                     edit: None,
