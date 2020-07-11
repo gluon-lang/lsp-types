@@ -2834,6 +2834,7 @@ impl From<&'static str> for CodeActionKind {
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CodeAction {
     /// A short, human-readable, title for this code action.
     pub title: String,
