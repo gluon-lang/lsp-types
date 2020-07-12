@@ -1502,6 +1502,25 @@ pub struct SaveOptions {
     pub include_text: Option<bool>,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum TextDocumentSyncSaveOptions {
+    Supported(bool),
+    SaveOptions(SaveOptions),
+}
+
+impl From<SaveOptions> for TextDocumentSyncSaveOptions {
+    fn from(from: SaveOptions) -> Self {
+        Self::SaveOptions(from)
+    }
+}
+
+impl From<bool> for TextDocumentSyncSaveOptions {
+    fn from(from: bool) -> Self {
+        Self::Supported(from)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentSyncOptions {
@@ -1524,7 +1543,7 @@ pub struct TextDocumentSyncOptions {
 
     /// Save notifications are sent to the server.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub save: Option<SaveOptions>,
+    pub save: Option<TextDocumentSyncSaveOptions>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
