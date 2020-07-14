@@ -1980,6 +1980,17 @@ pub struct DidSaveTextDocumentParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TextDocumentSaveRegistrationOptions {
+    /// The client is supposed to include the content on save.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include_text: Option<bool>,
+
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
     /// The actual file events.
     pub changes: Vec<FileEvent>,
