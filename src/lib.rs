@@ -1388,6 +1388,24 @@ pub struct CompletionOptions {
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
+/// Hover options.
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HoverOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HoverRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub hover_options: HoverOptions,
+}
+
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -1553,6 +1571,18 @@ pub enum TextDocumentSyncCapability {
     Options(TextDocumentSyncOptions),
 }
 
+impl From<TextDocumentSyncOptions> for TextDocumentSyncCapability {
+    fn from(from: TextDocumentSyncOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<TextDocumentSyncKind> for TextDocumentSyncCapability {
+    fn from(from: TextDocumentSyncKind) -> Self {
+        Self::Kind(from)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ImplementationProviderCapability {
@@ -1560,11 +1590,54 @@ pub enum ImplementationProviderCapability {
     Options(StaticTextDocumentRegistrationOptions),
 }
 
+impl From<StaticTextDocumentRegistrationOptions> for ImplementationProviderCapability {
+    fn from(from: StaticTextDocumentRegistrationOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for ImplementationProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum TypeDefinitionProviderCapability {
     Simple(bool),
     Options(StaticTextDocumentRegistrationOptions),
+}
+
+impl From<StaticTextDocumentRegistrationOptions> for TypeDefinitionProviderCapability {
+    fn from(from: StaticTextDocumentRegistrationOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for TypeDefinitionProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum HoverProviderCapability {
+    Simple(bool),
+    Options(HoverOptions),
+}
+
+impl From<HoverOptions> for HoverProviderCapability {
+    fn from(from: HoverOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for HoverProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -1575,11 +1648,41 @@ pub enum ColorProviderCapability {
     Options(StaticTextDocumentColorProviderOptions),
 }
 
+impl From<ColorProviderOptions> for ColorProviderCapability {
+    fn from(from: ColorProviderOptions) -> Self {
+        Self::ColorProvider(from)
+    }
+}
+
+impl From<StaticTextDocumentColorProviderOptions> for ColorProviderCapability {
+    fn from(from: StaticTextDocumentColorProviderOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for ColorProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum CodeActionProviderCapability {
     Simple(bool),
     Options(CodeActionOptions),
+}
+
+impl From<CodeActionOptions> for CodeActionProviderCapability {
+    fn from(from: CodeActionOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for CodeActionProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1631,7 +1734,7 @@ pub struct ServerCapabilities {
 
     /// The server provides hover support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hover_provider: Option<bool>,
+    pub hover_provider: Option<HoverProviderCapability>,
 
     /// The server provides completion support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3112,6 +3215,18 @@ pub enum RenameProviderCapability {
     Options(RenameOptions),
 }
 
+impl From<RenameOptions> for RenameProviderCapability {
+    fn from(from: RenameOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for RenameProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenameOptions {
@@ -3248,6 +3363,24 @@ pub enum FoldingRangeProviderCapability {
     Options(StaticTextDocumentColorProviderOptions),
 }
 
+impl From<StaticTextDocumentColorProviderOptions> for FoldingRangeProviderCapability {
+    fn from(from: StaticTextDocumentColorProviderOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<FoldingProviderOptions> for FoldingRangeProviderCapability {
+    fn from(from: FoldingProviderOptions) -> Self {
+        Self::FoldingProvider(from)
+    }
+}
+
+impl From<bool> for FoldingRangeProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct FoldingProviderOptions {}
 
@@ -3316,6 +3449,24 @@ pub enum SelectionRangeProviderCapability {
     Simple(bool),
     Options(SelectionRangeOptions),
     RegistrationOptions(SelectionRangeRegistrationOptions),
+}
+
+impl From<SelectionRangeRegistrationOptions> for SelectionRangeProviderCapability {
+    fn from(from: SelectionRangeRegistrationOptions) -> Self {
+        Self::RegistrationOptions(from)
+    }
+}
+
+impl From<SelectionRangeOptions> for SelectionRangeProviderCapability {
+    fn from(from: SelectionRangeOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+impl From<bool> for SelectionRangeProviderCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
 }
 
 /// A parameter literal used in selection range requests.
@@ -4159,6 +4310,20 @@ pub struct CallHierarchyOptions {
 pub enum CallHierarchyServerCapability {
     Simple(bool),
     Options(CallHierarchyOptions),
+}
+
+#[cfg(feature = "proposed")]
+impl From<CallHierarchyOptions> for CallHierarchyServerCapability {
+    fn from(from: CallHierarchyOptions) -> Self {
+        Self::Options(from)
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<bool> for CallHierarchyServerCapability {
+    fn from(from: bool) -> Self {
+        Self::Simple(from)
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
