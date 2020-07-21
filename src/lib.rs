@@ -3531,16 +3531,17 @@ pub enum MarkupKind {
 /// See <https://help.github.com/articles/creating-and-highlighting-code-blocks/#syntax-highlighting>
 ///
 /// Here is an example how such a string can be constructed using JavaScript / TypeScript:
-/// ```ts
-/// let markdown: MarkdownContent = {
-///  kind: MarkupKind.Markdown,
+/// ```ignore
+/// let markdown: MarkupContent = {
+///     kind: MarkupKind::Markdown,
 ///     value: [
-///             '# Header',
-///             'Some text',
-///             '```typescript',
-///             'someCode();',
-///             '```'
-///     ].join('\n')
+///         "# Header",
+///         "Some text",
+///         "```typescript",
+///         "someCode();",
+///         "```"
+///     ]
+///     .join("\n"),
 /// };
 /// ```
 ///
