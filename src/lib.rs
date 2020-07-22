@@ -939,7 +939,7 @@ pub struct SymbolKindCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SymbolCapability {
+pub struct WorkspaceSymbolClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -972,7 +972,7 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to the `workspace/symbol` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub symbol: Option<SymbolCapability>,
+    pub symbol: Option<WorkspaceSymbolClientCapabilities>,
 
     /// Capabilities specific to the `workspace/executeCommand` request.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1228,7 +1228,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/documentSymbol`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_symbol: Option<DocumentSymbolCapability>,
+    pub document_symbol: Option<DocumentSymbolClientCapabilities>,
     /// Capabilities specific to the `textDocument/formatting`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatting: Option<GenericCapability>,
@@ -2667,7 +2667,7 @@ pub enum DocumentHighlightKind {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DocumentSymbolCapability {
+pub struct DocumentSymbolClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
