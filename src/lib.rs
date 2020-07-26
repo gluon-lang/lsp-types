@@ -4110,7 +4110,7 @@ pub struct SemanticTokensEdit {
 #[cfg(feature = "proposed")]
 pub enum SemanticTokensEditResult {
     Tokens(SemanticTokens),
-    TokensEdits(SemanticTokensEdit),
+    TokensEdits(SemanticTokensEdits),
     PartialTokens(SemanticTokensPartialResult),
     PartialTokensEdit(SemanticTokensEditsPartialResult),
 }
@@ -4123,8 +4123,8 @@ impl From<SemanticTokens> for SemanticTokensEditResult {
 }
 
 #[cfg(feature = "proposed")]
-impl From<SemanticTokensEdit> for SemanticTokensEditResult {
-    fn from(from: SemanticTokensEdit) -> Self {
+impl From<SemanticTokensEdits> for SemanticTokensEditResult {
+    fn from(from: SemanticTokensEdits) -> Self {
         SemanticTokensEditResult::TokensEdits(from)
     }
 }
