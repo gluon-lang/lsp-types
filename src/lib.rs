@@ -1304,7 +1304,7 @@ pub struct TextDocumentClientCapabilities {
     #[cfg(feature = "proposed")]
     pub semantic_highlighting_capabilities: Option<SemanticHighlightingClientCapability>,
 
-    /// Capabilities specific to the `textDocument/semanticTokens`
+    /// Capabilities specific to the `textDocument/semanticTokens/*` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensClientCapabilities>,
@@ -3844,26 +3844,28 @@ pub struct SemanticTokenType(Cow<'static, str>);
 
 #[cfg(feature = "proposed")]
 impl SemanticTokenType {
-    pub const COMMENT: SemanticTokenType = SemanticTokenType::new("comment");
+    pub const NAMESPACE: SemanticTokenType = SemanticTokenType::new("namespace");
+    pub const TYPE: SemanticTokenType = SemanticTokenType::new("type");
+    pub const CLASS: SemanticTokenType = SemanticTokenType::new("class");
+    pub const ENUM: SemanticTokenType = SemanticTokenType::new("enum");
+    pub const INTERFACE: SemanticTokenType = SemanticTokenType::new("interface");
+    pub const STRUCT: SemanticTokenType = SemanticTokenType::new("struct");
+    pub const TYPE_PARAMETER: SemanticTokenType = SemanticTokenType::new("typeParameter");
+    pub const PARAMETER: SemanticTokenType = SemanticTokenType::new("parameter");
+    pub const VARIABLE: SemanticTokenType = SemanticTokenType::new("variable");
+    pub const PROPERTY: SemanticTokenType = SemanticTokenType::new("property");
+    pub const ENUM_MEMBER: SemanticTokenType = SemanticTokenType::new("enumMember");
+    pub const EVENT: SemanticTokenType = SemanticTokenType::new("event");
+    pub const FUNCTION: SemanticTokenType = SemanticTokenType::new("function");
+    pub const MEMBER: SemanticTokenType = SemanticTokenType::new("member");
+    pub const MACRO: SemanticTokenType = SemanticTokenType::new("macro");
     pub const KEYWORD: SemanticTokenType = SemanticTokenType::new("keyword");
+    pub const MODIFIER: SemanticTokenType = SemanticTokenType::new("modifier");
+    pub const COMMENT: SemanticTokenType = SemanticTokenType::new("comment");
     pub const STRING: SemanticTokenType = SemanticTokenType::new("string");
     pub const NUMBER: SemanticTokenType = SemanticTokenType::new("number");
     pub const REGEXP: SemanticTokenType = SemanticTokenType::new("regexp");
     pub const OPERATOR: SemanticTokenType = SemanticTokenType::new("operator");
-    pub const NAMESPACE: SemanticTokenType = SemanticTokenType::new("namespace");
-    pub const TYPE: SemanticTokenType = SemanticTokenType::new("type");
-    pub const STRUCT: SemanticTokenType = SemanticTokenType::new("struct");
-    pub const CLASS: SemanticTokenType = SemanticTokenType::new("class");
-    pub const INTERFACE: SemanticTokenType = SemanticTokenType::new("interface");
-    pub const ENUM: SemanticTokenType = SemanticTokenType::new("enum");
-    pub const TYPE_PARAMETER: SemanticTokenType = SemanticTokenType::new("typeParameter");
-    pub const FUNCTION: SemanticTokenType = SemanticTokenType::new("function");
-    pub const MEMBER: SemanticTokenType = SemanticTokenType::new("member");
-    pub const PROPERTY: SemanticTokenType = SemanticTokenType::new("property");
-    pub const MACRO: SemanticTokenType = SemanticTokenType::new("macro");
-    pub const VARIABLE: SemanticTokenType = SemanticTokenType::new("variable");
-    pub const PARAMETER: SemanticTokenType = SemanticTokenType::new("parameter");
-    pub const LABEL: SemanticTokenType = SemanticTokenType::new("label");
 
     pub const fn new(tag: &'static str) -> Self {
         SemanticTokenType(Cow::Borrowed(tag))
@@ -3898,13 +3900,16 @@ pub struct SemanticTokenModifier(Cow<'static, str>);
 
 #[cfg(feature = "proposed")]
 impl SemanticTokenModifier {
-    pub const DOCUMENTATION: SemanticTokenModifier = SemanticTokenModifier::new("documentation");
     pub const DECLARATION: SemanticTokenModifier = SemanticTokenModifier::new("declaration");
     pub const DEFINITION: SemanticTokenModifier = SemanticTokenModifier::new("definition");
-    pub const STATIC: SemanticTokenModifier = SemanticTokenModifier::new("static");
-    pub const ABSTRACT: SemanticTokenModifier = SemanticTokenModifier::new("abstract");
-    pub const DEPRECATED: SemanticTokenModifier = SemanticTokenModifier::new("deprecated");
     pub const READONLY: SemanticTokenModifier = SemanticTokenModifier::new("readonly");
+    pub const STATIC: SemanticTokenModifier = SemanticTokenModifier::new("static");
+    pub const DEPRECATED: SemanticTokenModifier = SemanticTokenModifier::new("deprecated");
+    pub const ABSTRACT: SemanticTokenModifier = SemanticTokenModifier::new("abstract");
+    pub const ASYNC: SemanticTokenModifier = SemanticTokenModifier::new("async");
+    pub const MODIFICATION: SemanticTokenModifier = SemanticTokenModifier::new("modification");
+    pub const DOCUMENTATION: SemanticTokenModifier = SemanticTokenModifier::new("documentation");
+    pub const DEFAULT_LIBRARY: SemanticTokenModifier = SemanticTokenModifier::new("defaultLibrary");
 
     pub const fn new(tag: &'static str) -> Self {
         SemanticTokenModifier(Cow::Borrowed(tag))
@@ -3925,6 +3930,36 @@ impl From<String> for SemanticTokenModifier {
 impl From<&'static str> for SemanticTokenModifier {
     fn from(from: &'static str) -> Self {
         SemanticTokenModifier::new(from)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct TokenFormat(Cow<'static, str>);
+
+#[cfg(feature = "proposed")]
+impl TokenFormat {
+    pub const RELATIVE: TokenFormat = TokenFormat::new("relative");
+
+    pub const fn new(tag: &'static str) -> Self {
+        TokenFormat(Cow::Borrowed(tag))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<String> for TokenFormat {
+    fn from(from: String) -> Self {
+        TokenFormat(Cow::from(from))
+    }
+}
+#[cfg(feature = "proposed")]
+impl From<&'static str> for TokenFormat {
+    fn from(from: &'static str) -> Self {
+        TokenFormat::new(from)
     }
 }
 
@@ -4037,7 +4072,7 @@ impl SemanticToken {
 pub struct SemanticTokens {
     /// An optional result id. If provided and clients support delta updating
     /// the client will include the result id in the next semantic token request.
-    /// A server can then instead of computing all sematic tokens again simply
+    /// A server can then instead of computing all semantic tokens again simply
     /// send a delta.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result_id: Option<String>,
@@ -4108,38 +4143,23 @@ pub struct SemanticTokensEdit {
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 #[cfg(feature = "proposed")]
-pub enum SemanticTokensEditResult {
+pub enum SemanticTokensFullDeltaResult {
     Tokens(SemanticTokens),
-    TokensEdits(SemanticTokensEdits),
-    PartialTokens(SemanticTokensPartialResult),
-    PartialTokensEdit(SemanticTokensEditsPartialResult),
+    TokensDelta(SemanticTokensDelta),
+    PartialTokensDelta { edits: Vec<SemanticTokensEdit> },
 }
 
 #[cfg(feature = "proposed")]
-impl From<SemanticTokens> for SemanticTokensEditResult {
+impl From<SemanticTokens> for SemanticTokensFullDeltaResult {
     fn from(from: SemanticTokens) -> Self {
-        SemanticTokensEditResult::Tokens(from)
+        SemanticTokensFullDeltaResult::Tokens(from)
     }
 }
 
 #[cfg(feature = "proposed")]
-impl From<SemanticTokensEdits> for SemanticTokensEditResult {
-    fn from(from: SemanticTokensEdits) -> Self {
-        SemanticTokensEditResult::TokensEdits(from)
-    }
-}
-
-#[cfg(feature = "proposed")]
-impl From<SemanticTokensPartialResult> for SemanticTokensEditResult {
-    fn from(from: SemanticTokensPartialResult) -> Self {
-        SemanticTokensEditResult::PartialTokens(from)
-    }
-}
-
-#[cfg(feature = "proposed")]
-impl From<SemanticTokensEditsPartialResult> for SemanticTokensEditResult {
-    fn from(from: SemanticTokensEditsPartialResult) -> Self {
-        SemanticTokensEditResult::PartialTokensEdit(from)
+impl From<SemanticTokensDelta> for SemanticTokensFullDeltaResult {
+    fn from(from: SemanticTokensDelta) -> Self {
+        SemanticTokensFullDeltaResult::TokensDelta(from)
     }
 }
 
@@ -4147,7 +4167,7 @@ impl From<SemanticTokensEditsPartialResult> for SemanticTokensEditResult {
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[cfg(feature = "proposed")]
-pub struct SemanticTokensEdits {
+pub struct SemanticTokensDelta {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result_id: Option<String>,
     /// For a detailed description how these edits are structured pls see
@@ -4155,15 +4175,7 @@ pub struct SemanticTokensEdits {
     pub edits: Vec<SemanticTokensEdit>,
 }
 
-/// @since 3.16.0 - Proposed state
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
-pub struct SemanticTokensEditsPartialResult {
-    pub edits: Vec<SemanticTokensEdit>,
-}
-
-/// Capabilities specific to the `textDocument/semanticTokens`
+/// Capabilities specific to the `textDocument/semanticTokens/*` requests.
 ///
 /// @since 3.16.0 - Proposed state
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -4176,24 +4188,43 @@ pub struct SemanticTokensClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
 
-    /// The token types known by the client.
+    /// Which requests the client supports and might send to the server.
+    pub requests: SemanticTokensClientCapabilitiesRequests,
+
+    /// The token types that the client supports.
     pub token_types: Vec<SemanticTokenType>,
 
-    /// The token modifiers known by the client.
+    /// The token modifiers that the client supports.
     pub token_modifiers: Vec<SemanticTokenModifier>,
+
+    /// The formats the clients supports.
+    pub formats: Vec<TokenFormat>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct SemanticTokensClientCapabilitiesRequests {
+    /// The client will send the `textDocument/semanticTokens/range` request if the server provides a corresponding handler.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range: Option<bool>,
+
+    /// The client will send the `textDocument/semanticTokens/full` request if the server provides a corresponding handler.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub full: Option<SemanticTokensFullOptions>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 #[cfg(feature = "proposed")]
-pub enum SemanticTokensDocumentProvider {
+pub enum SemanticTokensFullOptions {
     Bool(bool),
-
-    /// The server supports deltas for full documents.
-    Edits {
+    Delta {
+        /// The client will send the `textDocument/semanticTokens/full/delta` request if the server provides a corresponding handler.
+        /// The server supports deltas for full documents.
         #[serde(skip_serializing_if = "Option::is_none")]
-        edits: Option<bool>,
+        delta: Option<bool>,
     },
 }
 
@@ -4211,11 +4242,11 @@ pub struct SemanticTokensOptions {
     /// Server supports providing semantic tokens for a sepcific range
     /// of a document.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub range_provider: Option<bool>,
+    pub range: Option<bool>,
 
     /// Server supports providing semantic tokens for a full document.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_provider: Option<SemanticTokensDocumentProvider>,
+    pub full: Option<SemanticTokensFullOptions>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -4272,7 +4303,7 @@ pub struct SemanticTokensParams {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[cfg(feature = "proposed")]
-pub struct SemanticTokensEditsParams {
+pub struct SemanticTokensDeltaParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
 
@@ -4282,7 +4313,8 @@ pub struct SemanticTokensEditsParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
 
-    /// The previous result id.
+    /// The result id of a previous response. The result Id can either point to a full response
+    /// or a delta response depending on what was recevied last.
     pub previous_result_id: String,
 }
 
