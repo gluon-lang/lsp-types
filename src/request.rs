@@ -139,12 +139,12 @@ macro_rules! lsp_request {
         $crate::request::CallHierarchyPrepare
     };
     // Requires #[cfg(feature = "proposed")]
-    ("textDocument/semanticTokens") => {
-        $crate::request::SemanticTokensRequest
+    ("textDocument/semanticTokens/full") => {
+        $crate::request::SemanticTokensFullRequest
     };
     // Requires #[cfg(feature = "proposed")]
-    ("textDocument/semanticTokens/edits") => {
-        $crate::request::SemanticTokensEditsRequest
+    ("textDocument/semanticTokens/full/delta") => {
+        $crate::request::SemanticTokensFullDeltaRequest
     };
     // Requires #[cfg(feature = "proposed")]
     ("textDocument/semanticTokens/range") => {
@@ -635,23 +635,23 @@ impl Request for CallHierarchyOutgoingCalls {
 }
 
 #[cfg(feature = "proposed")]
-pub enum SemanticTokensRequest {}
+pub enum SemanticTokensFullRequest {}
 
 #[cfg(feature = "proposed")]
-impl Request for SemanticTokensRequest {
+impl Request for SemanticTokensFullRequest {
     type Params = SemanticTokensParams;
     type Result = Option<SemanticTokensResult>;
-    const METHOD: &'static str = "textDocument/semanticTokens";
+    const METHOD: &'static str = "textDocument/semanticTokens/full";
 }
 
 #[cfg(feature = "proposed")]
-pub enum SemanticTokensEditsRequest {}
+pub enum SemanticTokensFullDeltaRequest {}
 
 #[cfg(feature = "proposed")]
-impl Request for SemanticTokensEditsRequest {
-    type Params = SemanticTokensEditsParams;
-    type Result = Option<SemanticTokensEditResult>;
-    const METHOD: &'static str = "textDocument/semanticTokens/edits";
+impl Request for SemanticTokensFullDeltaRequest {
+    type Params = SemanticTokensDeltaParams;
+    type Result = Option<SemanticTokensFullDeltaResult>;
+    const METHOD: &'static str = "textDocument/semanticTokens/full/delta";
 }
 
 #[cfg(feature = "proposed")]
@@ -732,8 +732,8 @@ mod test {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("textDocument/prepareCallHierarchy");
-        check_macro!("textDocument/semanticTokens");
-        check_macro!("textDocument/semanticTokens/edits");
+        check_macro!("textDocument/semanticTokens/full");
+        check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
     }
 }
