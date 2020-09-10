@@ -98,6 +98,14 @@ pub struct CompletionItemCapability {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub insert_replace_support: Option<bool>,
+
+    /// Client supports to resolve `additionalTextEdits` in the `completionItem/resolve`
+    /// request. So servers can postpone computing them.
+    ///
+    /// @since 3.16.0 - Proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub resolve_additional_text_edits_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
