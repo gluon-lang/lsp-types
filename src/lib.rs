@@ -1667,6 +1667,10 @@ pub struct DidCloseTextDocumentParams {
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
     pub text_document: TextDocumentIdentifier,
+    /// Optional the content when saved. Depends on the includeText value
+    /// when the save notification was requested.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
