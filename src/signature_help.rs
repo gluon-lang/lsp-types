@@ -6,7 +6,7 @@ use crate::{
     WorkDoneProgressOptions, WorkDoneProgressParams,
 };
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignatureInformationSettings {
     /// Client supports the follow content formats for the documentation
@@ -16,13 +16,23 @@ pub struct SignatureInformationSettings {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parameter_information: Option<ParameterInformationSettings>,
+
+    /// The client support the `activeParameter` property on `SignatureInformation`
+    ///  literal.
+    ///
+    ///  @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub active_parameter_support: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParameterInformationSettings {
     /// The client supports processing label offsets instead of a
     /// simple label string.
+    ///
+    /// @since 3.14.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label_offset_support: Option<bool>,
 }
@@ -43,6 +53,8 @@ pub struct SignatureHelpCapability {
     /// `textDocument/signatureHelp` request. A client that opts into
     /// contextSupport will also support the `retriggerCharacters` on
     /// `SignatureHelpOptions`.
+    ///
+    /// @since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context_support: Option<bool>,
 }
@@ -156,6 +168,15 @@ pub struct SignatureInformation {
     /// The parameters of this signature.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<Vec<ParameterInformation>>,
+
+    /// The index of the active parameter.
+    ///
+    /// If provided, this is used in place of `SignatureHelp.activeParameter`.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub active_parameter: Option<i64>,
 }
 
 /// Represents a parameter of a callable-signature. A parameter can
