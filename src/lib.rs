@@ -1854,7 +1854,7 @@ pub struct GotoDefinitionParams {
 }
 
 /// GotoDefinition response can be single location, or multiple Locations or a link.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum GotoDefinitionResponse {
     Scalar(Location),
