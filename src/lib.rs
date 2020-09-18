@@ -502,7 +502,7 @@ pub struct ConfigurationParams {
 pub struct ConfigurationItem {
     /// The scope to get the configuration section for.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub scope_uri: Option<String>,
+    pub scope_uri: Option<Url>,
 
     ///The configuration section asked for.
     #[serde(skip_serializing_if = "Option::is_none")]
