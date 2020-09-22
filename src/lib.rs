@@ -1280,6 +1280,13 @@ pub struct TextDocumentSyncOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+pub enum OneOf<A, B> {
+    Left(A),
+    Right(B),
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
 pub enum TextDocumentSyncCapability {
     Kind(TextDocumentSyncKind),
     Options(TextDocumentSyncOptions),
@@ -1360,7 +1367,7 @@ pub struct ServerCapabilities {
 
     /// The server provides goto definition support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub definition_provider: Option<bool>,
+    pub definition_provider: Option<OneOf<bool, DefinitionOptions>>,
 
     /// The server provides goto type definition support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1372,15 +1379,15 @@ pub struct ServerCapabilities {
 
     /// The server provides find references support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub references_provider: Option<bool>,
+    pub references_provider: Option<OneOf<bool, ReferencesOptions>>,
 
     /// The server provides document highlight support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_highlight_provider: Option<bool>,
+    pub document_highlight_provider: Option<OneOf<bool, DocumentHighlightOptions>>,
 
     /// The server provides document symbol support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_symbol_provider: Option<bool>,
+    pub document_symbol_provider: Option<OneOf<bool, DocumentSymbolOptions>>,
 
     /// The server provides workspace symbol support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1396,11 +1403,11 @@ pub struct ServerCapabilities {
 
     /// The server provides document formatting.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_formatting_provider: Option<bool>,
+    pub document_formatting_provider: Option<OneOf<bool, DocumentFormattingOptions>>,
 
     /// The server provides document range formatting.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_range_formatting_provider: Option<bool>,
+    pub document_range_formatting_provider: Option<OneOf<bool, DocumentRangeFormattingOptions>>,
 
     /// The server provides document formatting on typing.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1408,7 +1415,7 @@ pub struct ServerCapabilities {
 
     /// The server provides rename support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename_provider: Option<RenameProviderCapability>,
+    pub rename_provider: Option<OneOf<bool, RenameOptions>>,
 
     /// The server provides document link support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1424,7 +1431,7 @@ pub struct ServerCapabilities {
 
     /// The server provides go to declaration support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub declaration_provider: Option<bool>,
+    pub declaration_provider: Option<DeclarationCapability>,
 
     /// The server provides execute command support.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1538,11 +1545,88 @@ pub struct TextDocumentRegistrationOptions {
     pub document_selector: Option<DocumentSelector>,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum DeclarationCapability {
+    Simple(bool),
+    RegistrationOptions(DeclarationRegistrationOptions),
+    Options(DeclarationOptions),
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeclarationRegistrationOptions {
+    #[serde(flatten)]
+    pub declaration_options: DeclarationOptions,
+
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+
+    #[serde(flatten)]
+    pub static_registration_options: StaticRegistrationOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeclarationOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StaticRegistrationOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkDoneProgressOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub work_done_progress: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentFormattingOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentRangeFormattingOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DefinitionOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentSymbolOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReferencesOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentHighlightOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -1996,6 +2080,18 @@ mod tests {
     {
         let value = serde_json::from_str::<T>(json).unwrap();
         assert_eq!(&value, expected);
+    }
+
+    #[test]
+    fn one_of() {
+        test_serialization(&OneOf::<bool, ()>::Left(true), r#"true"#);
+        test_serialization(&OneOf::<String, ()>::Left("abcd".into()), r#""abcd""#);
+        test_serialization(
+            &OneOf::<String, WorkDoneProgressOptions>::Right(WorkDoneProgressOptions{
+                work_done_progress: Some(false)
+            }),
+            r#"{"workDoneProgress":false}"#,
+        );
     }
 
     #[test]

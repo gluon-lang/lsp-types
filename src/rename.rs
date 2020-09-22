@@ -19,25 +19,6 @@ pub struct RenameParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[serde(untagged)]
-pub enum RenameProviderCapability {
-    Simple(bool),
-    Options(RenameOptions),
-}
-
-impl From<RenameOptions> for RenameProviderCapability {
-    fn from(from: RenameOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for RenameProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenameOptions {
     /// Renames should be checked and tested before being executed.
