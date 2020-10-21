@@ -433,6 +433,17 @@ impl From<SemanticTokensRegistrationOptions> for SemanticTokensServerCapabilitie
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct SemanticTokensWorkspaceClientCapabilities {
+    /// Whether the client implementation supports a refresh request sent from the server
+    /// to the client. This is useful if a server detects a project wide configuration change
+    /// which requires a re-calculation of all semantic tokens provided by the server issuing
+    /// the request.
+    ///
+    pub refresh_support: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SemanticTokensParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,

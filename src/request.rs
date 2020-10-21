@@ -150,6 +150,14 @@ macro_rules! lsp_request {
     ("textDocument/semanticTokens/range") => {
         $crate::request::SemanticTokensRangeRequest
     };
+    // Requires #[cfg(feature = "proposed")]
+    ("workspace/semanticTokens/refresh") => {
+        $crate::request::SemanticTokensRefesh
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("codeAction/resolve") => {
+        $crate::request::CodeActionResolveRequest
+    };
 }
 
 /// The initialize request is sent as the first request from the client to the server.
@@ -438,6 +446,22 @@ impl Request for CodeActionRequest {
     const METHOD: &'static str = "textDocument/codeAction";
 }
 
+#[cfg(feature = "proposed")]
+/// The request is sent from the client to the server to resolve additional information for a given code action.
+/// This is usually used to compute the `edit` property of a code action to avoid its unnecessary computation
+/// during the `textDocument/codeAction` request.
+///
+/// since 3.16.0
+#[derive(Debug)]
+pub enum CodeActionResolveRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for CodeActionResolveRequest {
+    type Params = CodeAction;
+    type Result = CodeAction;
+    const METHOD: &'static str = "codeAction/resolve";
+}
+
 /// The code lens request is sent from the client to the server to compute code lenses for a given text document.
 #[derive(Debug)]
 pub enum CodeLensRequest {}
@@ -664,6 +688,21 @@ impl Request for SemanticTokensRangeRequest {
     const METHOD: &'static str = "textDocument/semanticTokens/range";
 }
 
+#[cfg(feature = "proposed")]
+/// The `workspace/semanticTokens/refresh` request is sent from the server to the client.
+/// Servers can use it to ask clients to refresh the editors for which this server provides semantic tokens.
+/// As a result the client should ask the server to recompute the semantic tokens for these editors.
+/// This is useful if a server detects a project wide configuration change which requires a re-calculation of all semantic tokens.
+/// Note that the client still has the freedom to delay the re-calculation of the semantic tokens if for example an editor is currently not visible.
+pub enum SemanticTokensRefesh {}
+
+#[cfg(feature = "proposed")]
+impl Request for SemanticTokensRefesh {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = "workspace/semanticTokens/refresh";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -731,9 +770,11 @@ mod test {
     fn check_proposed_macro_definitions() {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
+        check_macro!("codeAction/resolve");
         check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
+        check_macro!("workspace/semanticTokens/refresh");
     }
 }
