@@ -1391,7 +1391,7 @@ pub struct ServerCapabilities {
 
     /// The server provides workspace symbol support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workspace_symbol_provider: Option<bool>,
+    pub workspace_symbol_provider: Option<OneOf<bool, WorkspaceSymbolOptions>>,
 
     /// The server provides code actions.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1625,6 +1625,13 @@ pub struct ReferencesOptions {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentHighlightOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceSymbolOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
@@ -2087,8 +2094,8 @@ mod tests {
         test_serialization(&OneOf::<bool, ()>::Left(true), r#"true"#);
         test_serialization(&OneOf::<String, ()>::Left("abcd".into()), r#""abcd""#);
         test_serialization(
-            &OneOf::<String, WorkDoneProgressOptions>::Right(WorkDoneProgressOptions{
-                work_done_progress: Some(false)
+            &OneOf::<String, WorkDoneProgressOptions>::Right(WorkDoneProgressOptions {
+                work_done_progress: Some(false),
             }),
             r#"{"workDoneProgress":false}"#,
         );
