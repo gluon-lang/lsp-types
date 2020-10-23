@@ -71,6 +71,7 @@ pub struct CallHierarchyItem {
     pub selection_range: Range,
 
     /// A data entry field that is preserved between a call hierarchy prepare and incloming calls or outgoing calls requests.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
 }
 
