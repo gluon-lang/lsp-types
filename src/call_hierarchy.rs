@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use url::Url;
 
 use crate::{
@@ -68,6 +69,10 @@ pub struct CallHierarchyItem {
     /// The range that should be selected and revealed when this symbol is being picked, e.g. the name of a function.
     /// Must be contained by the [`range`](#CallHierarchyItem.range).
     pub selection_range: Range,
+
+    /// A data entry field that is preserved between a call hierarchy prepare and incloming calls or outgoing calls requests.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Value>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]

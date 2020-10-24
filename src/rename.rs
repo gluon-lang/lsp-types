@@ -37,13 +37,25 @@ pub struct RenameCapability {
     pub dynamic_registration: Option<bool>,
 
     /// Client supports testing for validity of rename operations before execution.
+    ///
+    /// since 3.12.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_support: Option<bool>,
+
+    /// Client supports the default behavior result (`{ defaultBehavior: boolean }`).
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prepare_support_default_behavior: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[serde(rename_all = "camelCase")]
 pub enum PrepareRenameResponse {
     Range(Range),
     RangeWithPlaceholder { range: Range, placeholder: String },
+    #[cfg(feature = "proposed")]
+    DefaultBehavior { default_behavior: bool },
 }

@@ -201,7 +201,14 @@ pub struct Diagnostic {
     /// The diagnostic's code. Can be omitted.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code: Option<NumberOrString>,
-    //    code?: number | string;
+
+    /// An optional property to describe the error code.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code_description: Option<CodeDescription>,
+
     /// A human-readable string describing the source of this
     /// diagnostic, e.g. 'typescript' or 'super lint'.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -218,6 +225,21 @@ pub struct Diagnostic {
     /// Additional metadata about the diagnostic.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<DiagnosticTag>>,
+
+    ///  A data entry field that is preserved between a `textDocument/publishDiagnostics`
+    /// notification and `textDocument/codeAction` request.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeDescription {
+    pub href: Url,
 }
 
 impl Diagnostic {
@@ -238,6 +260,7 @@ impl Diagnostic {
             message,
             related_information,
             tags,
+            ..Diagnostic::default()
         }
     }
 
@@ -967,12 +990,20 @@ pub struct WorkspaceClientCapabilities {
     pub execute_command: Option<GenericCapability>,
 
     /// The client has support for workspace folders.
+    /// since 3.6.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace_folders: Option<bool>,
 
     /// The client supports `workspace/configuration` requests.
+    /// since 3.6.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub configuration: Option<bool>,
+
+    /// Capabilities specific to the semantic token requsts scoped to the workspace.
+    /// since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub semantic_tokens: Option<SemanticTokensWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -999,7 +1030,7 @@ pub struct SynchronizationCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PublishDiagnosticsCapability {
+pub struct PublishDiagnosticsClientCapabilities {
     /// Whether the clients accepts diagnostics with related information.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub related_information: Option<bool>,
@@ -1012,6 +1043,29 @@ pub struct PublishDiagnosticsCapability {
         deserialize_with = "TagSupport::deserialize_compat"
     )]
     pub tag_support: Option<TagSupport<DiagnosticTag>>,
+
+    /// Whether the client interprets the version property of the
+    /// `textDocument/publishDiagnostics` notification's parameter.
+    ///
+    ///  3.15.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version_support: Option<bool>,
+
+    /// Client supports a codeDescription property
+    ///
+    ///  3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code_description_support: Option<bool>,
+
+    /// Whether code action supports the `data` property which is
+    /// preserved between a `textDocument/publishDiagnostics` and
+    /// `textDocument/codeAction` request.
+    ///
+    ///  3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1123,7 +1177,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to `textDocument/publishDiagnostics`.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub publish_diagnostics: Option<PublishDiagnosticsCapability>,
+    pub publish_diagnostics: Option<PublishDiagnosticsClientCapabilities>,
 
     /// Capabilities specific to `textDocument/foldingRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]

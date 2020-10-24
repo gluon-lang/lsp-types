@@ -3,6 +3,8 @@ use crate::{
     WorkDoneProgressOptions, WorkDoneProgressParams, WorkspaceEdit,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
 use std::borrow::Cow;
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -38,8 +40,46 @@ pub struct CodeActionCapability {
     pub code_action_literal_support: Option<CodeActionLiteralSupport>,
 
     /// Whether code action supports the `isPreferred` property.
+    ///
+    /// since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_preferred_support: Option<bool>,
+
+    /// Whether code action supports the `disabled` property.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disabled_support: Option<bool>,
+
+    /// Whether code action supports the `data` property which is
+    /// preserved between a `textDocument/codeAction` and a
+    /// `codeAction/resolve` request.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_support: Option<bool>,
+
+    /// Whether the client supports resolving additional code action
+    /// properties via a separate `codeAction/resolve` request.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolve_support: Option<CodeActionCapabilityResolveSupport>,
+}
+
+/// Whether the client supports resolving additional code action
+///  properties via a separate `codeAction/resolve` request.
+///
+/// since 3.16.0
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionCapabilityResolveSupport {
+    /// The properties that a client can resolve lazily.
+    pub properties: Vec<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -206,8 +246,48 @@ pub struct CodeAction {
     /// by keybindings.
     /// A quick fix should be marked preferred if it properly addresses the underlying error.
     /// A refactoring should be marked preferred if it is the most reasonable choice of actions to take.
+    ///
+    /// since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_preferred: Option<bool>,
+
+    /// Marks that the code action cannot currently be applied.
+    ///
+    /// Clients should follow the following guidelines regarding disabled code actions:
+    ///
+    /// - Disabled code actions are not shown in automatic
+    ///   [lightbulb](https://code.visualstudio.com/docs/editor/editingevolved#_code-action)
+    ///   code action menu.
+    ///
+    /// - Disabled actions are shown as faded out in the code action menu when the user request
+    ///   a more specific type of code action, such as refactorings.
+    ///
+    /// - If the user has a keybinding that auto applies a code action and only a disabled code
+    ///   actions are returned, the client should show the user an error message with `reason`
+    ///   in the editor.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disabled: Option<CodeActionDisabled>,
+
+    /// A data entry field that is preserved on a code action between
+    /// a `textDocument/codeAction` and a `codeAction/resolve` request.
+    ///
+    /// since 3.16.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Value>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeActionDisabled {
+    /// Human readable description of why the code action is currently disabled.
+    ///
+    /// This is displayed in the code actions UI.
+    pub reason: String,
 }
 
 /// Contains additional diagnostic information about the context in which
@@ -237,6 +317,13 @@ pub struct CodeActionOptions {
 
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
+
+    /// The server provides support to resolve additional
+    /// information for a code action.
+    ///
+    /// since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolve_provider: Option<bool>,
 }
 
 #[cfg(test)]
@@ -260,6 +347,7 @@ mod tests {
                     diagnostics: None,
                     edit: None,
                     is_preferred: None,
+                    ..CodeAction::default()
                 }),
             ],
             r#"[{"title":"title","command":"command"},{"title":"title","kind":"quickfix"}]"#,

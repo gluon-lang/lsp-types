@@ -99,13 +99,22 @@ pub struct CompletionItemCapability {
     #[cfg(feature = "proposed")]
     pub insert_replace_support: Option<bool>,
 
-    /// Client supports to resolve `additionalTextEdits` in the `completionItem/resolve`
-    /// request. So servers can postpone computing them.
+    /// Indicates which properties a client can resolve lazily on a completion
+    /// item. Before version 3.16.0 only the predefined properties `documentation`
+    /// and `details` could be resolved lazily.
     ///
     /// @since 3.16.0 - Proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub resolve_additional_text_edits_support: Option<bool>,
+    pub resolve_support: Option<CompletionItemCapabilityResolveSupport>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CompletionItemCapabilityResolveSupport {
+    /// The properties that a client can resolve lazily.
+    pub properties: Vec<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
