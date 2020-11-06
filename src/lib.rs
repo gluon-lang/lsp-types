@@ -108,7 +108,7 @@ pub use workspace_symbols::*;
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum NumberOrString {
-    Number(u64),
+    Number(i32),
     String(String),
 }
 
@@ -127,13 +127,18 @@ pub struct CancelParams {
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize)]
 pub struct Position {
     /// Line position in a document (zero-based).
-    pub line: u64,
-    /// Character offset on a line in a document (zero-based).
-    pub character: u64,
+    pub line: u32,
+    /// Character offset on a line in a document (zero-based). Assuming that
+    /// the line is represented as a string, the `character` value represents
+    /// the gap between the `character` and `character + 1`.
+    ///
+    /// If the character value is greater than the line length it defaults back
+    /// to the line length.
+    pub character: u32,
 }
 
 impl Position {
-    pub fn new(line: u64, character: u64) -> Position {
+    pub fn new(line: u32, character: u32) -> Position {
         Position { line, character }
     }
 }
@@ -274,7 +279,7 @@ impl Diagnostic {
     pub fn new_with_code_number(
         range: Range,
         severity: DiagnosticSeverity,
-        code_number: u64,
+        code_number: i32,
         source: Option<String>,
         message: String,
     ) -> Diagnostic {
@@ -668,14 +673,14 @@ pub struct TextDocumentItem {
 
     /// The version number of this document (it will strictly increase after each
     /// change, including undo/redo).
-    pub version: i64,
+    pub version: i32,
 
     /// The content of the opened text document.
     pub text: String,
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: Url, language_id: String, version: i64, text: String) -> TextDocumentItem {
+    pub fn new(uri: Url, language_id: String, version: i32, text: String) -> TextDocumentItem {
         TextDocumentItem {
             uri,
             language_id,
@@ -693,11 +698,11 @@ pub struct VersionedTextDocumentIdentifier {
     pub uri: Url,
 
     /// The version number of this document.
-    pub version: Option<i64>,
+    pub version: Option<i32>,
 }
 
 impl VersionedTextDocumentIdentifier {
-    pub fn new(uri: Url, version: i64) -> VersionedTextDocumentIdentifier {
+    pub fn new(uri: Url, version: i32) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier {
             uri,
             version: Some(version),
@@ -764,7 +769,7 @@ pub struct InitializeParams {
     /// The process Id of the parent process that started
     /// the server. Is null if the process has not been started by another process.
     /// If the parent process is not alive then the server should exit (see exit notification) its process.
-    pub process_id: Option<u64>,
+    pub process_id: Option<u32>,
 
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
@@ -1721,9 +1726,10 @@ pub struct TextDocumentContentChangeEvent {
     pub range: Option<Range>,
 
     /// The length of the range that got replaced.
-    /// NOTE: seems redundant, see: <https://github.com/Microsoft/language-server-protocol/issues/9>
+    ///
+    /// Deprecated: Use range instead
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub range_length: Option<u64>,
+    pub range_length: Option<u32>,
 
     /// The new text of the document.
     pub text: String,
@@ -1897,14 +1903,14 @@ pub struct PublishDiagnosticsParams {
 
     /// Optional the version number of the document the diagnostics are published for.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub version: Option<i64>,
+    pub version: Option<i32>,
 }
 
 impl PublishDiagnosticsParams {
     pub fn new(
         uri: Url,
         diagnostics: Vec<Diagnostic>,
-        version: Option<i64>,
+        version: Option<i32>,
     ) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri,
@@ -2044,7 +2050,7 @@ pub struct ApplyWorkspaceEditResponse {
     pub failure_reason: Option<String>,
 
     /// Depending on the client's failure handling strategy `failedChange` might
-    ///contain the index of the change that failed. This property is only available
+    /// contain the index of the change that failed. This property is only available
     /// if the client signals a `failureHandlingStrategy` in its client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub failed_change: Option<u32>,

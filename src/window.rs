@@ -82,7 +82,7 @@ pub struct MessageActionItem {
 pub enum MessageActionItemProperty {
     String(String),
     Boolean(bool),
-    Integer(i64),
+    Integer(i32),
     Object(Value),
 }
 

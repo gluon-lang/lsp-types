@@ -37,7 +37,7 @@ pub struct DocumentFormattingParams {
 #[serde(rename_all = "camelCase")]
 pub struct FormattingOptions {
     /// Size of a tab in spaces.
-    pub tab_size: u64,
+    pub tab_size: u32,
 
     /// Prefer spaces over tabs.
     pub insert_spaces: bool,
@@ -63,7 +63,7 @@ pub struct FormattingOptions {
 #[serde(untagged)]
 pub enum FormattingProperty {
     Bool(bool),
-    Number(f64),
+    Number(i32),
     String(String),
 }
 
@@ -136,14 +136,14 @@ mod tests {
             &FormattingOptions {
                 tab_size: 123,
                 insert_spaces: true,
-                properties: vec![("prop".to_string(), FormattingProperty::Number(1.0))]
+                properties: vec![("prop".to_string(), FormattingProperty::Number(1))]
                     .into_iter()
                     .collect(),
                 trim_trailing_whitespace: None,
                 insert_final_newline: None,
                 trim_final_newlines: None,
             },
-            r#"{"tabSize":123,"insertSpaces":true,"prop":1.0}"#,
+            r#"{"tabSize":123,"insertSpaces":true,"prop":1}"#,
         );
     }
 }
