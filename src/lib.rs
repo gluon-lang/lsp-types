@@ -2018,15 +2018,36 @@ pub struct ExecuteCommandRegistrationOptions {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ApplyWorkspaceEditParams {
+    /// An optional label of the workspace edit. This label is
+    /// presented in the user interface for example on an undo
+    /// stack to undo the workspace edit.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+
     /// The edits to apply.
     pub edit: WorkspaceEdit,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ApplyWorkspaceEditResponse {
     /// Indicates whether the edit was applied or not.
     pub applied: bool,
+
+    /// An optional textual description for why the edit was not applied.
+    /// This may be used may be used by the server for diagnostic
+    /// logging or to provide a suitable error for a request that
+    /// triggered the edit
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failure_reason: Option<String>,
+
+    /// Depending on the client's failure handling strategy `failedChange` might
+    ///contain the index of the change that failed. This property is only available
+    /// if the client signals a `failureHandlingStrategy` in its client capabilities.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failed_change: Option<u32>,
 }
 
 /// Describes the content type that a client supports in various
