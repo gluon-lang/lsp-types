@@ -353,9 +353,11 @@ pub struct SemanticTokensClientCapabilities {
     pub formats: Vec<TokenFormat>,
 
     /// Whether the client supports tokens that can overlap each other.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub overlapping_token_support: Option<bool>,
 
     /// Whether the client supports tokens that can span multiple lines.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub multiline_token_support: Option<bool>,
 }
 
