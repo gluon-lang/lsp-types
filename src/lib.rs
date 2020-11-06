@@ -891,6 +891,17 @@ pub struct WorkspaceEditCapability {
     /// failes.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub failure_handling: Option<FailureHandlingKind>,
+
+    /// Whether the client normalizes line endings to the client specific
+    /// setting.
+    /// If set to `true` the client will normalize line ending characters
+    /// in a workspace edit containg to the client specific new line
+    /// character.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub normalizes_line_endings: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
