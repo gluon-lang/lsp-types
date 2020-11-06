@@ -1004,6 +1004,12 @@ pub struct WorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensWorkspaceClientCapabilities>,
+
+    /// Capabilities specific to the code lens requests scoped to the workspace.
+    /// since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub code_lens: Option<CodeLensWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

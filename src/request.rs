@@ -155,6 +155,10 @@ macro_rules! lsp_request {
         $crate::request::SemanticTokensRefesh
     };
     // Requires #[cfg(feature = "proposed")]
+    ("workspace/codeLens/refresh") => {
+        $crate::request::CodeLensRefresh
+    };
+    // Requires #[cfg(feature = "proposed")]
     ("codeAction/resolve") => {
         $crate::request::CodeActionResolveRequest
     };
@@ -703,6 +707,21 @@ impl Request for SemanticTokensRefesh {
     const METHOD: &'static str = "workspace/semanticTokens/refresh";
 }
 
+#[cfg(feature = "proposed")]
+/// The workspace/codeLens/refresh request is sent from the server to the client.
+/// Servers can use it to ask clients to refresh the code lenses currently shown in editors.
+/// As a result the client should ask the server to recompute the code lenses for these editors.
+/// This is useful if a server detects a configuration change which requires a re-calculation of all code lenses.
+/// Note that the client still has the freedom to delay the re-calculation of the code lenses if for example an editor is currently not visible.
+pub enum CodeLensRefresh {}
+
+#[cfg(feature = "proposed")]
+impl Request for CodeLensRefresh {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = "workspace/codeLens/refresh";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -776,5 +795,6 @@ mod test {
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
         check_macro!("workspace/semanticTokens/refresh");
+        check_macro!("workspace/codeLens/refresh");
     }
 }
