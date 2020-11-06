@@ -3,6 +3,8 @@ use crate::{
     WorkDoneProgressOptions, WorkDoneProgressParams, WorkspaceEdit,
 };
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "proposed")]
 use serde_json::Value;
 
 use std::borrow::Cow;
