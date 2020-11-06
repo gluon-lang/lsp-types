@@ -779,7 +779,7 @@ pub struct InitializeParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub initialization_options: Option<Value>,
 
-    /// The capabilities provided by the client (editor)
+    /// The capabilities provided by the client (editor or tool)
     pub capabilities: ClientCapabilities,
 
     /// The initial trace setting. If omitted trace is disabled ('off').
@@ -797,6 +797,18 @@ pub struct InitializeParams {
     /// Information about the client.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub client_info: Option<ClientInfo>,
+
+    /// The locale the client is currently showing the user interface
+    /// in. This must not necessarily be the locale of the operating
+    /// system.
+    ///
+    /// Uses IETF language tags as the value's syntax
+    /// (See https://en.wikipedia.org/wiki/IETF_language_tag)
+    ///
+    /// @since 3.16.0 - proposed state
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
