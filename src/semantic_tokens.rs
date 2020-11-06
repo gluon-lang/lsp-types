@@ -349,8 +349,14 @@ pub struct SemanticTokensClientCapabilities {
     /// The token modifiers that the client supports.
     pub token_modifiers: Vec<SemanticTokenModifier>,
 
-    /// The formats the clients supports.
+    /// The token formats the clients supports.
     pub formats: Vec<TokenFormat>,
+
+    /// Whether the client supports tokens that can overlap each other.
+    pub overlapping_token_support: Option<bool>,
+
+    /// Whether the client supports tokens that can span multiple lines.
+    pub multiline_token_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
