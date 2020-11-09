@@ -38,7 +38,8 @@ pub struct WindowClientCapabilities {
     /// @since 3.16.0 - proposed state
     ///
     #[cfg(feature = "proposed")]
-    pub show_message: ShowMessageRequestClientCapabilities,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub show_message: Option<ShowMessageRequestClientCapabilities>,
 }
 
 /// Show message request client capabilities

@@ -384,6 +384,12 @@ pub struct CompletionItem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub insert_text_format: Option<InsertTextFormat>,
 
+    /// How whitespace and indentation is handled during completion item insertion.
+    /// If ignored the clients default value depends on the `textDocument.completion.insertTextMode` client capability.
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub insert_text_mode: Option<InsertTextMode>,
+
     /// An edit which is applied to a document when selecting
     /// this completion. When an edit is provided the value of
     /// insertText is ignored.
