@@ -162,6 +162,10 @@ macro_rules! lsp_request {
     ("codeAction/resolve") => {
         $crate::request::CodeActionResolveRequest
     };
+    // Requires #[cfg(feature = "proposed")]
+    ("window/showDocument") => {
+        $crate::request::ShowDocument
+    };
 }
 
 /// The initialize request is sent as the first request from the client to the server.
@@ -722,6 +726,17 @@ impl Request for CodeLensRefresh {
     const METHOD: &'static str = "workspace/codeLens/refresh";
 }
 
+#[cfg(feature = "proposed")]
+/// The show document request is sent from a server to a client to ask the client to display a particular document in the user interface.
+pub enum ShowDocument {}
+
+#[cfg(feature = "proposed")]
+impl Request for ShowDocument {
+    type Params = ShowDocumentParams;
+    type Result = ShowDocumentResult;
+    const METHOD: &'static str = "window/showDocument";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -794,6 +809,7 @@ mod test {
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
+        check_macro!("window/showDocument");
         check_macro!("workspace/semanticTokens/refresh");
         check_macro!("workspace/codeLens/refresh");
     }

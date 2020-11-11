@@ -8,6 +8,12 @@ use serde_json::Value;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+#[cfg(feature = "proposed")]
+use url::Url;
+
+#[cfg(feature = "proposed")]
+use crate::Range;
+
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
 #[repr(u8)]
 pub enum MessageType {
@@ -33,13 +39,21 @@ pub struct WindowClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_progress: Option<bool>,
 
-    /// Capabilities specific to the showMessage request
+    /// Capabilities specific to the showMessage request.
     ///
     /// @since 3.16.0 - proposed state
     ///
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub show_message: Option<ShowMessageRequestClientCapabilities>,
+
+    /// Client capabilities for the show document request.
+    ///
+    /// @since 3.16.0 - proposed state
+    ///
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub show_document: Option<ShowDocumentClientCapabilities>,
 }
 
 /// Show message request client capabilities
@@ -119,4 +133,56 @@ pub struct ShowMessageRequestParams {
     /// The message action items to present.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub actions: Option<Vec<MessageActionItem>>,
+}
+
+/// Client capabilities for the show document request.
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+#[serde(rename_all = "camelCase")]
+pub struct ShowDocumentClientCapabilities {
+    /// The client has support for the show document request.
+    pub support: bool,
+}
+
+/// Params to show a document.
+///
+/// @since 3.16.0 - proposed state
+///
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+#[serde(rename_all = "camelCase")]
+pub struct ShowDocumentParams {
+    /// The document uri to show.
+    pub uri: Url,
+
+    /// Indicates to show the resource in an external program.
+    /// To show for example `https://code.visualstudio.com/`
+    /// in the default WEB browser set `external` to `true`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external: Option<bool>,
+
+    ///  An optional property to indicate whether the editor
+    ///  showing the document should take focus or not.
+    ///  Clients might ignore this property if an external
+    ///  program in started.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub take_focus: Option<bool>,
+
+    ///  An optional selection range if the document is a text
+    ///  document. Clients might ignore the property if an
+    ///  external program is started or the file is not a text
+    ///  file.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selection: Option<Range>,
+}
+
+/// The result of an show document request.
+///
+/// @since 3.16.0 - proposed state
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+#[serde(rename_all = "camelCase")]
+pub struct ShowDocumentResult {
+    /// A boolean indicating if the show was successful.
+    pub success: bool,
 }
