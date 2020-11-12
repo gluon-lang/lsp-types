@@ -780,6 +780,8 @@ pub struct InitializeParams {
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
+    ///
+    /// Deprecated in favour of `workspaceFolders`
     #[serde(default)]
     pub root_uri: Option<Url>,
 
@@ -1247,9 +1249,34 @@ pub struct ClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window: Option<WindowClientCapabilities>,
 
+    /// General client capabilities.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub general: Option<GeneralClientCapabilities>,
+
     /// Experimental client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
+}
+
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct GeneralClientCapabilities {
+    /// Client capabilities specific to regular expressions.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub regular_expressions: Option<RegularExpressionsClientCapabilities>,
+}
+
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct RegularExpressionsClientCapabilities {
+    /// The engine's name.
+    pub engine: String,
+
+    /// The engine's version
+    pub version: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
