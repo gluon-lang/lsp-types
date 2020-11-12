@@ -127,6 +127,8 @@ impl Notification for LogMessage {
 }
 
 /// The telemetry notification is sent from the server to the client to ask the client to log a telemetry event.
+/// The protocol doesn't specify the payload since no interpretation of the data happens in the protocol. Most clients even don't handle
+/// the event directly but forward them to the extensions owning the corresponding server issuing the event.
 #[derive(Debug)]
 pub enum TelemetryEvent {}
 
@@ -195,8 +197,10 @@ impl Notification for DidSaveTextDocument {
     const METHOD: &'static str = "textDocument/didSave";
 }
 
-/// The watched files notification is sent from the client to the server when the client detects changes to files
-/// watched by the language client.
+/// The watched files notification is sent from the client to the server when the client detects changes to files and folders
+/// watched by the language client (note although the name suggest that only file events are sent it is about file system events which include folders as well).
+/// It is recommended that servers register for these file system events using the registration mechanism.
+/// In former implementations clients pushed file events without the server actively asking for it.
 #[derive(Debug)]
 pub enum DidChangeWatchedFiles {}
 
