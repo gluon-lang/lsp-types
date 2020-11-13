@@ -94,6 +94,11 @@ pub use semantic_tokens::*;
 mod signature_help;
 pub use signature_help::*;
 
+#[cfg(feature = "proposed")]
+mod type_rename;
+#[cfg(feature = "proposed")]
+pub use type_rename::*;
+
 mod window;
 pub use window::*;
 
@@ -1257,6 +1262,13 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selection_range: Option<SelectionRangeClientCapabilities>,
 
+    /// Capabilities specific to `textDocument/onTypeRename` requests.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub on_type_rename: Option<OnTypeRenameClientCapabilities>,
+
     /// The client's semantic highlighting capability.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
@@ -1599,6 +1611,13 @@ pub struct ServerCapabilities {
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_tokens_provider: Option<SemanticTokensServerCapabilities>,
+
+    /// The server provides on type rename support.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub on_type_rename_provider: Option<OnTypeRenameServerCapabilities>,
 
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]

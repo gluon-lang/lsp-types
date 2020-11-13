@@ -134,6 +134,9 @@ macro_rules! lsp_request {
     ("callHierarchy/outgoingCalls") => {
         $crate::request::CallHierarchyOutgoingCalls
     };
+    ("textDocument/onTypeRename") => {
+        $crate::request::OnTypeRename
+    };
     // Requires #[cfg(feature = "proposed")]
     ("textDocument/prepareCallHierarchy") => {
         $crate::request::CallHierarchyPrepare
@@ -543,6 +546,22 @@ impl Request for OnTypeFormatting {
     const METHOD: &'static str = "textDocument/onTypeFormatting";
 }
 
+/// The on type rename request is sent from the client to the server to return for a given position in a document
+/// the range of the symbol at the position and all ranges that have the same content and can be renamed together.
+/// Optionally a word pattern can be returned to describe valid contents. A rename to one of the ranges can be applied
+/// to all other ranges if the new content is valid. If no result-specific word pattern is provided, the word pattern from
+/// the client’s language configuration is used.
+#[cfg(feature = "proposed")]
+#[derive(Debug)]
+pub enum OnTypeRename {}
+
+#[cfg(feature = "proposed")]
+impl Request for OnTypeRename {
+    type Params = OnTypeRenameParams;
+    type Result = Option<OnTypeRenameRanges>;
+    const METHOD: &'static str = "textDocument/onTypeRename";
+}
+
 /// The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
 #[derive(Debug)]
 pub enum Rename {}
@@ -805,6 +824,7 @@ mod test {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("codeAction/resolve");
+        check_macro!("textDocument/onTypeRename");
         check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
