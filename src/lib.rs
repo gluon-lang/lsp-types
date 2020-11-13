@@ -376,7 +376,7 @@ impl TextEdit {
 }
 
 /// Describes textual changes on a single text document. The text document is referred to as a
-/// `VersionedTextDocumentIdentifier` to allow clients to check the text document version before an
+/// `OptionalVersionedTextDocumentIdentifier` to allow clients to check the text document version before an
 /// edit is applied. A `TextDocumentEdit` describes all changes on a version Si and after they are
 /// applied move the document to version Si+1. So the creator of a `TextDocumentEdit` doesn't need to
 /// sort the array or do any kind of ordering. However the edits must be non overlapping.
@@ -384,7 +384,7 @@ impl TextEdit {
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentEdit {
     /// The text document to change.
-    pub text_document: VersionedTextDocumentIdentifier,
+    pub text_document: OptionalVersionedTextDocumentIdentifier,
 
     /// The edits to be applied.
     pub edits: Vec<TextEdit>,
@@ -690,7 +690,7 @@ impl TextDocumentItem {
     }
 }
 
-/// An identifier to denote a specific version of a text document.
+/// An identifier to denote a specific version of a text document. This information usually flows from the client to the server.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
@@ -698,12 +698,41 @@ pub struct VersionedTextDocumentIdentifier {
     pub uri: Url,
 
     /// The version number of this document.
-    pub version: Option<i32>,
+    ///
+    /// The version number of a document will increase after each change,
+    /// including undo/redo. The number doesn't need to be consecutive.
+    pub version: i32,
 }
 
 impl VersionedTextDocumentIdentifier {
     pub fn new(uri: Url, version: i32) -> VersionedTextDocumentIdentifier {
-        VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier { uri, version }
+    }
+}
+
+/// An identifier which optionally denotes a specific version of a text document. This information usually flows from the server to the client
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct OptionalVersionedTextDocumentIdentifier {
+    // This field was "mixed-in" from TextDocumentIdentifier
+    /// The text document's URI.
+    pub uri: Url,
+
+    /// The version number of this document. If an optional versioned text document
+    /// identifier is sent from the server to the client and the file is not
+    /// open in the editor (the server has not received an open notification
+    /// before) the server can send `null` to indicate that the version is
+    /// known and the content on disk is the master (as specified with document
+    /// content ownership).
+    ///
+    /// The version number of a document will increase after each change,
+    /// including undo/redo. The number doesn't need to be consecutive.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<i32>,
+}
+
+impl OptionalVersionedTextDocumentIdentifier {
+    pub fn new(uri: Url, version: i32) -> OptionalVersionedTextDocumentIdentifier {
+        OptionalVersionedTextDocumentIdentifier {
             uri,
             version: Some(version),
         }
@@ -1814,7 +1843,8 @@ pub struct DidCloseTextDocumentParams {
 #[serde(rename_all = "camelCase")]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
-    pub text_document: TextDocumentIdentifier,
+    pub text_document: VersionedTextDocumentIdentifier,
+
     /// Optional the content when saved. Depends on the includeText value
     /// when the save notification was requested.
     #[serde(skip_serializing_if = "Option::is_none")]
