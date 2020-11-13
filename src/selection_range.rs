@@ -4,6 +4,16 @@ use crate::{
     PartialResultParams, Position, Range, StaticTextDocumentRegistrationOptions,
     TextDocumentIdentifier, WorkDoneProgressOptions, WorkDoneProgressParams,
 };
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SelectionRangeClientCapabilities {
+    /// Whether implementation supports dynamic registration for selection range
+    /// providers. If this is set to `true` the client supports the new
+    /// `SelectionRangeRegistrationOptions` return value for the corresponding
+    /// server capability as well.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+}
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct SelectionRangeOptions {

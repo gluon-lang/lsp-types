@@ -1251,6 +1251,12 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub folding_range: Option<FoldingRangeCapability>,
 
+    /// Capabilities specific to the `textDocument/selectionRange` request.
+    ///
+    /// @since 3.15.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selection_range: Option<SelectionRangeClientCapabilities>,
+
     /// The client's semantic highlighting capability.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
