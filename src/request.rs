@@ -134,6 +134,9 @@ macro_rules! lsp_request {
     ("callHierarchy/outgoingCalls") => {
         $crate::request::CallHierarchyOutgoingCalls
     };
+    ("textDocument/onTypeRename") => {
+        $crate::request::OnTypeRename
+    };
     // Requires #[cfg(feature = "proposed")]
     ("textDocument/prepareCallHierarchy") => {
         $crate::request::CallHierarchyPrepare
@@ -155,8 +158,16 @@ macro_rules! lsp_request {
         $crate::request::SemanticTokensRefesh
     };
     // Requires #[cfg(feature = "proposed")]
+    ("workspace/codeLens/refresh") => {
+        $crate::request::CodeLensRefresh
+    };
+    // Requires #[cfg(feature = "proposed")]
     ("codeAction/resolve") => {
         $crate::request::CodeActionResolveRequest
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("window/showDocument") => {
+        $crate::request::ShowDocument
     };
 }
 
@@ -535,6 +546,22 @@ impl Request for OnTypeFormatting {
     const METHOD: &'static str = "textDocument/onTypeFormatting";
 }
 
+/// The on type rename request is sent from the client to the server to return for a given position in a document
+/// the range of the symbol at the position and all ranges that have the same content and can be renamed together.
+/// Optionally a word pattern can be returned to describe valid contents. A rename to one of the ranges can be applied
+/// to all other ranges if the new content is valid. If no result-specific word pattern is provided, the word pattern from
+/// the client’s language configuration is used.
+#[cfg(feature = "proposed")]
+#[derive(Debug)]
+pub enum OnTypeRename {}
+
+#[cfg(feature = "proposed")]
+impl Request for OnTypeRename {
+    type Params = OnTypeRenameParams;
+    type Result = Option<OnTypeRenameRanges>;
+    const METHOD: &'static str = "textDocument/onTypeRename";
+}
+
 /// The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
 #[derive(Debug)]
 pub enum Rename {}
@@ -703,6 +730,32 @@ impl Request for SemanticTokensRefesh {
     const METHOD: &'static str = "workspace/semanticTokens/refresh";
 }
 
+#[cfg(feature = "proposed")]
+/// The workspace/codeLens/refresh request is sent from the server to the client.
+/// Servers can use it to ask clients to refresh the code lenses currently shown in editors.
+/// As a result the client should ask the server to recompute the code lenses for these editors.
+/// This is useful if a server detects a configuration change which requires a re-calculation of all code lenses.
+/// Note that the client still has the freedom to delay the re-calculation of the code lenses if for example an editor is currently not visible.
+pub enum CodeLensRefresh {}
+
+#[cfg(feature = "proposed")]
+impl Request for CodeLensRefresh {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = "workspace/codeLens/refresh";
+}
+
+#[cfg(feature = "proposed")]
+/// The show document request is sent from a server to a client to ask the client to display a particular document in the user interface.
+pub enum ShowDocument {}
+
+#[cfg(feature = "proposed")]
+impl Request for ShowDocument {
+    type Params = ShowDocumentParams;
+    type Result = ShowDocumentResult;
+    const METHOD: &'static str = "window/showDocument";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -771,10 +824,13 @@ mod test {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("codeAction/resolve");
+        check_macro!("textDocument/onTypeRename");
         check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
+        check_macro!("window/showDocument");
         check_macro!("workspace/semanticTokens/refresh");
+        check_macro!("workspace/codeLens/refresh");
     }
 }

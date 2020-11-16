@@ -71,13 +71,13 @@ pub struct ColorInformation {
 #[serde(rename_all = "camelCase")]
 pub struct Color {
     /// The red component of this color in the range [0-1].
-    pub red: f64,
+    pub red: f32,
     /// The green component of this color in the range [0-1].
-    pub green: f64,
+    pub green: f32,
     /// The blue component of this color in the range [0-1].
-    pub blue: f64,
+    pub blue: f32,
     /// The alpha component of this color in the range [0-1].
-    pub alpha: f64,
+    pub alpha: f32,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]

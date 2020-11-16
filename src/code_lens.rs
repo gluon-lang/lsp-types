@@ -30,6 +30,7 @@ pub struct CodeLensParams {
 /// A code lens is _unresolved_ when no command is associated to it. For performance
 /// reasons the creation of a code lens and resolving should be done in two stages.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CodeLens {
     /// The range in which this code lens is valid. Should only span a single line.
     pub range: Range,
@@ -42,4 +43,15 @@ pub struct CodeLens {
     /// a code lens and a code lens resolve request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+#[serde(rename_all = "camelCase")]
+pub struct CodeLensWorkspaceClientCapabilities {
+    /// Whether the client implementation supports a refresh request send from the server
+    /// to the client. This is useful if a server detects a change which requires a
+    /// re-calculation of all code lenses.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub refresh_support: Option<bool>,
 }

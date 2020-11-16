@@ -55,7 +55,12 @@ pub struct RenameCapability {
 #[serde(rename_all = "camelCase")]
 pub enum PrepareRenameResponse {
     Range(Range),
-    RangeWithPlaceholder { range: Range, placeholder: String },
+    RangeWithPlaceholder {
+        range: Range,
+        placeholder: String,
+    },
     #[cfg(feature = "proposed")]
-    DefaultBehavior { default_behavior: bool },
+    DefaultBehavior {
+        default_behavior: bool,
+    },
 }

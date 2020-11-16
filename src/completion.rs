@@ -107,6 +107,15 @@ pub struct CompletionItemCapability {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub resolve_support: Option<CompletionItemCapabilityResolveSupport>,
+
+    /// The client supports the `insertTextMode` property on
+    /// a completion item to override the whitespace handling mode
+    /// as defined by the client (see `insertTextMode`).
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub insert_text_mode_support: Option<InsertTextModeSupport>,
 }
 
 #[cfg(feature = "proposed")]
@@ -115,6 +124,38 @@ pub struct CompletionItemCapability {
 pub struct CompletionItemCapabilityResolveSupport {
     /// The properties that a client can resolve lazily.
     pub properties: Vec<String>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InsertTextModeSupport {
+    pub value_set: Vec<InsertTextMode>,
+}
+
+/// How whitespace and indentation is handled during completion
+/// item insertion.
+///
+/// @since 3.16.0 - proposed state
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum InsertTextMode {
+    /// The insertion or replace strings is taken as it is. If the
+    /// value is multi line the lines below the cursor will be
+    /// inserted using the indentation defined in the string value.
+    /// The client will not apply any kind of adjustments to the
+    /// string.
+    AsIs = 1,
+
+    /// The editor adjusts leading whitespace of new lines so that
+    /// they match the indentation up to the cursor of the line for
+    /// which the item is accepted.
+    ///
+    /// Consider a line like this: <2tabs><cursor><3tabs>foo. Accepting a
+    /// multi line completion item is indented using 2 tabs all
+    /// following lines inserted will be indented using 2 tabs as well.
+    AdjustIndentation = 2,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
@@ -342,6 +383,12 @@ pub struct CompletionItem {
     /// and the `newText` property of a provided `textEdit`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub insert_text_format: Option<InsertTextFormat>,
+
+    /// How whitespace and indentation is handled during completion item insertion.
+    /// If not provided the clients default value depends on the `textDocument.completion.insertTextMode` client capability.
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub insert_text_mode: Option<InsertTextMode>,
 
     /// An edit which is applied to a document when selecting
     /// this completion. When an edit is provided the value of

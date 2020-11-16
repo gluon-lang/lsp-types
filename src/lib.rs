@@ -94,6 +94,14 @@ pub use semantic_tokens::*;
 mod signature_help;
 pub use signature_help::*;
 
+#[cfg(feature = "proposed")]
+mod type_rename;
+#[cfg(feature = "proposed")]
+pub use type_rename::*;
+
+mod window;
+pub use window::*;
+
 mod workspace_folders;
 pub use workspace_folders::*;
 
@@ -105,7 +113,7 @@ pub use workspace_symbols::*;
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum NumberOrString {
-    Number(u64),
+    Number(i32),
     String(String),
 }
 
@@ -124,13 +132,18 @@ pub struct CancelParams {
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize)]
 pub struct Position {
     /// Line position in a document (zero-based).
-    pub line: u64,
-    /// Character offset on a line in a document (zero-based).
-    pub character: u64,
+    pub line: u32,
+    /// Character offset on a line in a document (zero-based). Assuming that
+    /// the line is represented as a string, the `character` value represents
+    /// the gap between the `character` and `character + 1`.
+    ///
+    /// If the character value is greater than the line length it defaults back
+    /// to the line length.
+    pub character: u32,
 }
 
 impl Position {
-    pub fn new(line: u64, character: u64) -> Position {
+    pub fn new(line: u32, character: u32) -> Position {
         Position { line, character }
     }
 }
@@ -271,7 +284,7 @@ impl Diagnostic {
     pub fn new_with_code_number(
         range: Range,
         severity: DiagnosticSeverity,
-        code_number: u64,
+        code_number: i32,
         source: Option<String>,
         message: String,
     ) -> Diagnostic {
@@ -368,7 +381,7 @@ impl TextEdit {
 }
 
 /// Describes textual changes on a single text document. The text document is referred to as a
-/// `VersionedTextDocumentIdentifier` to allow clients to check the text document version before an
+/// `OptionalVersionedTextDocumentIdentifier` to allow clients to check the text document version before an
 /// edit is applied. A `TextDocumentEdit` describes all changes on a version Si and after they are
 /// applied move the document to version Si+1. So the creator of a `TextDocumentEdit` doesn't need to
 /// sort the array or do any kind of ordering. However the edits must be non overlapping.
@@ -376,7 +389,7 @@ impl TextEdit {
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentEdit {
     /// The text document to change.
-    pub text_document: VersionedTextDocumentIdentifier,
+    pub text_document: OptionalVersionedTextDocumentIdentifier,
 
     /// The edits to be applied.
     pub edits: Vec<TextEdit>,
@@ -665,14 +678,14 @@ pub struct TextDocumentItem {
 
     /// The version number of this document (it will strictly increase after each
     /// change, including undo/redo).
-    pub version: i64,
+    pub version: i32,
 
     /// The content of the opened text document.
     pub text: String,
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: Url, language_id: String, version: i64, text: String) -> TextDocumentItem {
+    pub fn new(uri: Url, language_id: String, version: i32, text: String) -> TextDocumentItem {
         TextDocumentItem {
             uri,
             language_id,
@@ -682,7 +695,7 @@ impl TextDocumentItem {
     }
 }
 
-/// An identifier to denote a specific version of a text document.
+/// An identifier to denote a specific version of a text document. This information usually flows from the client to the server.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
@@ -690,12 +703,41 @@ pub struct VersionedTextDocumentIdentifier {
     pub uri: Url,
 
     /// The version number of this document.
-    pub version: Option<i64>,
+    ///
+    /// The version number of a document will increase after each change,
+    /// including undo/redo. The number doesn't need to be consecutive.
+    pub version: i32,
 }
 
 impl VersionedTextDocumentIdentifier {
-    pub fn new(uri: Url, version: i64) -> VersionedTextDocumentIdentifier {
-        VersionedTextDocumentIdentifier {
+    pub fn new(uri: Url, version: i32) -> VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier { uri, version }
+    }
+}
+
+/// An identifier which optionally denotes a specific version of a text document. This information usually flows from the server to the client
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct OptionalVersionedTextDocumentIdentifier {
+    // This field was "mixed-in" from TextDocumentIdentifier
+    /// The text document's URI.
+    pub uri: Url,
+
+    /// The version number of this document. If an optional versioned text document
+    /// identifier is sent from the server to the client and the file is not
+    /// open in the editor (the server has not received an open notification
+    /// before) the server can send `null` to indicate that the version is
+    /// known and the content on disk is the master (as specified with document
+    /// content ownership).
+    ///
+    /// The version number of a document will increase after each change,
+    /// including undo/redo. The number doesn't need to be consecutive.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<i32>,
+}
+
+impl OptionalVersionedTextDocumentIdentifier {
+    pub fn new(uri: Url, version: i32) -> OptionalVersionedTextDocumentIdentifier {
+        OptionalVersionedTextDocumentIdentifier {
             uri,
             version: Some(version),
         }
@@ -761,7 +803,7 @@ pub struct InitializeParams {
     /// The process Id of the parent process that started
     /// the server. Is null if the process has not been started by another process.
     /// If the parent process is not alive then the server should exit (see exit notification) its process.
-    pub process_id: Option<u64>,
+    pub process_id: Option<u32>,
 
     /// The rootPath of the workspace. Is null
     /// if no folder is open.
@@ -772,6 +814,8 @@ pub struct InitializeParams {
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
+    ///
+    /// Deprecated in favour of `workspaceFolders`
     #[serde(default)]
     pub root_uri: Option<Url>,
 
@@ -779,7 +823,7 @@ pub struct InitializeParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub initialization_options: Option<Value>,
 
-    /// The capabilities provided by the client (editor)
+    /// The capabilities provided by the client (editor or tool)
     pub capabilities: ClientCapabilities,
 
     /// The initial trace setting. If omitted trace is disabled ('off').
@@ -797,6 +841,18 @@ pub struct InitializeParams {
     /// Information about the client.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub client_info: Option<ClientInfo>,
+
+    /// The locale the client is currently showing the user interface
+    /// in. This must not necessarily be the locale of the operating
+    /// system.
+    ///
+    /// Uses IETF language tags as the value's syntax
+    /// (See https://en.wikipedia.org/wiki/IETF_language_tag)
+    ///
+    /// @since 3.16.0 - proposed state
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -891,6 +947,17 @@ pub struct WorkspaceEditCapability {
     /// failes.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub failure_handling: Option<FailureHandlingKind>,
+
+    /// Whether the client normalizes line endings to the client specific
+    /// setting.
+    /// If set to `true` the client will normalize line ending characters
+    /// in a workspace edit containg to the client specific new line
+    /// character.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub normalizes_line_endings: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
@@ -1004,6 +1071,12 @@ pub struct WorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensWorkspaceClientCapabilities>,
+
+    /// Capabilities specific to the code lens requests scoped to the workspace.
+    /// since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub code_lens: Option<CodeLensWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1183,6 +1256,19 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub folding_range: Option<FoldingRangeCapability>,
 
+    /// Capabilities specific to the `textDocument/selectionRange` request.
+    ///
+    /// @since 3.15.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selection_range: Option<SelectionRangeClientCapabilities>,
+
+    /// Capabilities specific to `textDocument/onTypeRename` requests.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub on_type_rename: Option<OnTypeRenameClientCapabilities>,
+
     /// The client's semantic highlighting capability.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
@@ -1192,15 +1278,6 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensClientCapabilities>,
-}
-
-/// Window specific client capabilities.
-#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct WindowClientCapabilities {
-    /// Whether client supports create a work done progress UI from the server side.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub work_done_progress: Option<bool>,
 }
 
 /// Where ClientCapabilities are currently empty:
@@ -1219,9 +1296,34 @@ pub struct ClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window: Option<WindowClientCapabilities>,
 
+    /// General client capabilities.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub general: Option<GeneralClientCapabilities>,
+
     /// Experimental client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
+}
+
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct GeneralClientCapabilities {
+    /// Client capabilities specific to regular expressions.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub regular_expressions: Option<RegularExpressionsClientCapabilities>,
+}
+
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct RegularExpressionsClientCapabilities {
+    /// The engine's name.
+    pub engine: String,
+
+    /// The engine's version
+    pub version: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1510,62 +1612,16 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_tokens_provider: Option<SemanticTokensServerCapabilities>,
 
+    /// The server provides on type rename support.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub on_type_rename_provider: Option<OnTypeRenameServerCapabilities>,
+
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-pub struct ShowMessageParams {
-    /// The message type. See {@link MessageType}.
-    #[serde(rename = "type")]
-    pub typ: MessageType,
-
-    /// The actual message.
-    pub message: String,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum MessageType {
-    /// An error message.
-    Error = 1,
-    /// A warning message.
-    Warning = 2,
-    /// An information message.
-    Info = 3,
-    /// A log message.
-    Log = 4,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-pub struct ShowMessageRequestParams {
-    /// The message type. See {@link MessageType}
-    #[serde(rename = "type")]
-    pub typ: MessageType,
-
-    /// The actual message
-    pub message: String,
-
-    /// The message action items to present.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub actions: Option<Vec<MessageActionItem>>,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-pub struct MessageActionItem {
-    /// A short title like 'Retry', 'Open Log' etc.
-    pub title: String,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-pub struct LogMessageParams {
-    /// The message type. See {@link MessageType}
-    #[serde(rename = "type")]
-    pub typ: MessageType,
-
-    /// The actual message
-    pub message: String,
 }
 
 /// General parameters to to register for a capability.
@@ -1751,9 +1807,10 @@ pub struct TextDocumentContentChangeEvent {
     pub range: Option<Range>,
 
     /// The length of the range that got replaced.
-    /// NOTE: seems redundant, see: <https://github.com/Microsoft/language-server-protocol/issues/9>
+    ///
+    /// Deprecated: Use range instead
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub range_length: Option<u64>,
+    pub range_length: Option<u32>,
 
     /// The new text of the document.
     pub text: String,
@@ -1811,7 +1868,8 @@ pub struct DidCloseTextDocumentParams {
 #[serde(rename_all = "camelCase")]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
-    pub text_document: TextDocumentIdentifier,
+    pub text_document: VersionedTextDocumentIdentifier,
+
     /// Optional the content when saved. Depends on the includeText value
     /// when the save notification was requested.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1927,14 +1985,14 @@ pub struct PublishDiagnosticsParams {
 
     /// Optional the version number of the document the diagnostics are published for.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub version: Option<i64>,
+    pub version: Option<i32>,
 }
 
 impl PublishDiagnosticsParams {
     pub fn new(
         uri: Url,
         diagnostics: Vec<Diagnostic>,
-        version: Option<i64>,
+        version: Option<i32>,
     ) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri,
@@ -2048,15 +2106,36 @@ pub struct ExecuteCommandRegistrationOptions {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ApplyWorkspaceEditParams {
+    /// An optional label of the workspace edit. This label is
+    /// presented in the user interface for example on an undo
+    /// stack to undo the workspace edit.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+
     /// The edits to apply.
     pub edit: WorkspaceEdit,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ApplyWorkspaceEditResponse {
     /// Indicates whether the edit was applied or not.
     pub applied: bool,
+
+    /// An optional textual description for why the edit was not applied.
+    /// This may be used may be used by the server for diagnostic
+    /// logging or to provide a suitable error for a request that
+    /// triggered the edit
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failure_reason: Option<String>,
+
+    /// Depending on the client's failure handling strategy `failedChange` might
+    /// contain the index of the change that failed. This property is only available
+    /// if the client signals a `failureHandlingStrategy` in its client capabilities.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failed_change: Option<u32>,
 }
 
 /// Describes the content type that a client supports in various

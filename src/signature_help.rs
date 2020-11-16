@@ -144,11 +144,11 @@ pub struct SignatureHelp {
 
     /// The active signature.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active_signature: Option<i64>,
+    pub active_signature: Option<u32>,
 
     /// The active parameter of the active signature.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active_parameter: Option<i64>,
+    pub active_parameter: Option<u32>,
 }
 
 /// Represents the signature of something callable. A signature
@@ -176,7 +176,7 @@ pub struct SignatureInformation {
     /// @since 3.16.0 - proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub active_parameter: Option<i64>,
+    pub active_parameter: Option<u32>,
 }
 
 /// Represents a parameter of a callable-signature. A parameter can
@@ -200,5 +200,5 @@ pub struct ParameterInformation {
 #[serde(untagged)]
 pub enum ParameterLabel {
     Simple(String),
-    LabelOffsets([u64; 2]),
+    LabelOffsets([u32; 2]),
 }
