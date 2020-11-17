@@ -380,6 +380,20 @@ impl TextEdit {
     }
 }
 
+/// A special text edit with an additional change annotation.
+///
+/// @since 3.16.0 - proposed state.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct AnnotatedTextEdit {
+    #[serde(flatten)]
+    pub text_document: TextDocumentEdit,
+
+    /// The actual annotation
+    pub annotation: ChangeAnnotation,
+}
+
 /// Describes textual changes on a single text document. The text document is referred to as a
 /// `OptionalVersionedTextDocumentIdentifier` to allow clients to check the text document version before an
 /// edit is applied. A `TextDocumentEdit` describes all changes on a version Si and after they are
@@ -392,7 +406,33 @@ pub struct TextDocumentEdit {
     pub text_document: OptionalVersionedTextDocumentIdentifier,
 
     /// The edits to be applied.
+    #[cfg(feature = "proposed")]
+    pub edits: Vec<OneOf<TextEdit, AnnotatedTextEdit>>,
+
+    #[cfg(not(feature = "proposed"))]
     pub edits: Vec<TextEdit>,
+}
+
+/// Additional information that describes document changes.
+///
+/// @since 3.16.0 - proposed state.
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct ChangeAnnotation {
+    /// A human-readable string describing the actual change. The string
+    /// is rendered prominent in the user interface.
+    pub label: String,
+
+    /// A flag which indicates that user confirmation is needed
+    /// before applying the change.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub needs_confirmation: Option<bool>,
+
+    /// A human-readable string which is rendered less prominent in
+    /// the user interface.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
 }
 
 /// Options to create a file.
@@ -416,6 +456,13 @@ pub struct CreateFile {
     /// Additional options
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<CreateFileOptions>,
+
+    /// An optional annotation describing the operation.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub annotation: Option<ChangeAnnotation>,
 }
 
 /// Rename file options
@@ -441,6 +488,13 @@ pub struct RenameFile {
     /// Rename options.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<RenameFileOptions>,
+
+    /// An optional annotation describing the operation.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub annotation: Option<ChangeAnnotation>,
 }
 
 /// Delete file options
@@ -453,6 +507,13 @@ pub struct DeleteFileOptions {
     /// Ignore the operation if the file doesn't exist.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_if_not_exists: Option<bool>,
+
+    /// An optional annotation describing the operation.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub annotation: Option<ChangeAnnotation>,
 }
 
 /// Delete file operation
@@ -958,6 +1019,14 @@ pub struct WorkspaceEditCapability {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub normalizes_line_endings: Option<bool>,
+
+    /// Whether the client in general supports change annotations on text edits,
+    /// create file, rename file and delete file changes.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub change_annotation_support: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]

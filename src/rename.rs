@@ -48,6 +48,17 @@ pub struct RenameCapability {
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_support_default_behavior: Option<bool>,
+
+    /// Whether the client honors the change annotations in
+    /// text edits and resource operations returned via the
+    /// rename request's workspace edit by for example presenting
+    /// the workspace edit in the user interface and asking
+    /// for confirmation.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub honors_change_annotations: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
