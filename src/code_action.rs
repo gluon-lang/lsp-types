@@ -70,6 +70,17 @@ pub struct CodeActionCapability {
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_support: Option<CodeActionCapabilityResolveSupport>,
+
+    /// Whether the client honors the change annotations in
+    /// text edits and resource operations returned via the
+    /// `CodeAction#edit` property by for example presenting
+    /// the workspace edit in the user interface and asking
+    /// for confirmation.
+    ///
+    /// @since 3.16.0 - proposed state
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub honors_change_annotations: Option<bool>,
 }
 
 /// Whether the client supports resolving additional code action
