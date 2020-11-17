@@ -1380,8 +1380,14 @@ pub struct ClientCapabilities {
 #[cfg(feature = "proposed")]
 pub struct GeneralClientCapabilities {
     /// Client capabilities specific to regular expressions.
+    /// @since 3.16.0 - proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     pub regular_expressions: Option<RegularExpressionsClientCapabilities>,
+
+    /// Client capabilities specific to the client's markdown parser.
+    /// @since 3.16.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub markdown: Option<MarkdownClientCapabilities>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1392,6 +1398,19 @@ pub struct RegularExpressionsClientCapabilities {
     pub engine: String,
 
     /// The engine's version
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+}
+
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct MarkdownClientCapabilities {
+    /// The name of the parser.
+    pub parser: String,
+
+    /// The version of the parser.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
 }
 
@@ -2221,11 +2240,10 @@ pub enum MarkupKind {
     Markdown,
 }
 
-/// A `MarkupContent` literal represents a string value which content is interpreted base on its
-/// kind flag. Currently the protocol supports `plaintext` and `markdown` as markup kinds.
-///
-/// If the kind is `markdown` then the value can contain fenced code blocks like in GitHub issues.
-/// See <https://help.github.com/articles/creating-and-highlighting-code-blocks/#syntax-highlighting>
+/// A `MarkupContent` literal represents a string value which content can be represented in different formats.
+/// Currently `plaintext` and `markdown` are supported formats. A `MarkupContent` is usually used in
+/// documentation properties of result literals like `CompletionItem` or `SignatureInformation`.
+/// If the format is `markdown` the content should follow the [GitHub Flavored Markdown Specification](https://github.github.com/gfm/).
 ///
 /// Here is an example how such a string can be constructed using JavaScript / TypeScript:
 /// ```ignore
