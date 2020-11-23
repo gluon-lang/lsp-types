@@ -1956,7 +1956,7 @@ pub struct DidCloseTextDocumentParams {
 #[serde(rename_all = "camelCase")]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
-    pub text_document: VersionedTextDocumentIdentifier,
+    pub text_document: TextDocumentIdentifier,
 
     /// Optional the content when saved. Depends on the includeText value
     /// when the save notification was requested.
