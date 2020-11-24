@@ -29,7 +29,7 @@ impl SemanticTokenType {
     pub const ENUM_MEMBER: SemanticTokenType = SemanticTokenType::new("enumMember");
     pub const EVENT: SemanticTokenType = SemanticTokenType::new("event");
     pub const FUNCTION: SemanticTokenType = SemanticTokenType::new("function");
-    pub const MEMBER: SemanticTokenType = SemanticTokenType::new("member");
+    pub const METHOD: SemanticTokenType = SemanticTokenType::new("method");
     pub const MACRO: SemanticTokenType = SemanticTokenType::new("macro");
     pub const KEYWORD: SemanticTokenType = SemanticTokenType::new("keyword");
     pub const MODIFIER: SemanticTokenType = SemanticTokenType::new("modifier");
