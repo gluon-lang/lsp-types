@@ -388,7 +388,7 @@ impl TextEdit {
 #[cfg(feature = "proposed")]
 pub struct AnnotatedTextEdit {
     #[serde(flatten)]
-    pub text_document: TextDocumentEdit,
+    pub text_edit: TextEdit,
 
     /// The actual annotation
     pub annotation: ChangeAnnotation,
