@@ -792,7 +792,6 @@ pub struct OptionalVersionedTextDocumentIdentifier {
     ///
     /// The version number of a document will increase after each change,
     /// including undo/redo. The number doesn't need to be consecutive.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<i32>,
 }
 
