@@ -1,8 +1,10 @@
 use crate::{
-    DocumentSelector, PartialResultParams, Range, TextDocumentIdentifier, TextEdit,
-    WorkDoneProgressParams,
+    DocumentSelector, DynamicRegistrationClientCapabilities, PartialResultParams, Range,
+    TextDocumentIdentifier, TextEdit, WorkDoneProgressParams,
 };
 use serde::{Deserialize, Serialize};
+
+pub type DocumentColorClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]

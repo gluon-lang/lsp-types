@@ -1,7 +1,13 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{Command, PartialResultParams, Range, TextDocumentIdentifier, WorkDoneProgressParams};
+use crate::{
+    Command, DynamicRegistrationClientCapabilities, PartialResultParams, Range,
+    TextDocumentIdentifier, WorkDoneProgressParams,
+};
+
+pub type CodeLensClientCapabilities = DynamicRegistrationClientCapabilities;
+
 /// Code Lens options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]

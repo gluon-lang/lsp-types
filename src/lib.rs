@@ -588,6 +588,8 @@ pub enum ResourceOp {
     Delete(DeleteFile),
 }
 
+pub type DidChangeConfigurationClientCapabilities = DynamicRegistrationClientCapabilities;
+
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConfigurationParams {
@@ -1110,11 +1112,11 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to the `workspace/didChangeConfiguration` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub did_change_configuration: Option<DynamicRegistrationClientCapabilities>,
+    pub did_change_configuration: Option<DidChangeConfigurationClientCapabilities>,
 
     /// Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub did_change_watched_files: Option<DynamicRegistrationClientCapabilities>,
+    pub did_change_watched_files: Option<DidChangeWatchedFilesClientCapabilities>,
 
     /// Capabilities specific to the `workspace/symbol` request.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1122,7 +1124,7 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to the `workspace/executeCommand` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub execute_command: Option<DynamicRegistrationClientCapabilities>,
+    pub execute_command: Option<ExecuteCommandClientCapabilities>,
 
     /// The client has support for workspace folders.
     /// since 3.6.0
@@ -1258,26 +1260,26 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/references`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub references: Option<DynamicRegistrationClientCapabilities>,
+    pub references: Option<ReferenceClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentHighlight`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_highlight: Option<DynamicRegistrationClientCapabilities>,
+    pub document_highlight: Option<DocumentHighlightClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentSymbol`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_symbol: Option<DocumentSymbolClientCapabilities>,
     /// Capabilities specific to the `textDocument/formatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub formatting: Option<DynamicRegistrationClientCapabilities>,
+    pub formatting: Option<DocumentFormattingClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/rangeFormatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub range_formatting: Option<DynamicRegistrationClientCapabilities>,
+    pub range_formatting: Option<DocumentRangeFormattingClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/onTypeFormatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub on_type_formatting: Option<DynamicRegistrationClientCapabilities>,
+    pub on_type_formatting: Option<DocumentOnTypeFormattingClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/declaration`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1301,7 +1303,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/codeLens`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_lens: Option<DynamicRegistrationClientCapabilities>,
+    pub code_lens: Option<CodeLensClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentLink`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1310,11 +1312,11 @@ pub struct TextDocumentClientCapabilities {
     /// Capabilities specific to the `textDocument/documentColor` and the
     /// `textDocument/colorPresentation` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_provider: Option<DynamicRegistrationClientCapabilities>,
+    pub color_provider: Option<DocumentColorClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/rename`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename: Option<RenameCapability>,
+    pub rename: Option<RenameClientCapabilities>,
 
     /// Capabilities specific to `textDocument/publishDiagnostics`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1464,6 +1466,8 @@ pub enum TextDocumentSyncKind {
     /// incremental updates to the document are sent.
     Incremental = 2,
 }
+
+pub type ExecuteCommandClientCapabilities = DynamicRegistrationClientCapabilities;
 
 /// Execute command options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1980,6 +1984,8 @@ pub struct TextDocumentSaveRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 }
+
+pub type DidChangeWatchedFilesClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
