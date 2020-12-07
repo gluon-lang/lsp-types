@@ -1342,6 +1342,13 @@ pub struct TextDocumentClientCapabilities {
     #[cfg(feature = "proposed")]
     pub semantic_highlighting_capabilities: Option<SemanticHighlightingClientCapability>,
 
+    /// Capabilities specific to the various call hierarchy requests.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub call_hierarchy: Option<CallHierarchyClientCapabilities>,
+
     /// Capabilities specific to the `textDocument/semanticTokens/*` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]

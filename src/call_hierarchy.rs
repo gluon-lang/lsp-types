@@ -3,9 +3,11 @@ use serde_json::Value;
 use url::Url;
 
 use crate::{
-    PartialResultParams, Range, SymbolKind, SymbolTag, TextDocumentPositionParams,
-    WorkDoneProgressOptions, WorkDoneProgressParams,
+    GenericCapability, PartialResultParams, Range, SymbolKind, SymbolTag,
+    TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams,
 };
+
+pub type CallHierarchyClientCapabilities = GenericCapability;
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
