@@ -29,7 +29,7 @@ impl From<bool> for CodeActionProviderCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CodeActionCapability {
+pub struct CodeActionClientCapabilities {
     ///
     /// This capability supports dynamic registration.
     ///

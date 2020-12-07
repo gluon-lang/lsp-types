@@ -1151,7 +1151,7 @@ pub struct WorkspaceClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SynchronizationCapability {
+pub struct TextDocumentSyncClientCapabilities {
     /// Whether text document synchronization supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -1245,18 +1245,18 @@ impl<T> TagSupport<T> {
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub synchronization: Option<SynchronizationCapability>,
+    pub synchronization: Option<TextDocumentSyncClientCapabilities>,
     /// Capabilities specific to the `textDocument/completion`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub completion: Option<CompletionCapability>,
+    pub completion: Option<CompletionClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/hover`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hover: Option<HoverCapability>,
+    pub hover: Option<HoverClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/signatureHelp`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub signature_help: Option<SignatureHelpCapability>,
+    pub signature_help: Option<SignatureHelpClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/references`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1299,7 +1299,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/codeAction`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action: Option<CodeActionCapability>,
+    pub code_action: Option<CodeActionClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/codeLens`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1307,7 +1307,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/documentLink`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_link: Option<DocumentLinkCapabilities>,
+    pub document_link: Option<DocumentLinkClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentColor` and the
     /// `textDocument/colorPresentation` request.
@@ -1324,7 +1324,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to `textDocument/foldingRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub folding_range: Option<FoldingRangeCapability>,
+    pub folding_range: Option<FoldingRangeClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/selectionRange` request.
     ///

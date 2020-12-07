@@ -7,7 +7,7 @@ use crate::{
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct HoverCapability {
+pub struct HoverClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
