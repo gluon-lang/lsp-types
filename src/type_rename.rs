@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    GenericCapability, Range, StaticRegistrationOptions, TextDocumentPositionParams,
-    TextDocumentRegistrationOptions, WorkDoneProgressOptions, WorkDoneProgressParams,
+    DynamicRegistrationClientCapabilities, Range, StaticRegistrationOptions,
+    TextDocumentPositionParams, TextDocumentRegistrationOptions, WorkDoneProgressOptions,
+    WorkDoneProgressParams,
 };
 
-pub type OnTypeRenameClientCapabilities = GenericCapability;
+pub type OnTypeRenameClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]

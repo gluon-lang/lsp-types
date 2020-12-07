@@ -975,7 +975,7 @@ pub struct GenericParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GenericCapability {
+pub struct DynamicRegistrationClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -1110,11 +1110,11 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to the `workspace/didChangeConfiguration` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub did_change_configuration: Option<GenericCapability>,
+    pub did_change_configuration: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub did_change_watched_files: Option<GenericCapability>,
+    pub did_change_watched_files: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `workspace/symbol` request.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1122,7 +1122,7 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to the `workspace/executeCommand` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub execute_command: Option<GenericCapability>,
+    pub execute_command: Option<DynamicRegistrationClientCapabilities>,
 
     /// The client has support for workspace folders.
     /// since 3.6.0
@@ -1258,26 +1258,26 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/references`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub references: Option<GenericCapability>,
+    pub references: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentHighlight`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_highlight: Option<GenericCapability>,
+    pub document_highlight: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentSymbol`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_symbol: Option<DocumentSymbolClientCapabilities>,
     /// Capabilities specific to the `textDocument/formatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub formatting: Option<GenericCapability>,
+    pub formatting: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/rangeFormatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub range_formatting: Option<GenericCapability>,
+    pub range_formatting: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/onTypeFormatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub on_type_formatting: Option<GenericCapability>,
+    pub on_type_formatting: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/declaration`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1301,7 +1301,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/codeLens`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_lens: Option<GenericCapability>,
+    pub code_lens: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentLink`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1310,7 +1310,7 @@ pub struct TextDocumentClientCapabilities {
     /// Capabilities specific to the `textDocument/documentColor` and the
     /// `textDocument/colorPresentation` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_provider: Option<GenericCapability>,
+    pub color_provider: Option<DynamicRegistrationClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/rename`
     #[serde(skip_serializing_if = "Option::is_none")]
