@@ -69,6 +69,11 @@ pub use formatting::*;
 mod hover;
 pub use hover::*;
 
+#[cfg(feature = "proposed")]
+mod moniker;
+#[cfg(feature = "proposed")]
+pub use moniker::*;
+
 mod progress;
 pub use progress::*;
 
@@ -1355,6 +1360,13 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/moniker` request.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub moniker: Option<MonikerClientCapabilities>,
 }
 
 /// Where ClientCapabilities are currently empty:
@@ -1710,6 +1722,11 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_tokens_provider: Option<SemanticTokensServerCapabilities>,
 
+    /// Whether server provides moniker support.
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
+
     /// The server provides on type rename support.
     ///
     /// @since 3.16.0 - proposed state
@@ -1795,7 +1812,7 @@ pub struct WorkDoneProgressOptions {
     pub work_done_progress: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentFormattingOptions {
     #[serde(flatten)]

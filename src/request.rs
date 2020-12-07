@@ -134,6 +134,11 @@ macro_rules! lsp_request {
     ("callHierarchy/outgoingCalls") => {
         $crate::request::CallHierarchyOutgoingCalls
     };
+    // Requires #[cfg(feature = "proposed")]
+    ("textDocument/moniker") => {
+        $crate::request::MonikerRequest
+    };
+    // Requires #[cfg(feature = "proposed")]
     ("textDocument/onTypeRename") => {
         $crate::request::OnTypeRename
     };
@@ -756,6 +761,16 @@ impl Request for ShowDocument {
     const METHOD: &'static str = "window/showDocument";
 }
 
+#[cfg(feature = "proposed")]
+pub enum MonikerRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for MonikerRequest {
+    type Params = MonikerParams;
+    type Result = Option<Vec<Moniker>>;
+    const METHOD: &'static str = "textDocument/moniker";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -824,6 +839,7 @@ mod test {
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("codeAction/resolve");
+        check_macro!("textDocument/moniker");
         check_macro!("textDocument/onTypeRename");
         check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/semanticTokens/full");
