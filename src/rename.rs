@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
-
 use crate::{Range, TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams};
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,12 +42,15 @@ pub struct RenameClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_support: Option<bool>,
 
-    /// Client supports the default behavior result (`{ defaultBehavior: boolean }`).
+    /// Client supports the default behavior result.
+    ///
+    /// The value indicates the default behavior used by the
+    /// client.
     ///
     /// since 3.16.0
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prepare_support_default_behavior: Option<bool>,
+    pub prepare_support_default_behavior: Option<PrepareSupportDefaultBehavior>,
 
     /// Whether the client honors the change annotations in
     /// text edits and resource operations returned via the
@@ -59,6 +62,15 @@ pub struct RenameClientCapabilities {
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub honors_change_annotations: Option<bool>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum PrepareSupportDefaultBehavior {
+    /// The client's default behavior is to select the identifier
+    /// according the to language's syntax rule
+    Identifier = 1,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
