@@ -1,5 +1,7 @@
 use crate::{Range, TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams};
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "proposed")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

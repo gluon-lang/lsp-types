@@ -385,6 +385,13 @@ impl TextEdit {
     }
 }
 
+/// An identifier referring to a change annotation managed by a workspace
+/// edit.
+///
+/// @since 3.16.0 - proposed state.
+#[cfg(feature = "proposed")]
+pub type ChangeAnnotationIdentifier = String;
+
 /// A special text edit with an additional change annotation.
 ///
 /// @since 3.16.0 - proposed state.
@@ -396,7 +403,7 @@ pub struct AnnotatedTextEdit {
     pub text_edit: TextEdit,
 
     /// The actual annotation
-    pub annotation: ChangeAnnotation,
+    pub annotation_id: ChangeAnnotationIdentifier,
 }
 
 /// Describes textual changes on a single text document. The text document is referred to as a
@@ -410,11 +417,15 @@ pub struct TextDocumentEdit {
     /// The text document to change.
     pub text_document: OptionalVersionedTextDocumentIdentifier,
 
-    /// The edits to be applied.
     #[cfg(feature = "proposed")]
+    /// The edits to be applied.
+    ///
+    /// @since 3.16.0 - support for AnnotatedTextEdit. This is guarded by the
+    /// client capability `workspace.workspaceEdit.changeAnnotationSupport`
     pub edits: Vec<OneOf<TextEdit, AnnotatedTextEdit>>,
 
     #[cfg(not(feature = "proposed"))]
+    /// The edits to be applied.
     pub edits: Vec<TextEdit>,
 }
 
@@ -440,6 +451,17 @@ pub struct ChangeAnnotation {
     pub description: Option<String>,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[cfg(feature = "proposed")]
+pub struct ChangeAnnotationWorkspaceEditClientCapabilities {
+    /// Whether the client groups edits with equal labels into tree nodes,
+    /// for instance all edits labelled with "Changes in Strings" would
+    /// be a tree node.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub groups_on_labels: Option<bool>,
+}
+
 /// Options to create a file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -462,12 +484,12 @@ pub struct CreateFile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<CreateFileOptions>,
 
-    /// An optional annotation describing the operation.
+    /// An optional annotation identifer describing the operation.
     ///
     /// @since 3.16.0 - proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub annotation: Option<ChangeAnnotation>,
+    pub annotation_id: Option<ChangeAnnotationIdentifier>,
 }
 
 /// Rename file options
@@ -494,12 +516,12 @@ pub struct RenameFile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<RenameFileOptions>,
 
-    /// An optional annotation describing the operation.
+    /// An optional annotation identifer describing the operation.
     ///
     /// @since 3.16.0 - proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub annotation: Option<ChangeAnnotation>,
+    pub annotation_id: Option<ChangeAnnotationIdentifier>,
 }
 
 /// Delete file options
@@ -513,12 +535,12 @@ pub struct DeleteFileOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_if_not_exists: Option<bool>,
 
-    /// An optional annotation describing the operation.
+    /// An optional annotation identifer describing the operation.
     ///
     /// @since 3.16.0 - proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub annotation: Option<ChangeAnnotation>,
+    pub annotation_id: Option<ChangeAnnotationIdentifier>,
 }
 
 /// Delete file operation
@@ -533,6 +555,9 @@ pub struct DeleteFile {
 }
 
 /// A workspace edit represents changes to many resources managed in the workspace.
+/// The edit should either provide `changes` or `documentChanges`.
+/// If the client can handle versioned document edits and if `documentChanges` are present,
+/// the latter are preferred over `changes`.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceEdit {
@@ -554,6 +579,19 @@ pub struct WorkspaceEdit {
     /// only plain `TextEdit`s using the `changes` property are supported.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<DocumentChanges>,
+
+    /// A map of change annotations that can be referenced in
+    /// `AnnotatedTextEdit`s or create, rename and delete file / folder
+    /// operations.
+    ///
+    /// Whether clients honor this property depends on the client capability
+    /// `workspace.changeAnnotationSupport`.
+    ///
+    /// @since 3.16.0 - proposed state
+    ///
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change_annotations: Option<HashMap<ChangeAnnotationIdentifier, ChangeAnnotation>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -713,6 +751,7 @@ impl WorkspaceEdit {
         WorkspaceEdit {
             changes: Some(changes),
             document_changes: None,
+            ..Default::default()
         }
     }
 }
@@ -1032,7 +1071,7 @@ pub struct WorkspaceEditCapability {
     /// @since 3.16.0 - proposed state
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub change_annotation_support: Option<bool>,
+    pub change_annotation_support: Option<ChangeAnnotationWorkspaceEditClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
@@ -2384,6 +2423,7 @@ mod tests {
             &WorkspaceEdit {
                 changes: Some(vec![].into_iter().collect()),
                 document_changes: None,
+                ..Default::default()
             },
             r#"{"changes":{}}"#,
         );
@@ -2392,6 +2432,7 @@ mod tests {
             &WorkspaceEdit {
                 changes: None,
                 document_changes: None,
+                ..Default::default()
             },
             r#"{}"#,
         );
@@ -2404,6 +2445,7 @@ mod tests {
                         .collect(),
                 ),
                 document_changes: None,
+                ..Default::default()
             },
             r#"{"changes":{"file://test/":[]}}"#,
         );
