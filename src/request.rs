@@ -139,8 +139,8 @@ macro_rules! lsp_request {
         $crate::request::MonikerRequest
     };
     // Requires #[cfg(feature = "proposed")]
-    ("textDocument/onTypeRename") => {
-        $crate::request::OnTypeRename
+    ("textDocument/linkedEditingRange") => {
+        $crate::request::LinkedEditingRange
     };
     // Requires #[cfg(feature = "proposed")]
     ("textDocument/prepareCallHierarchy") => {
@@ -551,20 +551,20 @@ impl Request for OnTypeFormatting {
     const METHOD: &'static str = "textDocument/onTypeFormatting";
 }
 
-/// The on type rename request is sent from the client to the server to return for a given position in a document
-/// the range of the symbol at the position and all ranges that have the same content and can be renamed together.
+/// The linked editing request is sent from the client to the server to return for a given position in a document
+/// the range of the symbol at the position and all ranges that have the same content.
 /// Optionally a word pattern can be returned to describe valid contents. A rename to one of the ranges can be applied
 /// to all other ranges if the new content is valid. If no result-specific word pattern is provided, the word pattern from
 /// the client’s language configuration is used.
 #[cfg(feature = "proposed")]
 #[derive(Debug)]
-pub enum OnTypeRename {}
+pub enum LinkedEditingRange {}
 
 #[cfg(feature = "proposed")]
-impl Request for OnTypeRename {
-    type Params = OnTypeRenameParams;
-    type Result = Option<OnTypeRenameRanges>;
-    const METHOD: &'static str = "textDocument/onTypeRename";
+impl Request for LinkedEditingRange {
+    type Params = LinkedEditingRangeParams;
+    type Result = Option<LinkedEditingRanges>;
+    const METHOD: &'static str = "textDocument/linkedEditingRange";
 }
 
 /// The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
@@ -840,7 +840,7 @@ mod test {
         check_macro!("callHierarchy/outgoingCalls");
         check_macro!("codeAction/resolve");
         check_macro!("textDocument/moniker");
-        check_macro!("textDocument/onTypeRename");
+        check_macro!("textDocument/linkedEditingRange");
         check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");

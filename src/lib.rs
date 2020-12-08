@@ -100,9 +100,9 @@ mod signature_help;
 pub use signature_help::*;
 
 #[cfg(feature = "proposed")]
-mod type_rename;
+mod linked_editing;
 #[cfg(feature = "proposed")]
-pub use type_rename::*;
+pub use linked_editing::*;
 
 mod window;
 pub use window::*;
@@ -1337,12 +1337,12 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selection_range: Option<SelectionRangeClientCapabilities>,
 
-    /// Capabilities specific to `textDocument/onTypeRename` requests.
+    /// Capabilities specific to `textDocument/linkedEditingRange` requests.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
-    pub on_type_rename: Option<OnTypeRenameClientCapabilities>,
+    pub linked_editing_range: Option<LinkedEditingRangeClientCapabilities>,
 
     /// The client's semantic highlighting capability.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1727,12 +1727,12 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
 
-    /// The server provides on type rename support.
+    /// The server provides linked editing range support.
     ///
     /// @since 3.16.0 - proposed state
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub on_type_rename_provider: Option<OnTypeRenameServerCapabilities>,
+    pub linked_editing_range_provider: Option<LinkedEditingRangeServerCapabilities>,
 
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]

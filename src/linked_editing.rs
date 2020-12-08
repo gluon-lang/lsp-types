@@ -6,23 +6,23 @@ use crate::{
     WorkDoneProgressParams,
 };
 
-pub type OnTypeRenameClientCapabilities = DynamicRegistrationClientCapabilities;
+pub type LinkedEditingRangeClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OnTypeRenameOptions {
+pub struct LinkedEditingRangeOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OnTypeRenameRegistrationOptions {
+pub struct LinkedEditingRangeRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 
     #[serde(flatten)]
-    pub on_type_rename_options: OnTypeRenameOptions,
+    pub linked_editing_range_options: LinkedEditingRangeOptions,
 
     #[serde(flatten)]
     pub static_registration_options: StaticRegistrationOptions,
@@ -30,14 +30,14 @@ pub struct OnTypeRenameRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
-pub enum OnTypeRenameServerCapabilities {
-    Options(OnTypeRenameOptions),
-    RegistrationOptions(OnTypeRenameRegistrationOptions),
+pub enum LinkedEditingRangeServerCapabilities {
+    Options(LinkedEditingRangeOptions),
+    RegistrationOptions(LinkedEditingRangeRegistrationOptions),
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OnTypeRenameParams {
+pub struct LinkedEditingRangeParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
 
@@ -47,7 +47,7 @@ pub struct OnTypeRenameParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OnTypeRenameRanges {
+pub struct LinkedEditingRanges {
     /// A list of ranges that can be renamed together. The ranges must have
     /// identical length and contain identical text content. The ranges cannot overlap.
     pub ranges: Vec<Range>,
