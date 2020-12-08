@@ -1039,7 +1039,7 @@ pub struct GotoCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WorkspaceEditCapability {
+pub struct WorkspaceEditClientCapabilities {
     /// The client supports versioned document changes in `WorkspaceEdit`s
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<bool>,
@@ -1152,7 +1152,7 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to `WorkspaceEdit`s
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workspace_edit: Option<WorkspaceEditCapability>,
+    pub workspace_edit: Option<WorkspaceEditClientCapabilities>,
 
     /// Capabilities specific to the `workspace/didChangeConfiguration` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
