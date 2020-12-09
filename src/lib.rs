@@ -60,6 +60,11 @@ pub use document_link::*;
 mod document_symbols;
 pub use document_symbols::*;
 
+#[cfg(feature = "proposed")]
+mod file_operations;
+#[cfg(feature = "proposed")]
+pub use file_operations::*;
+
 mod folding_range;
 pub use folding_range::*;
 
@@ -1782,6 +1787,18 @@ pub struct ServerCapabilities {
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceServerCapabilities {
+    /// The server supports workspace folder.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<WorkspaceFoldersServerCapabilities>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub file_operations: Option<WorkspaceFileOperationsServerCapabilities>,
 }
 
 /// General parameters to to register for a capability.
