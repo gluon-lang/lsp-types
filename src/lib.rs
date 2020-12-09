@@ -1191,6 +1191,12 @@ pub struct WorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
     pub code_lens: Option<CodeLensWorkspaceClientCapabilities>,
+
+    /// The client has support for file requests/notifications.
+    /// since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

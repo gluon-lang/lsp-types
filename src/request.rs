@@ -159,6 +159,18 @@ macro_rules! lsp_request {
         $crate::request::SemanticTokensRangeRequest
     };
     // Requires #[cfg(feature = "proposed")]
+    ("workspace/willCreateFiles") => {
+        $crate::request::WillCreateFiles
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("workspace/willRenameFiles") => {
+        $crate::request::WillRenameFiles
+    };
+    // Requires #[cfg(feature = "proposed")]
+    ("workspace/willDeleteFiles") => {
+        $crate::request::WillDeleteFiles
+    };
+    // Requires #[cfg(feature = "proposed")]
     ("workspace/semanticTokens/refresh") => {
         $crate::request::SemanticTokensRefesh
     };
@@ -751,6 +763,39 @@ impl Request for CodeLensRefresh {
 }
 
 #[cfg(feature = "proposed")]
+/// The will create files request is sent from the client to the server before files are actually created as long as the creation is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are created. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep creates fast and reliable.
+pub enum WillCreateFiles {}
+
+#[cfg(feature = "proposed")]
+impl Request for WillCreateFiles {
+    type Params = CreateFilesParams;
+    type Result = Option<WorkspaceEdit>;
+    const METHOD: &'static str = "workspace/willCreateFiles";
+}
+
+#[cfg(feature = "proposed")]
+/// The will rename files request is sent from the client to the server before files are actually renamed as long as the rename is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are renamed. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep renames fast and reliable.
+pub enum WillRenameFiles {}
+
+#[cfg(feature = "proposed")]
+impl Request for WillRenameFiles {
+    type Params = RenameFilesParams;
+    type Result = Option<WorkspaceEdit>;
+    const METHOD: &'static str = "workspace/willRenameFiles";
+}
+
+#[cfg(feature = "proposed")]
+/// The will delete files request is sent from the client to the server before files are actually deleted as long as the deletion is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are deleted. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep deletes fast and reliable.
+pub enum WillDeleteFiles {}
+
+#[cfg(feature = "proposed")]
+impl Request for WillDeleteFiles {
+    type Params = DeleteFilesParams;
+    type Result = Option<WorkspaceEdit>;
+    const METHOD: &'static str = "workspace/willDeleteFiles";
+}
+
+#[cfg(feature = "proposed")]
 /// The show document request is sent from a server to a client to ask the client to display a particular document in the user interface.
 pub enum ShowDocument {}
 
@@ -846,6 +891,9 @@ mod test {
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
         check_macro!("window/showDocument");
+        check_macro!("workspace/willCreateFiles");
+        check_macro!("workspace/willRenameFiles");
+        check_macro!("workspace/willDeleteFiles");
         check_macro!("workspace/semanticTokens/refresh");
         check_macro!("workspace/codeLens/refresh");
     }
