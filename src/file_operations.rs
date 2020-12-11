@@ -71,7 +71,22 @@ pub struct WorkspaceFileOperationsServerCapabilities {
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FileOperationRegistrationOptions {
-    pub patterns: Vec<FileOperationPattern>,
+    /// The actual filters.
+    pub filters: Vec<FileOperationFilter>,
+}
+
+/// A filter to describe in which file operation requests or notifications
+/// the server is interested in.
+///
+/// @since 3.16.0
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileOperationFilter {
+    /// A Uri like `file` or `untitled`.
+    pub scheme: Option<String>,
+
+    /// The actual file operation pattern.
+    pub pattern: FileOperationPattern,
 }
 
 /// A pattern kind describing if a glob pattern matches a file a folder or
