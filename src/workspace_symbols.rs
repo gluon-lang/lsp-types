@@ -1,6 +1,5 @@
 use crate::{PartialResultParams, SymbolKindCapability, WorkDoneProgressParams};
 
-#[cfg(feature = "proposed")]
 use crate::{SymbolTag, TagSupport};
 
 use serde::{Deserialize, Serialize};
@@ -26,7 +25,6 @@ pub struct WorkspaceSymbolClientCapabilities {
         skip_serializing_if = "Option::is_none",
         deserialize_with = "TagSupport::deserialize_compat"
     )]
-    #[cfg(feature = "proposed")]
     pub tag_support: Option<TagSupport<SymbolTag>>,
 }
 

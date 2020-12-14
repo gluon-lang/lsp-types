@@ -126,63 +126,48 @@ macro_rules! lsp_request {
     ("window/workDoneProgress/create") => {
         $crate::request::WorkDoneProgressCreate
     };
-    // Requires #[cfg(feature = "proposed")]
     ("callHierarchy/incomingCalls") => {
         $crate::request::CallHierarchyIncomingCalls
     };
-    // Requires #[cfg(feature = "proposed")]
     ("callHierarchy/outgoingCalls") => {
         $crate::request::CallHierarchyOutgoingCalls
     };
-    // Requires #[cfg(feature = "proposed")]
     ("textDocument/moniker") => {
         $crate::request::MonikerRequest
     };
-    // Requires #[cfg(feature = "proposed")]
     ("textDocument/linkedEditingRange") => {
         $crate::request::LinkedEditingRange
     };
-    // Requires #[cfg(feature = "proposed")]
     ("textDocument/prepareCallHierarchy") => {
         $crate::request::CallHierarchyPrepare
     };
-    // Requires #[cfg(feature = "proposed")]
     ("textDocument/semanticTokens/full") => {
         $crate::request::SemanticTokensFullRequest
     };
-    // Requires #[cfg(feature = "proposed")]
     ("textDocument/semanticTokens/full/delta") => {
         $crate::request::SemanticTokensFullDeltaRequest
     };
-    // Requires #[cfg(feature = "proposed")]
     ("textDocument/semanticTokens/range") => {
         $crate::request::SemanticTokensRangeRequest
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/willCreateFiles") => {
         $crate::request::WillCreateFiles
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/willRenameFiles") => {
         $crate::request::WillRenameFiles
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/willDeleteFiles") => {
         $crate::request::WillDeleteFiles
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/semanticTokens/refresh") => {
         $crate::request::SemanticTokensRefesh
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/codeLens/refresh") => {
         $crate::request::CodeLensRefresh
     };
-    // Requires #[cfg(feature = "proposed")]
     ("codeAction/resolve") => {
         $crate::request::CodeActionResolveRequest
     };
-    // Requires #[cfg(feature = "proposed")]
     ("window/showDocument") => {
         $crate::request::ShowDocument
     };
@@ -474,7 +459,6 @@ impl Request for CodeActionRequest {
     const METHOD: &'static str = "textDocument/codeAction";
 }
 
-#[cfg(feature = "proposed")]
 /// The request is sent from the client to the server to resolve additional information for a given code action.
 /// This is usually used to compute the `edit` property of a code action to avoid its unnecessary computation
 /// during the `textDocument/codeAction` request.
@@ -483,7 +467,6 @@ impl Request for CodeActionRequest {
 #[derive(Debug)]
 pub enum CodeActionResolveRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for CodeActionResolveRequest {
     type Params = CodeAction;
     type Result = CodeAction;
@@ -568,11 +551,9 @@ impl Request for OnTypeFormatting {
 /// Optionally a word pattern can be returned to describe valid contents. A rename to one of the ranges can be applied
 /// to all other ranges if the new content is valid. If no result-specific word pattern is provided, the word pattern from
 /// the client’s language configuration is used.
-#[cfg(feature = "proposed")]
 #[derive(Debug)]
 pub enum LinkedEditingRange {}
 
-#[cfg(feature = "proposed")]
 impl Request for LinkedEditingRange {
     type Params = LinkedEditingRangeParams;
     type Result = Option<LinkedEditingRanges>;
@@ -672,67 +653,54 @@ impl Request for SelectionRangeRequest {
     const METHOD: &'static str = "textDocument/selectionRange";
 }
 
-#[cfg(feature = "proposed")]
 pub enum CallHierarchyPrepare {}
 
-#[cfg(feature = "proposed")]
 impl Request for CallHierarchyPrepare {
     type Params = CallHierarchyPrepareParams;
     type Result = Option<Vec<CallHierarchyItem>>;
     const METHOD: &'static str = "textDocument/prepareCallHierarchy";
 }
 
-#[cfg(feature = "proposed")]
 pub enum CallHierarchyIncomingCalls {}
 
-#[cfg(feature = "proposed")]
 impl Request for CallHierarchyIncomingCalls {
     type Params = CallHierarchyIncomingCallsParams;
     type Result = Option<Vec<CallHierarchyIncomingCall>>;
     const METHOD: &'static str = "callHierarchy/incomingCalls";
 }
 
-#[cfg(feature = "proposed")]
 pub enum CallHierarchyOutgoingCalls {}
 
-#[cfg(feature = "proposed")]
 impl Request for CallHierarchyOutgoingCalls {
     type Params = CallHierarchyOutgoingCallsParams;
     type Result = Option<Vec<CallHierarchyOutgoingCall>>;
     const METHOD: &'static str = "callHierarchy/outgoingCalls";
 }
 
-#[cfg(feature = "proposed")]
 pub enum SemanticTokensFullRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for SemanticTokensFullRequest {
     type Params = SemanticTokensParams;
     type Result = Option<SemanticTokensResult>;
     const METHOD: &'static str = "textDocument/semanticTokens/full";
 }
 
-#[cfg(feature = "proposed")]
 pub enum SemanticTokensFullDeltaRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for SemanticTokensFullDeltaRequest {
     type Params = SemanticTokensDeltaParams;
     type Result = Option<SemanticTokensFullDeltaResult>;
     const METHOD: &'static str = "textDocument/semanticTokens/full/delta";
 }
 
-#[cfg(feature = "proposed")]
 pub enum SemanticTokensRangeRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for SemanticTokensRangeRequest {
     type Params = SemanticTokensRangeParams;
     type Result = Option<SemanticTokensRangeResult>;
     const METHOD: &'static str = "textDocument/semanticTokens/range";
 }
 
-#[cfg(feature = "proposed")]
 /// The `workspace/semanticTokens/refresh` request is sent from the server to the client.
 /// Servers can use it to ask clients to refresh the editors for which this server provides semantic tokens.
 /// As a result the client should ask the server to recompute the semantic tokens for these editors.
@@ -740,14 +708,12 @@ impl Request for SemanticTokensRangeRequest {
 /// Note that the client still has the freedom to delay the re-calculation of the semantic tokens if for example an editor is currently not visible.
 pub enum SemanticTokensRefesh {}
 
-#[cfg(feature = "proposed")]
 impl Request for SemanticTokensRefesh {
     type Params = ();
     type Result = ();
     const METHOD: &'static str = "workspace/semanticTokens/refresh";
 }
 
-#[cfg(feature = "proposed")]
 /// The workspace/codeLens/refresh request is sent from the server to the client.
 /// Servers can use it to ask clients to refresh the code lenses currently shown in editors.
 /// As a result the client should ask the server to recompute the code lenses for these editors.
@@ -755,61 +721,50 @@ impl Request for SemanticTokensRefesh {
 /// Note that the client still has the freedom to delay the re-calculation of the code lenses if for example an editor is currently not visible.
 pub enum CodeLensRefresh {}
 
-#[cfg(feature = "proposed")]
 impl Request for CodeLensRefresh {
     type Params = ();
     type Result = ();
     const METHOD: &'static str = "workspace/codeLens/refresh";
 }
 
-#[cfg(feature = "proposed")]
 /// The will create files request is sent from the client to the server before files are actually created as long as the creation is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are created. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep creates fast and reliable.
 pub enum WillCreateFiles {}
 
-#[cfg(feature = "proposed")]
 impl Request for WillCreateFiles {
     type Params = CreateFilesParams;
     type Result = Option<WorkspaceEdit>;
     const METHOD: &'static str = "workspace/willCreateFiles";
 }
 
-#[cfg(feature = "proposed")]
 /// The will rename files request is sent from the client to the server before files are actually renamed as long as the rename is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are renamed. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep renames fast and reliable.
 pub enum WillRenameFiles {}
 
-#[cfg(feature = "proposed")]
 impl Request for WillRenameFiles {
     type Params = RenameFilesParams;
     type Result = Option<WorkspaceEdit>;
     const METHOD: &'static str = "workspace/willRenameFiles";
 }
 
-#[cfg(feature = "proposed")]
 /// The will delete files request is sent from the client to the server before files are actually deleted as long as the deletion is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are deleted. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep deletes fast and reliable.
 pub enum WillDeleteFiles {}
 
-#[cfg(feature = "proposed")]
 impl Request for WillDeleteFiles {
     type Params = DeleteFilesParams;
     type Result = Option<WorkspaceEdit>;
     const METHOD: &'static str = "workspace/willDeleteFiles";
 }
 
-#[cfg(feature = "proposed")]
 /// The show document request is sent from a server to a client to ask the client to display a particular document in the user interface.
 pub enum ShowDocument {}
 
-#[cfg(feature = "proposed")]
 impl Request for ShowDocument {
     type Params = ShowDocumentParams;
     type Result = ShowDocumentResult;
     const METHOD: &'static str = "window/showDocument";
 }
 
-#[cfg(feature = "proposed")]
 pub enum MonikerRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for MonikerRequest {
     type Params = MonikerParams;
     type Result = Option<Vec<Moniker>>;
@@ -841,15 +796,16 @@ mod test {
     fn check_macro_definitions() {
         check_macro!("initialize");
         check_macro!("shutdown");
+
+        check_macro!("window/showDocument");
         check_macro!("window/showMessageRequest");
         check_macro!("window/workDoneProgress/create");
+
         check_macro!("client/registerCapability");
         check_macro!("client/unregisterCapability");
-        check_macro!("workspace/symbol");
-        check_macro!("workspace/executeCommand");
+
         check_macro!("textDocument/willSaveWaitUntil");
         check_macro!("textDocument/completion");
-        check_macro!("completionItem/resolve");
         check_macro!("textDocument/hover");
         check_macro!("textDocument/signatureHelp");
         check_macro!("textDocument/declaration");
@@ -859,10 +815,7 @@ mod test {
         check_macro!("textDocument/documentSymbol");
         check_macro!("textDocument/codeAction");
         check_macro!("textDocument/codeLens");
-        check_macro!("codeLens/resolve");
         check_macro!("textDocument/documentLink");
-        check_macro!("documentLink/resolve");
-        check_macro!("workspace/applyEdit");
         check_macro!("textDocument/rangeFormatting");
         check_macro!("textDocument/onTypeFormatting");
         check_macro!("textDocument/formatting");
@@ -871,30 +824,36 @@ mod test {
         check_macro!("textDocument/colorPresentation");
         check_macro!("textDocument/foldingRange");
         check_macro!("textDocument/prepareRename");
-        check_macro!("workspace/workspaceFolders");
         check_macro!("textDocument/implementation");
         check_macro!("textDocument/selectionRange");
         check_macro!("textDocument/typeDefinition");
-        check_macro!("workspace/configuration");
-    }
-
-    #[test]
-    #[cfg(feature = "proposed")]
-    fn check_proposed_macro_definitions() {
-        check_macro!("callHierarchy/incomingCalls");
-        check_macro!("callHierarchy/outgoingCalls");
-        check_macro!("codeAction/resolve");
         check_macro!("textDocument/moniker");
         check_macro!("textDocument/linkedEditingRange");
         check_macro!("textDocument/prepareCallHierarchy");
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
-        check_macro!("window/showDocument");
+
+        check_macro!("workspace/applyEdit");
+        check_macro!("workspace/symbol");
+        check_macro!("workspace/executeCommand");
+        check_macro!("workspace/configuration");
         check_macro!("workspace/willCreateFiles");
         check_macro!("workspace/willRenameFiles");
         check_macro!("workspace/willDeleteFiles");
+        check_macro!("workspace/workspaceFolders");
         check_macro!("workspace/semanticTokens/refresh");
         check_macro!("workspace/codeLens/refresh");
+
+        check_macro!("codeAction/resolve");
+        check_macro!("codeLens/resolve");
+        check_macro!("completionItem/resolve");
+        check_macro!("documentLink/resolve");
+        check_macro!("callHierarchy/incomingCalls");
+        check_macro!("callHierarchy/outgoingCalls");
     }
+
+    #[test]
+    #[cfg(feature = "proposed")]
+    fn check_proposed_macro_definitions() {}
 }

@@ -11,7 +11,7 @@ use crate::{
 /// and clients can specify additional token types via the
 /// corresponding client capabilities.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
 pub struct SemanticTokenType(Cow<'static, str>);
 
@@ -64,7 +64,7 @@ impl From<&'static str> for SemanticTokenType {
 /// and clients can specify additional token types via the
 /// corresponding client capabilities.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
 pub struct SemanticTokenModifier(Cow<'static, str>);
 
@@ -128,7 +128,7 @@ impl From<&'static str> for TokenFormat {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensLegend {
@@ -143,7 +143,6 @@ pub struct SemanticTokensLegend {
 /// structured please see
 /// https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Default)]
-#[cfg(feature = "proposed")]
 pub struct SemanticToken {
     pub delta_line: u32,
     pub delta_start: u32,
@@ -228,7 +227,7 @@ impl SemanticToken {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokens {
@@ -249,7 +248,7 @@ pub struct SemanticTokens {
     pub data: Vec<SemanticToken>,
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensPartialResult {
@@ -280,7 +279,7 @@ impl From<SemanticTokensPartialResult> for SemanticTokensResult {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensEdit {
@@ -317,7 +316,7 @@ impl From<SemanticTokensDelta> for SemanticTokensFullDeltaResult {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensDelta {
@@ -330,7 +329,7 @@ pub struct SemanticTokensDelta {
 
 /// Capabilities specific to the `textDocument/semanticTokens/*` requests.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensClientCapabilities {
@@ -393,7 +392,7 @@ pub enum SemanticTokensFullOptions {
     },
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensOptions {

@@ -68,15 +68,12 @@ macro_rules! lsp_notification {
     ("textDocument/semanticHighlighting") => {
         $crate::notification::SemanticHighlighting
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/didCreateFiles") => {
         $crate::notification::DidCreateFiles
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/didRenameFiles") => {
         $crate::notification::DidRenameFiles
     };
-    // Requires #[cfg(feature = "proposed")]
     ("workspace/didDeleteFiles") => {
         $crate::notification::DidDeleteFiles
     };
@@ -271,23 +268,19 @@ impl Notification for SemanticHighlighting {
     const METHOD: &'static str = "textDocument/semanticHighlighting";
 }
 
-#[cfg(feature = "proposed")]
 /// The did create files notification is sent from the client to the server when files were created from within the client.
 #[derive(Debug)]
 pub enum DidCreateFiles {}
 
-#[cfg(feature = "proposed")]
 impl Notification for DidCreateFiles {
     type Params = CreateFilesParams;
     const METHOD: &'static str = "workspace/didCreateFiles";
 }
 
-#[cfg(feature = "proposed")]
 /// The did rename files notification is sent from the client to the server when files were renamed from within the client.
 #[derive(Debug)]
 pub enum DidRenameFiles {}
 
-#[cfg(feature = "proposed")]
 impl Notification for DidRenameFiles {
     type Params = RenameFilesParams;
     const METHOD: &'static str = "workspace/didRenameFiles";
@@ -297,7 +290,6 @@ impl Notification for DidRenameFiles {
 #[derive(Debug)]
 pub enum DidDeleteFiles {}
 
-#[cfg(feature = "proposed")]
 impl Notification for DidDeleteFiles {
     type Params = DeleteFilesParams;
     const METHOD: &'static str = "workspace/didDeleteFiles";
@@ -342,14 +334,14 @@ mod test {
         check_macro!("workspace/didChangeConfiguration");
         check_macro!("workspace/didChangeWatchedFiles");
         check_macro!("workspace/didChangeWorkspaceFolders");
+        check_macro!("workspace/didCreateFiles");
+        check_macro!("workspace/didRenameFiles");
+        check_macro!("workspace/didDeleteFiles");
     }
 
     #[test]
     #[cfg(feature = "proposed")]
     fn check_proposed_macro_definitions() {
         check_macro!("textDocument/semanticHighlighting");
-        check_macro!("workspace/didCreateFiles");
-        check_macro!("workspace/didRenameFiles");
-        check_macro!("workspace/didDeleteFiles");
     }
 }

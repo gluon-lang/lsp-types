@@ -108,7 +108,6 @@ pub struct SemanticHighlightingParams {
     pub lines: Vec<SemanticHighlightingInformation>,
 }
 
-#[cfg(feature = "proposed")]
 #[cfg(test)]
 mod tests {
     use super::*;

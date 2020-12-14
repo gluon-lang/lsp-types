@@ -1,7 +1,6 @@
 use crate::{Range, TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams};
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "proposed")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -50,7 +49,6 @@ pub struct RenameClientCapabilities {
     /// client.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_support_default_behavior: Option<PrepareSupportDefaultBehavior>,
 
@@ -60,13 +58,11 @@ pub struct RenameClientCapabilities {
     /// the workspace edit in the user interface and asking
     /// for confirmation.
     ///
-    /// @since 3.16.0 - proposed state
-    #[cfg(feature = "proposed")]
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub honors_change_annotations: Option<bool>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum PrepareSupportDefaultBehavior {
@@ -80,12 +76,6 @@ pub enum PrepareSupportDefaultBehavior {
 #[serde(rename_all = "camelCase")]
 pub enum PrepareRenameResponse {
     Range(Range),
-    RangeWithPlaceholder {
-        range: Range,
-        placeholder: String,
-    },
-    #[cfg(feature = "proposed")]
-    DefaultBehavior {
-        default_behavior: bool,
-    },
+    RangeWithPlaceholder { range: Range, placeholder: String },
+    DefaultBehavior { default_behavior: bool },
 }

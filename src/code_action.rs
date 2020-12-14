@@ -4,7 +4,6 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "proposed")]
 use serde_json::Value;
 
 use std::borrow::Cow;
@@ -50,7 +49,6 @@ pub struct CodeActionClientCapabilities {
     /// Whether code action supports the `disabled` property.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disabled_support: Option<bool>,
 
@@ -59,7 +57,6 @@ pub struct CodeActionClientCapabilities {
     /// `codeAction/resolve` request.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_support: Option<bool>,
 
@@ -67,7 +64,6 @@ pub struct CodeActionClientCapabilities {
     /// properties via a separate `codeAction/resolve` request.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_support: Option<CodeActionCapabilityResolveSupport>,
 
@@ -77,8 +73,7 @@ pub struct CodeActionClientCapabilities {
     /// the workspace edit in the user interface and asking
     /// for confirmation.
     ///
-    /// @since 3.16.0 - proposed state
-    #[cfg(feature = "proposed")]
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub honors_change_annotations: Option<bool>,
 }
@@ -87,7 +82,6 @@ pub struct CodeActionClientCapabilities {
 ///  properties via a separate `codeAction/resolve` request.
 ///
 /// since 3.16.0
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeActionCapabilityResolveSupport {
@@ -280,7 +274,6 @@ pub struct CodeAction {
     ///   in the editor.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disabled: Option<CodeActionDisabled>,
 
@@ -288,12 +281,10 @@ pub struct CodeAction {
     /// a `textDocument/codeAction` and a `codeAction/resolve` request.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeActionDisabled {

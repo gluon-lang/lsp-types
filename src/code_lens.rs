@@ -52,7 +52,6 @@ pub struct CodeLens {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct CodeLensWorkspaceClientCapabilities {
     /// Whether the client implementation supports a refresh request sent from the

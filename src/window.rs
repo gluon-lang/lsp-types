@@ -1,17 +1,13 @@
-#[cfg(feature = "proposed")]
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "proposed")]
 use serde_json::Value;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-#[cfg(feature = "proposed")]
 use url::Url;
 
-#[cfg(feature = "proposed")]
 use crate::Range;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
@@ -41,24 +37,21 @@ pub struct WindowClientCapabilities {
 
     /// Capabilities specific to the showMessage request.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     ///
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub show_message: Option<ShowMessageRequestClientCapabilities>,
 
     /// Client capabilities for the show document request.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     ///
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub show_document: Option<ShowDocumentClientCapabilities>,
 }
 
 /// Show message request client capabilities
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct ShowMessageRequestClientCapabilities {
     /// Capabilities specific to the `MessageActionItem` type.
@@ -67,7 +60,6 @@ pub struct ShowMessageRequestClientCapabilities {
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct MessageActionItemCapabilities {
     /// Whether the client supports additional attribues which
@@ -86,13 +78,11 @@ pub struct MessageActionItem {
     /// Additional attributes that the client preserves and
     /// sends back to the server. This depends on the client
     /// capability window.messageActionItem.additionalPropertiesSupport
-    #[cfg(feature = "proposed")]
     #[serde(flatten)]
     pub properties: HashMap<String, MessageActionItemProperty>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(untagged)]
 pub enum MessageActionItemProperty {
     String(String),
@@ -137,7 +127,6 @@ pub struct ShowMessageRequestParams {
 
 /// Client capabilities for the show document request.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct ShowDocumentClientCapabilities {
     /// The client has support for the show document request.
@@ -146,10 +135,9 @@ pub struct ShowDocumentClientCapabilities {
 
 /// Params to show a document.
 ///
-/// @since 3.16.0 - proposed state
+/// @since 3.16.0
 ///
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct ShowDocumentParams {
     /// The document uri to show.
@@ -178,9 +166,8 @@ pub struct ShowDocumentParams {
 
 /// The result of an show document request.
 ///
-/// @since 3.16.0 - proposed state
+/// @since 3.16.0
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct ShowDocumentResult {
     /// A boolean indicating if the show was successful.
