@@ -1,7 +1,13 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{Command, PartialResultParams, Range, TextDocumentIdentifier, WorkDoneProgressParams};
+use crate::{
+    Command, DynamicRegistrationClientCapabilities, PartialResultParams, Range,
+    TextDocumentIdentifier, WorkDoneProgressParams,
+};
+
+pub type CodeLensClientCapabilities = DynamicRegistrationClientCapabilities;
+
 /// Code Lens options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -46,12 +52,15 @@ pub struct CodeLens {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 #[serde(rename_all = "camelCase")]
 pub struct CodeLensWorkspaceClientCapabilities {
-    /// Whether the client implementation supports a refresh request send from the server
-    /// to the client. This is useful if a server detects a change which requires a
-    /// re-calculation of all code lenses.
+    /// Whether the client implementation supports a refresh request sent from the
+    /// server to the client.
+    ///
+    /// Note that this event is global and will force the client to refresh all
+    /// code lenses currently shown. It should be used with absolute care and is
+    /// useful for situation where a server for example detect a project wide
+    /// change that requires such a calculation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refresh_support: Option<bool>,
 }

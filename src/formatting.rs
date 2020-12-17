@@ -1,11 +1,15 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    DocumentSelector, Range, TextDocumentIdentifier, TextDocumentPositionParams,
-    WorkDoneProgressParams,
+    DocumentSelector, DynamicRegistrationClientCapabilities, Range, TextDocumentIdentifier,
+    TextDocumentPositionParams, WorkDoneProgressParams,
 };
 
 use std::collections::HashMap;
+
+pub type DocumentFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
+pub type DocumentRangeFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
+pub type DocumentOnTypeFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
 
 /// Format document on type options
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

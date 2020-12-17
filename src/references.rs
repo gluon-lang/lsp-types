@@ -1,6 +1,10 @@
-use crate::{PartialResultParams, TextDocumentPositionParams, WorkDoneProgressParams};
+use crate::{
+    DynamicRegistrationClientCapabilities, PartialResultParams, TextDocumentPositionParams,
+    WorkDoneProgressParams,
+};
 use serde::{Deserialize, Serialize};
 
+pub type ReferenceClientCapabilities = DynamicRegistrationClientCapabilities;
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReferenceContext {

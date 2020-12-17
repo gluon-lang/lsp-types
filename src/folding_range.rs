@@ -47,7 +47,7 @@ pub struct FoldingProviderOptions {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FoldingRangeCapability {
+pub struct FoldingRangeClientCapabilities {
     /// Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
     /// the client supports the new `(FoldingRangeProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
     /// return value for the corresponding server capability as well.

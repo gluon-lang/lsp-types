@@ -20,9 +20,8 @@ pub struct SignatureInformationSettings {
     /// The client support the `activeParameter` property on `SignatureInformation`
     ///  literal.
     ///
-    ///  @since 3.16.0 - proposed state
+    ///  @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub active_parameter_support: Option<bool>,
 }
 
@@ -39,7 +38,7 @@ pub struct ParameterInformationSettings {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SignatureHelpCapability {
+pub struct SignatureHelpClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -173,9 +172,8 @@ pub struct SignatureInformation {
     ///
     /// If provided, this is used in place of `SignatureHelp.activeParameter`.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub active_parameter: Option<u32>,
 }
 

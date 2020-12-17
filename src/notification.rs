@@ -68,6 +68,15 @@ macro_rules! lsp_notification {
     ("textDocument/semanticHighlighting") => {
         $crate::notification::SemanticHighlighting
     };
+    ("workspace/didCreateFiles") => {
+        $crate::notification::DidCreateFiles
+    };
+    ("workspace/didRenameFiles") => {
+        $crate::notification::DidRenameFiles
+    };
+    ("workspace/didDeleteFiles") => {
+        $crate::notification::DidDeleteFiles
+    };
 }
 
 /// The base protocol now offers support for request cancellation. To cancel a request,
@@ -259,6 +268,33 @@ impl Notification for SemanticHighlighting {
     const METHOD: &'static str = "textDocument/semanticHighlighting";
 }
 
+/// The did create files notification is sent from the client to the server when files were created from within the client.
+#[derive(Debug)]
+pub enum DidCreateFiles {}
+
+impl Notification for DidCreateFiles {
+    type Params = CreateFilesParams;
+    const METHOD: &'static str = "workspace/didCreateFiles";
+}
+
+/// The did rename files notification is sent from the client to the server when files were renamed from within the client.
+#[derive(Debug)]
+pub enum DidRenameFiles {}
+
+impl Notification for DidRenameFiles {
+    type Params = RenameFilesParams;
+    const METHOD: &'static str = "workspace/didRenameFiles";
+}
+
+/// The did delete files notification is sent from the client to the server when files were deleted from within the client.
+#[derive(Debug)]
+pub enum DidDeleteFiles {}
+
+impl Notification for DidDeleteFiles {
+    type Params = DeleteFilesParams;
+    const METHOD: &'static str = "workspace/didDeleteFiles";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -298,6 +334,9 @@ mod test {
         check_macro!("workspace/didChangeConfiguration");
         check_macro!("workspace/didChangeWatchedFiles");
         check_macro!("workspace/didChangeWorkspaceFolders");
+        check_macro!("workspace/didCreateFiles");
+        check_macro!("workspace/didRenameFiles");
+        check_macro!("workspace/didDeleteFiles");
     }
 
     #[test]

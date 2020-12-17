@@ -34,9 +34,7 @@ use serde_json::Value;
 pub mod notification;
 pub mod request;
 
-#[cfg(feature = "proposed")]
 mod call_hierarchy;
-#[cfg(feature = "proposed")]
 pub use call_hierarchy::*;
 
 mod code_action;
@@ -60,6 +58,9 @@ pub use document_link::*;
 mod document_symbols;
 pub use document_symbols::*;
 
+mod file_operations;
+pub use file_operations::*;
+
 mod folding_range;
 pub use folding_range::*;
 
@@ -68,6 +69,9 @@ pub use formatting::*;
 
 mod hover;
 pub use hover::*;
+
+mod moniker;
+pub use moniker::*;
 
 mod progress;
 pub use progress::*;
@@ -86,18 +90,14 @@ mod semantic_highlighting;
 #[cfg(feature = "proposed")]
 pub use semantic_highlighting::*;
 
-#[cfg(feature = "proposed")]
 mod semantic_tokens;
-#[cfg(feature = "proposed")]
 pub use semantic_tokens::*;
 
 mod signature_help;
 pub use signature_help::*;
 
-#[cfg(feature = "proposed")]
-mod type_rename;
-#[cfg(feature = "proposed")]
-pub use type_rename::*;
+mod linked_editing;
+pub use linked_editing::*;
 
 mod window;
 pub use window::*;
@@ -218,7 +218,6 @@ pub struct Diagnostic {
     /// An optional property to describe the error code.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_description: Option<CodeDescription>,
 
@@ -243,12 +242,10 @@ pub struct Diagnostic {
     /// notification and `textDocument/codeAction` request.
     ///
     /// since 3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<serde_json::Value>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeDescription {
@@ -380,18 +377,23 @@ impl TextEdit {
     }
 }
 
+/// An identifier referring to a change annotation managed by a workspace
+/// edit.
+///
+/// @since 3.16.0.
+pub type ChangeAnnotationIdentifier = String;
+
 /// A special text edit with an additional change annotation.
 ///
-/// @since 3.16.0 - proposed state.
+/// @since 3.16.0.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct AnnotatedTextEdit {
     #[serde(flatten)]
     pub text_edit: TextEdit,
 
     /// The actual annotation
-    pub annotation: ChangeAnnotation,
+    pub annotation_id: ChangeAnnotationIdentifier,
 }
 
 /// Describes textual changes on a single text document. The text document is referred to as a
@@ -406,19 +408,17 @@ pub struct TextDocumentEdit {
     pub text_document: OptionalVersionedTextDocumentIdentifier,
 
     /// The edits to be applied.
-    #[cfg(feature = "proposed")]
+    ///
+    /// @since 3.16.0 - support for AnnotatedTextEdit. This is guarded by the
+    /// client capability `workspace.workspaceEdit.changeAnnotationSupport`
     pub edits: Vec<OneOf<TextEdit, AnnotatedTextEdit>>,
-
-    #[cfg(not(feature = "proposed"))]
-    pub edits: Vec<TextEdit>,
 }
 
 /// Additional information that describes document changes.
 ///
-/// @since 3.16.0 - proposed state.
+/// @since 3.16.0.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct ChangeAnnotation {
     /// A human-readable string describing the actual change. The string
     /// is rendered prominent in the user interface.
@@ -433,6 +433,16 @@ pub struct ChangeAnnotation {
     /// the user interface.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChangeAnnotationWorkspaceEditClientCapabilities {
+    /// Whether the client groups edits with equal labels into tree nodes,
+    /// for instance all edits labelled with "Changes in Strings" would
+    /// be a tree node.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub groups_on_labels: Option<bool>,
 }
 
 /// Options to create a file.
@@ -457,12 +467,11 @@ pub struct CreateFile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<CreateFileOptions>,
 
-    /// An optional annotation describing the operation.
+    /// An optional annotation identifer describing the operation.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
-    pub annotation: Option<ChangeAnnotation>,
+    pub annotation_id: Option<ChangeAnnotationIdentifier>,
 }
 
 /// Rename file options
@@ -489,12 +498,11 @@ pub struct RenameFile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<RenameFileOptions>,
 
-    /// An optional annotation describing the operation.
+    /// An optional annotation identifer describing the operation.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
-    pub annotation: Option<ChangeAnnotation>,
+    pub annotation_id: Option<ChangeAnnotationIdentifier>,
 }
 
 /// Delete file options
@@ -508,12 +516,11 @@ pub struct DeleteFileOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_if_not_exists: Option<bool>,
 
-    /// An optional annotation describing the operation.
+    /// An optional annotation identifer describing the operation.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
-    pub annotation: Option<ChangeAnnotation>,
+    pub annotation_id: Option<ChangeAnnotationIdentifier>,
 }
 
 /// Delete file operation
@@ -528,6 +535,9 @@ pub struct DeleteFile {
 }
 
 /// A workspace edit represents changes to many resources managed in the workspace.
+/// The edit should either provide `changes` or `documentChanges`.
+/// If the client can handle versioned document edits and if `documentChanges` are present,
+/// the latter are preferred over `changes`.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceEdit {
@@ -549,6 +559,18 @@ pub struct WorkspaceEdit {
     /// only plain `TextEdit`s using the `changes` property are supported.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<DocumentChanges>,
+
+    /// A map of change annotations that can be referenced in
+    /// `AnnotatedTextEdit`s or create, rename and delete file / folder
+    /// operations.
+    ///
+    /// Whether clients honor this property depends on the client capability
+    /// `workspace.changeAnnotationSupport`.
+    ///
+    /// @since 3.16.0
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change_annotations: Option<HashMap<ChangeAnnotationIdentifier, ChangeAnnotation>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -587,6 +609,8 @@ pub enum ResourceOp {
     Rename(RenameFile),
     Delete(DeleteFile),
 }
+
+pub type DidChangeConfigurationClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -706,6 +730,7 @@ impl WorkspaceEdit {
         WorkspaceEdit {
             changes: Some(changes),
             document_changes: None,
+            ..Default::default()
         }
     }
 }
@@ -909,8 +934,7 @@ pub struct InitializeParams {
     /// Uses IETF language tags as the value's syntax
     /// (See https://en.wikipedia.org/wiki/IETF_language_tag)
     ///
-    /// @since 3.16.0 - proposed state
-    #[cfg(feature = "proposed")]
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
 }
@@ -975,7 +999,7 @@ pub struct GenericParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GenericCapability {
+pub struct DynamicRegistrationClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -993,7 +1017,7 @@ pub struct GotoCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WorkspaceEditCapability {
+pub struct WorkspaceEditClientCapabilities {
     /// The client supports versioned document changes in `WorkspaceEdit`s
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_changes: Option<bool>,
@@ -1014,18 +1038,16 @@ pub struct WorkspaceEditCapability {
     /// in a workspace edit containg to the client specific new line
     /// character.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub normalizes_line_endings: Option<bool>,
 
     /// Whether the client in general supports change annotations on text edits,
     /// create file, rename file and delete file changes.
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
-    pub change_annotation_support: Option<bool>,
+    pub change_annotation_support: Option<ChangeAnnotationWorkspaceEditClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
@@ -1106,15 +1128,15 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to `WorkspaceEdit`s
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workspace_edit: Option<WorkspaceEditCapability>,
+    pub workspace_edit: Option<WorkspaceEditClientCapabilities>,
 
     /// Capabilities specific to the `workspace/didChangeConfiguration` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub did_change_configuration: Option<GenericCapability>,
+    pub did_change_configuration: Option<DidChangeConfigurationClientCapabilities>,
 
     /// Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub did_change_watched_files: Option<GenericCapability>,
+    pub did_change_watched_files: Option<DidChangeWatchedFilesClientCapabilities>,
 
     /// Capabilities specific to the `workspace/symbol` request.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1122,7 +1144,7 @@ pub struct WorkspaceClientCapabilities {
 
     /// Capabilities specific to the `workspace/executeCommand` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub execute_command: Option<GenericCapability>,
+    pub execute_command: Option<ExecuteCommandClientCapabilities>,
 
     /// The client has support for workspace folders.
     /// since 3.6.0
@@ -1137,19 +1159,22 @@ pub struct WorkspaceClientCapabilities {
     /// Capabilities specific to the semantic token requsts scoped to the workspace.
     /// since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensWorkspaceClientCapabilities>,
 
     /// Capabilities specific to the code lens requests scoped to the workspace.
     /// since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub code_lens: Option<CodeLensWorkspaceClientCapabilities>,
+
+    /// The client has support for file requests/notifications.
+    /// since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SynchronizationCapability {
+pub struct TextDocumentSyncClientCapabilities {
     /// Whether text document synchronization supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -1195,7 +1220,6 @@ pub struct PublishDiagnosticsClientCapabilities {
     /// Client supports a codeDescription property
     ///
     ///  3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_description_support: Option<bool>,
 
@@ -1204,7 +1228,6 @@ pub struct PublishDiagnosticsClientCapabilities {
     /// `textDocument/codeAction` request.
     ///
     ///  3.16.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_support: Option<bool>,
 }
@@ -1243,41 +1266,41 @@ impl<T> TagSupport<T> {
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub synchronization: Option<SynchronizationCapability>,
+    pub synchronization: Option<TextDocumentSyncClientCapabilities>,
     /// Capabilities specific to the `textDocument/completion`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub completion: Option<CompletionCapability>,
+    pub completion: Option<CompletionClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/hover`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hover: Option<HoverCapability>,
+    pub hover: Option<HoverClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/signatureHelp`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub signature_help: Option<SignatureHelpCapability>,
+    pub signature_help: Option<SignatureHelpClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/references`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub references: Option<GenericCapability>,
+    pub references: Option<ReferenceClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentHighlight`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_highlight: Option<GenericCapability>,
+    pub document_highlight: Option<DocumentHighlightClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentSymbol`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub document_symbol: Option<DocumentSymbolClientCapabilities>,
     /// Capabilities specific to the `textDocument/formatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub formatting: Option<GenericCapability>,
+    pub formatting: Option<DocumentFormattingClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/rangeFormatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub range_formatting: Option<GenericCapability>,
+    pub range_formatting: Option<DocumentRangeFormattingClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/onTypeFormatting`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub on_type_formatting: Option<GenericCapability>,
+    pub on_type_formatting: Option<DocumentOnTypeFormattingClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/declaration`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1297,24 +1320,24 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/codeAction`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_action: Option<CodeActionCapability>,
+    pub code_action: Option<CodeActionClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/codeLens`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub code_lens: Option<GenericCapability>,
+    pub code_lens: Option<CodeLensClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentLink`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub document_link: Option<DocumentLinkCapabilities>,
+    pub document_link: Option<DocumentLinkClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/documentColor` and the
     /// `textDocument/colorPresentation` request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_provider: Option<GenericCapability>,
+    pub color_provider: Option<DocumentColorClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/rename`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rename: Option<RenameCapability>,
+    pub rename: Option<RenameClientCapabilities>,
 
     /// Capabilities specific to `textDocument/publishDiagnostics`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1322,7 +1345,7 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to `textDocument/foldingRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub folding_range: Option<FoldingRangeCapability>,
+    pub folding_range: Option<FoldingRangeClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/selectionRange` request.
     ///
@@ -1330,22 +1353,32 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selection_range: Option<SelectionRangeClientCapabilities>,
 
-    /// Capabilities specific to `textDocument/onTypeRename` requests.
+    /// Capabilities specific to `textDocument/linkedEditingRange` requests.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
-    pub on_type_rename: Option<OnTypeRenameClientCapabilities>,
+    pub linked_editing_range: Option<LinkedEditingRangeClientCapabilities>,
 
     /// The client's semantic highlighting capability.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_highlighting_capabilities: Option<SemanticHighlightingClientCapability>,
+
+    /// Capabilities specific to the various call hierarchy requests.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub call_hierarchy: Option<CallHierarchyClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/semanticTokens/*` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub semantic_tokens: Option<SemanticTokensClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/moniker` request.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub moniker: Option<MonikerClientCapabilities>,
 }
 
 /// Where ClientCapabilities are currently empty:
@@ -1366,7 +1399,6 @@ pub struct ClientCapabilities {
 
     /// General client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub general: Option<GeneralClientCapabilities>,
 
     /// Experimental client capabilities.
@@ -1376,22 +1408,20 @@ pub struct ClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct GeneralClientCapabilities {
     /// Client capabilities specific to regular expressions.
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub regular_expressions: Option<RegularExpressionsClientCapabilities>,
 
     /// Client capabilities specific to the client's markdown parser.
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markdown: Option<MarkdownClientCapabilities>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct RegularExpressionsClientCapabilities {
     /// The engine's name.
     pub engine: String,
@@ -1403,7 +1433,6 @@ pub struct RegularExpressionsClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct MarkdownClientCapabilities {
     /// The name of the parser.
     pub parser: String,
@@ -1457,6 +1486,8 @@ pub enum TextDocumentSyncKind {
     /// incremental updates to the document are sent.
     Incremental = 2,
 }
+
+pub type ExecuteCommandClientCapabilities = DynamicRegistrationClientCapabilities;
 
 /// Execute command options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1682,7 +1713,7 @@ pub struct ServerCapabilities {
 
     /// Workspace specific server capabilities
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub workspace: Option<WorkspaceCapability>,
+    pub workspace: Option<WorkspaceServerCapabilities>,
 
     /// Semantic highlighting server capabilities.
     #[cfg(feature = "proposed")]
@@ -1690,25 +1721,37 @@ pub struct ServerCapabilities {
     pub semantic_highlighting: Option<SemanticHighlightingServerCapability>,
 
     /// Call hierarchy provider capabilities.
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub call_hierarchy_provider: Option<CallHierarchyServerCapability>,
 
     /// Semantic tokens server capabilities.
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_tokens_provider: Option<SemanticTokensServerCapabilities>,
 
-    /// The server provides on type rename support.
-    ///
-    /// @since 3.16.0 - proposed state
-    #[cfg(feature = "proposed")]
+    /// Whether server provides moniker support.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub on_type_rename_provider: Option<OnTypeRenameServerCapabilities>,
+    pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
+
+    /// The server provides linked editing range support.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linked_editing_range_provider: Option<LinkedEditingRangeServerCapabilities>,
 
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorkspaceServerCapabilities {
+    /// The server supports workspace folder.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_folders: Option<WorkspaceFoldersServerCapabilities>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub file_operations: Option<WorkspaceFileOperationsServerCapabilities>,
 }
 
 /// General parameters to to register for a capability.
@@ -1784,7 +1827,7 @@ pub struct WorkDoneProgressOptions {
     pub work_done_progress: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentFormattingOptions {
     #[serde(flatten)]
@@ -1973,6 +2016,8 @@ pub struct TextDocumentSaveRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 }
+
+pub type DidChangeWatchedFilesClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
@@ -2279,7 +2324,6 @@ pub struct PartialResultParams {
 /// Since 3.15
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
 #[repr(u8)]
-#[cfg(feature = "proposed")]
 pub enum SymbolTag {
     /// Render a symbol as obsolete, usually using a strike-out.
     Deprecated = 1,
@@ -2354,6 +2398,7 @@ mod tests {
             &WorkspaceEdit {
                 changes: Some(vec![].into_iter().collect()),
                 document_changes: None,
+                ..Default::default()
             },
             r#"{"changes":{}}"#,
         );
@@ -2362,6 +2407,7 @@ mod tests {
             &WorkspaceEdit {
                 changes: None,
                 document_changes: None,
+                ..Default::default()
             },
             r#"{}"#,
         );
@@ -2374,6 +2420,7 @@ mod tests {
                         .collect(),
                 ),
                 document_changes: None,
+                ..Default::default()
             },
             r#"{"changes":{"file://test/":[]}}"#,
         );

@@ -7,7 +7,6 @@ use crate::{
     WorkDoneProgressParams,
 };
 
-#[cfg(feature = "proposed")]
 use crate::Range;
 
 use serde_json::Value;
@@ -94,31 +93,27 @@ pub struct CompletionItemCapability {
     /// Client support insert replace edit to control different behavior if a
     /// completion item is inserted in the text or should replace text.
     ///
-    /// @since 3.16.0 - Proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub insert_replace_support: Option<bool>,
 
     /// Indicates which properties a client can resolve lazily on a completion
     /// item. Before version 3.16.0 only the predefined properties `documentation`
     /// and `details` could be resolved lazily.
     ///
-    /// @since 3.16.0 - Proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub resolve_support: Option<CompletionItemCapabilityResolveSupport>,
 
     /// The client supports the `insertTextMode` property on
     /// a completion item to override the whitespace handling mode
     /// as defined by the client (see `insertTextMode`).
     ///
-    /// @since 3.16.0 - proposed state
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub insert_text_mode_support: Option<InsertTextModeSupport>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionItemCapabilityResolveSupport {
@@ -126,7 +121,6 @@ pub struct CompletionItemCapabilityResolveSupport {
     pub properties: Vec<String>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InsertTextModeSupport {
@@ -136,8 +130,7 @@ pub struct InsertTextModeSupport {
 /// How whitespace and indentation is handled during completion
 /// item insertion.
 ///
-/// @since 3.16.0 - proposed state
-#[cfg(feature = "proposed")]
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum InsertTextMode {
@@ -181,7 +174,7 @@ pub struct CompletionItemKindCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CompletionCapability {
+pub struct CompletionClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -202,10 +195,9 @@ pub struct CompletionCapability {
 
 /// A special text edit to provide an insert and a replace operation.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(feature = "proposed")]
 pub struct InsertReplaceEdit {
     /// The string to be inserted.
     pub new_text: String,
@@ -221,7 +213,6 @@ pub struct InsertReplaceEdit {
 #[serde(untagged)]
 pub enum CompletionTextEdit {
     Edit(TextEdit),
-    #[cfg(feature = "proposed")]
     InsertAndReplace(InsertReplaceEdit),
 }
 
@@ -231,7 +222,6 @@ impl From<TextEdit> for CompletionTextEdit {
     }
 }
 
-#[cfg(feature = "proposed")]
 impl From<InsertReplaceEdit> for CompletionTextEdit {
     fn from(edit: InsertReplaceEdit) -> Self {
         CompletionTextEdit::InsertAndReplace(edit)
@@ -386,7 +376,6 @@ pub struct CompletionItem {
 
     /// How whitespace and indentation is handled during completion item insertion.
     /// If not provided the clients default value depends on the `textDocument.completion.insertTextMode` client capability.
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub insert_text_mode: Option<InsertTextMode>,
 
@@ -405,7 +394,7 @@ pub struct CompletionItem {
     /// *Note 2:* If an `InsertReplaceEdit` is returned the edit's insert range must be a prefix of
     /// the edit's replace range, that means it must be contained and starting at the same position.
     ///
-    /// @since 3.16.0 additional type `InsertReplaceEdit` - Proposed state
+    /// @since 3.16.0 additional type `InsertReplaceEdit`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_edit: Option<CompletionTextEdit>,
 

@@ -1,7 +1,12 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{PartialResultParams, Range, TextDocumentPositionParams, WorkDoneProgressParams};
+use crate::{
+    DynamicRegistrationClientCapabilities, PartialResultParams, Range, TextDocumentPositionParams,
+    WorkDoneProgressParams,
+};
+
+pub type DocumentHighlightClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]

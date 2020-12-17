@@ -3,7 +3,6 @@ use crate::{
     WorkDoneProgressParams,
 };
 
-#[cfg(feature = "proposed")]
 use crate::{SymbolTag, TagSupport};
 
 use serde::{Deserialize, Serialize};
@@ -33,7 +32,6 @@ pub struct DocumentSymbolClientCapabilities {
         skip_serializing_if = "Option::is_none",
         deserialize_with = "TagSupport::deserialize_compat"
     )]
-    #[cfg(feature = "proposed")]
     pub tag_support: Option<TagSupport<SymbolTag>>,
 }
 
@@ -87,7 +85,6 @@ pub struct DocumentSymbol {
     /// Tags for this completion item.
     ///  since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub tags: Option<Vec<SymbolTag>>,
     /// Indicates if this symbol is deprecated.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -119,7 +116,6 @@ pub struct SymbolInformation {
     /// Tags for this completion item.
     ///  since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub tags: Option<Vec<SymbolTag>>,
 
     /// Indicates if this symbol is deprecated.

@@ -11,7 +11,7 @@ use crate::{
 /// and clients can specify additional token types via the
 /// corresponding client capabilities.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
 pub struct SemanticTokenType(Cow<'static, str>);
 
@@ -64,7 +64,7 @@ impl From<&'static str> for SemanticTokenType {
 /// and clients can specify additional token types via the
 /// corresponding client capabilities.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
 pub struct SemanticTokenModifier(Cow<'static, str>);
 
@@ -128,7 +128,7 @@ impl From<&'static str> for TokenFormat {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensLegend {
@@ -143,7 +143,6 @@ pub struct SemanticTokensLegend {
 /// structured please see
 /// https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Default)]
-#[cfg(feature = "proposed")]
 pub struct SemanticToken {
     pub delta_line: u32,
     pub delta_start: u32,
@@ -228,7 +227,7 @@ impl SemanticToken {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokens {
@@ -249,7 +248,7 @@ pub struct SemanticTokens {
     pub data: Vec<SemanticToken>,
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensPartialResult {
@@ -280,7 +279,7 @@ impl From<SemanticTokensPartialResult> for SemanticTokensResult {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensEdit {
@@ -317,7 +316,7 @@ impl From<SemanticTokensDelta> for SemanticTokensFullDeltaResult {
     }
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensDelta {
@@ -330,7 +329,7 @@ pub struct SemanticTokensDelta {
 
 /// Capabilities specific to the `textDocument/semanticTokens/*` requests.
 ///
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensClientCapabilities {
@@ -340,7 +339,14 @@ pub struct SemanticTokensClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
 
-    /// Which requests the client supports and might send to the server.
+    /// Which requests the client supports and might send to the server
+    /// depending on the server's capability. Please note that clients might not
+    /// show semantic tokens or degrade some of the user experience if a range
+    /// or full request is advertised by the client but not provided by the
+    /// server. If for example the client capability `requests.full` and
+    /// `request.range` are both set to true but the server only provides a
+    /// range provider the client might not render a minimap correctly or might
+    /// even decide to not show any semantic tokens at all.
     pub requests: SemanticTokensClientCapabilitiesRequests,
 
     /// The token types that the client supports.
@@ -386,7 +392,7 @@ pub enum SemanticTokensFullOptions {
     },
 }
 
-/// @since 3.16.0 - Proposed state
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensOptions {
@@ -442,11 +448,13 @@ impl From<SemanticTokensRegistrationOptions> for SemanticTokensServerCapabilitie
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SemanticTokensWorkspaceClientCapabilities {
-    /// Whether the client implementation supports a refresh request sent from the server
-    /// to the client. This is useful if a server detects a project wide configuration change
-    /// which requires a re-calculation of all semantic tokens provided by the server issuing
-    /// the request.
+    /// Whether the client implementation supports a refresh request sent from
+    /// the server to the client.
     ///
+    /// Note that this event is global and will force the client to refresh all
+    /// semantic tokens currently shown. It should be used with absolute care
+    /// and is useful for situation where a server for example detect a project
+    /// wide change that requires such a calculation.
     pub refresh_support: Option<bool>,
 }
 
