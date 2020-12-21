@@ -442,7 +442,7 @@ pub struct ChangeAnnotationWorkspaceEditClientCapabilities {
     /// for instance all edits labelled with "Changes in Strings" would
     /// be a tree node.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub groups_on_labels: Option<bool>,
+    pub groups_on_label: Option<bool>,
 }
 
 /// Options to create a file.
