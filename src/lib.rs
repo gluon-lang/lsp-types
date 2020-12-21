@@ -1047,7 +1047,31 @@ pub struct WorkspaceEditClientCapabilities {
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(deserialize_with = "deserialize_change_annotation_support")]
     pub change_annotation_support: Option<ChangeAnnotationWorkspaceEditClientCapabilities>,
+}
+
+fn deserialize_change_annotation_support<'de, D>(
+    d: D,
+) -> Result<Option<ChangeAnnotationWorkspaceEditClientCapabilities>, D::Error>
+where
+    D: de::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Repr {
+        Bool(bool),
+        Obj(ChangeAnnotationWorkspaceEditClientCapabilities),
+    }
+    Option::<Repr>::deserialize(d).map(|repr| {
+        repr.and_then(|repr| match repr {
+            Repr::Bool(true) => Some(ChangeAnnotationWorkspaceEditClientCapabilities {
+                groups_on_labels: None,
+            }),
+            Repr::Bool(false) => None,
+            Repr::Obj(it) => Some(it),
+        })
+    })
 }
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]

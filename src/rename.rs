@@ -1,5 +1,5 @@
 use crate::{Range, TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams};
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Serialize};
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -50,6 +50,7 @@ pub struct RenameClientCapabilities {
     ///
     /// since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(deserialize_with = "deserialize_prepare_support_default_behavior")]
     pub prepare_support_default_behavior: Option<PrepareSupportDefaultBehavior>,
 
     /// Whether the client honors the change annotations in
@@ -62,6 +63,28 @@ pub struct RenameClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub honors_change_annotations: Option<bool>,
 }
+
+fn deserialize_prepare_support_default_behavior<'de, D>(
+    d: D,
+) -> Result<Option<PrepareSupportDefaultBehavior>, D::Error>
+where
+    D: de::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Repr {
+        Bool(bool),
+        Obj(PrepareSupportDefaultBehavior),
+    }
+    Option::<Repr>::deserialize(d).map(|repr| {
+        repr.and_then(|repr| match repr {
+            Repr::Bool(true) => Some(PrepareSupportDefaultBehavior::Identifier),
+            Repr::Bool(false) => None,
+            Repr::Obj(it) => Some(it),
+        })
+    })
+}
+
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
