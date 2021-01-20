@@ -85,11 +85,6 @@ pub use rename::*;
 pub mod selection_range;
 pub use selection_range::*;
 
-#[cfg(feature = "proposed")]
-mod semantic_highlighting;
-#[cfg(feature = "proposed")]
-pub use semantic_highlighting::*;
-
 mod semantic_tokens;
 pub use semantic_tokens::*;
 
@@ -1359,11 +1354,6 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linked_editing_range: Option<LinkedEditingRangeClientCapabilities>,
 
-    /// The client's semantic highlighting capability.
-    #[cfg(feature = "proposed")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub semantic_highlighting_capabilities: Option<SemanticHighlightingClientCapability>,
-
     /// Capabilities specific to the various call hierarchy requests.
     ///
     /// @since 3.16.0
@@ -1714,11 +1704,6 @@ pub struct ServerCapabilities {
     /// Workspace specific server capabilities
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace: Option<WorkspaceServerCapabilities>,
-
-    /// Semantic highlighting server capabilities.
-    #[cfg(feature = "proposed")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub semantic_highlighting: Option<SemanticHighlightingServerCapability>,
 
     /// Call hierarchy provider capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]

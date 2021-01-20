@@ -64,10 +64,6 @@ macro_rules! lsp_notification {
     ("$/progress") => {
         $crate::notification::Progress
     };
-    // Requires #[cfg(feature = "proposed")]
-    ("textDocument/semanticHighlighting") => {
-        $crate::notification::SemanticHighlighting
-    };
     ("workspace/didCreateFiles") => {
         $crate::notification::DidCreateFiles
     };
@@ -257,17 +253,6 @@ impl Notification for WorkDoneProgressCancel {
     const METHOD: &'static str = "window/workDoneProgress/cancel";
 }
 
-#[cfg(feature = "proposed")]
-/// Diagnostics notification are sent from the server to the client to signal results of validation runs.
-#[derive(Debug)]
-pub enum SemanticHighlighting {}
-
-#[cfg(feature = "proposed")]
-impl Notification for SemanticHighlighting {
-    type Params = SemanticHighlightingParams;
-    const METHOD: &'static str = "textDocument/semanticHighlighting";
-}
-
 /// The did create files notification is sent from the client to the server when files were created from within the client.
 #[derive(Debug)]
 pub enum DidCreateFiles {}
@@ -341,7 +326,5 @@ mod test {
 
     #[test]
     #[cfg(feature = "proposed")]
-    fn check_proposed_macro_definitions() {
-        check_macro!("textDocument/semanticHighlighting");
-    }
+    fn check_proposed_macro_definitions() {}
 }
