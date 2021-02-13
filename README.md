@@ -2,8 +2,13 @@
 
 Types useful for interacting with a [language server](https://code.visualstudio.com/blogs/2016/06/27/common-language-protocol).
 
-Supports Language Server Protocol (LSP) version 3.15.0.
+Supports Language Server Protocol (LSP) version 3.16.0.
+
+Proposed 3.17 features can be activated using the `proposed` feature flag.
+- **NOTE** that these are unstable and may change between releases.
 
 ## Links
 
-[Protocol reference](https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-15.md)
+[Stable Protocol reference](https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-16.md)
+
+[Proposed Protocol reference](https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-17.md)
