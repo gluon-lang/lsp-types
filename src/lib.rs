@@ -1408,6 +1408,30 @@ pub struct GeneralClientCapabilities {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markdown: Option<MarkdownClientCapabilities>,
+
+    /// @since 3.17.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stale_request_support: Option<StaleRequestSupportClientCapabilities>,
+}
+
+/// Client capability that signals how the client
+/// handles stale requests (e.g. a request
+/// for which the client will not process the response
+/// anymore since the information is outdated).
+///
+/// @since 3.17.0
+#[cfg(feature = "proposed")]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StaleRequestSupportClientCapabilities {
+    /// The client will actively cancel the request.
+    pub cancel: bool,
+
+    /// The list of requests for which the client
+    /// will retry the request if it receives a
+    /// response with error code `ContentModified``
+    pub retry_on_content_modified: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
