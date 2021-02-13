@@ -236,9 +236,30 @@ pub struct CompletionOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_provider: Option<bool>,
 
-    /// The characters that trigger completion automatically.
+    /// Most tools trigger completion request automatically without explicitly
+    /// requesting it using a keyboard shortcut (e.g. Ctrl+Space). Typically they
+    /// do so when the user starts to type an identifier. For example if the user
+    /// types `c` in a JavaScript file code complete will automatically pop up
+    /// present `console` besides others as a completion item. Characters that
+    /// make up identifiers don't need to be listed here.
+    ///
+    /// If code complete should automatically be trigger on characters not being
+    /// valid inside an identifier (for example `.` in JavaScript) list them in
+    /// `triggerCharacters`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_characters: Option<Vec<String>>,
+
+    /// The list of all possible characters that commit a completion. This field
+    /// can be used if clients don't support individual commit characters per
+    /// completion item. See client capability
+    /// `completion.completionItem.commitCharactersSupport`.
+    ///
+    /// If a server provides both `allCommitCharacters` and commit characters on
+    /// an individual completion item the ones on the completion item win.
+    ///
+    /// @since 3.2.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub all_commit_characters: Option<Vec<String>>,
 
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
