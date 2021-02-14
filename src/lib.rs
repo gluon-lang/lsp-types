@@ -1391,6 +1391,13 @@ pub struct ClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub general: Option<GeneralClientCapabilities>,
 
+    /// Unofficial UT8-offsets extension.
+    ///
+    /// See https://clangd.llvm.org/extensions.html#utf-8-offsets.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub offset_encoding: Option<Vec<String>>,
+
     /// Experimental client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental: Option<Value>,
@@ -1465,6 +1472,13 @@ pub struct InitializeResult {
     /// The capabilities the language server provides.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server_info: Option<ServerInfo>,
+
+    /// Unofficial UT8-offsets extension.
+    ///
+    /// See https://clangd.llvm.org/extensions.html#utf-8-offsets.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub offset_encoding: Option<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
