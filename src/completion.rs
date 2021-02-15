@@ -279,13 +279,13 @@ pub struct CompletionOptions {
     /// @since 3.17.0 - proposed state
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub completion_item: Option<ComptionOptionsCompletionItem>,
+    pub completion_item: Option<CompletionOptionsCompletionItem>,
 }
 
 #[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ComptionOptionsCompletionItem {
+pub struct CompletionOptionsCompletionItem {
     /// The server has support for completion item label
     /// details (see also `CompletionItemLabelDetails`) when receiving
     /// a completion item in a resolve call.
