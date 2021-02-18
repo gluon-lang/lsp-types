@@ -1469,7 +1469,7 @@ pub struct InitializeResult {
     /// The capabilities the language server provides.
     pub capabilities: ServerCapabilities,
 
-    /// The capabilities the language server provides.
+    /// Information about the server.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server_info: Option<ServerInfo>,
 
