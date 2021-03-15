@@ -443,8 +443,8 @@ pub struct CompletionItem {
     /// insertText is ignored.
     ///
     /// Most editors support two different operation when accepting a completion item. One is to insert a
-    /// completion text and the other is to replace an existing text with a competion text. Since this can
-    /// usually not predetermend by a server it can report both ranges. Clients need to signal support for
+    /// completion text and the other is to replace an existing text with a completion text. Since this can
+    /// usually not predetermined by a server it can report both ranges. Clients need to signal support for
     /// `InsertReplaceEdits` via the `textDocument.completion.insertReplaceSupport` client capability
     /// property.
     ///
@@ -468,6 +468,13 @@ pub struct CompletionItem {
     /// additionalTextEdits-property.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub command: Option<Command>,
+
+    /// An optional set of characters that when pressed while this completion is
+    /// active will accept it first and then type that character. *Note* that all
+    /// commit characters should have `length=1` and that superfluous characters
+    /// will be ignored.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub commit_characters: Option<Vec<String>>,
 
     /// An data entry field that is preserved on a completion item between
     /// a completion and a completion resolve request.
