@@ -107,7 +107,7 @@ pub struct CompletionItemCapability {
 
     /// The client supports the `insertTextMode` property on
     /// a completion item to override the whitespace handling mode
-    /// as defined by the client (see `insertTextMode`).
+    /// as defined by the client.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -200,6 +200,14 @@ pub struct CompletionClientCapabilities {
     /// `textDocument/completion` requestion.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context_support: Option<bool>,
+
+    /// The client's default when the completion item doesn't provide a
+    /// `insertTextMode` property.
+    ///
+    /// @since 3.17.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub insert_text_mode: Option<InsertTextMode>,
 }
 
 /// A special text edit to provide an insert and a replace operation.
@@ -447,8 +455,7 @@ pub struct CompletionItem {
     pub insert_text_format: Option<InsertTextFormat>,
 
     /// How whitespace and indentation is handled during completion
-    /// item insertion. If not provided the client's default value depends on
-    /// the `textDocument.completion.insertTextMode` client capability.
+    /// item insertion. If not provided the client's default value is used.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
