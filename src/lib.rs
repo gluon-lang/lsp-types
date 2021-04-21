@@ -1874,6 +1874,13 @@ pub struct DefinitionOptions {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentSymbolOptions {
+    /// A human-readable string that is shown when multiple outlines trees are
+    /// shown for the same document.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
