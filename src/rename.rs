@@ -77,5 +77,6 @@ pub enum PrepareSupportDefaultBehavior {
 pub enum PrepareRenameResponse {
     Range(Range),
     RangeWithPlaceholder { range: Range, placeholder: String },
+    #[serde(rename_all = "camelCase")]
     DefaultBehavior { default_behavior: bool },
 }
