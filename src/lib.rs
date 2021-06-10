@@ -31,6 +31,7 @@ use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
 
+pub mod error_codes;
 pub mod notification;
 pub mod request;
 
