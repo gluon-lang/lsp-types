@@ -528,17 +528,17 @@ impl CompletionItem {
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionItemLabelDetails {
-    /// The parameters without the return type.
+    /// An optional string which is rendered less prominently directly after
+    /// {@link CompletionItemLabel.label label}, without any spacing. Should be
+    /// used for function signatures or type annotations.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub parameters: Option<String>,
+    pub detail: Option<String>,
 
-    /// The fully qualified name, like package name or file path.
+    /// An optional string which is rendered less prominently after
+    /// {@link CompletionItemLabel.detail}. Should be used for fully qualified
+    /// names or file path.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub qualifier: Option<String>,
-
-    /// The return-type of a function or type of a property/variable.
-    #[serde(skip_serializing_if = "Option::is_none", rename = "type")]
-    pub typ: Option<String>,
+    pub description: Option<String>,
 }
 
 #[cfg(test)]
