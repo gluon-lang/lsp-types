@@ -104,6 +104,8 @@ pub use workspace_folders::*;
 mod workspace_symbols;
 pub use workspace_symbols::*;
 
+pub mod lsif;
+
 /* ----------------- Auxiliary types ----------------- */
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
