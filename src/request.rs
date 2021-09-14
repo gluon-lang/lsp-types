@@ -641,7 +641,7 @@ impl Request for WorkDoneProgressCreate {
 /// around the cursor position which the user might be interested in selecting.
 ///
 /// A selection range in the return array is for the position in the provided parameters at the same index.
-/// Therefore positions[i] must be contained in result[i].range.
+/// Therefore `positions[i]` must be contained in `result[i].range`.
 ///
 /// Typically, but not necessary, selection ranges correspond to the nodes of the
 /// syntax tree.
