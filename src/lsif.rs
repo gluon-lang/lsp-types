@@ -1,3 +1,9 @@
+//! Types of Language Server Index Format (LSIF). LSIF is a standard format
+//! for language servers or other programming tools to dump their knowledge
+//! about a workspace.
+//!
+//! Based on <https://microsoft.github.io/language-server-protocol/specifications/lsif/0.6.0/specification/>
+
 use serde::{Deserialize, Serialize};
 use crate::{Url, Range};
 
