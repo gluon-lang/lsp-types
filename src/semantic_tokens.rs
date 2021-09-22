@@ -141,7 +141,7 @@ pub struct SemanticTokensLegend {
 
 /// The actual tokens. For a detailed description about how the data is
 /// structured please see
-/// https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71
+/// <https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71>
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Default)]
 pub struct SemanticToken {
     pub delta_line: u32,
@@ -240,7 +240,7 @@ pub struct SemanticTokens {
 
     /// The actual tokens. For a detailed description about how the data is
     /// structured please see
-    /// https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71
+    /// <https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71>
     #[serde(
         deserialize_with = "SemanticToken::deserialize_tokens",
         serialize_with = "SemanticToken::serialize_tokens"
@@ -322,8 +322,8 @@ impl From<SemanticTokensDelta> for SemanticTokensFullDeltaResult {
 pub struct SemanticTokensDelta {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result_id: Option<String>,
-    /// For a detailed description how these edits are structured pls see
-    /// https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L131
+    /// For a detailed description how these edits are structured please see
+    /// <https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L131>
     pub edits: Vec<SemanticTokensEdit>,
 }
 

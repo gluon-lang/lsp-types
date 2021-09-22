@@ -130,17 +130,17 @@ pub enum RangeTag {
 #[serde(tag = "label")]
 pub enum Vertex {
     MetaData(MetaData),
-    /// https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex
+    /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex>
     Project(Project),
     Document(Document),
-    /// https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#ranges
+    /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#ranges>
     Range {
         #[serde(flatten)]
         range: Range,
         #[serde(skip_serializing_if = "Option::is_none")]
         tag: Option<RangeTag>,
     },
-    /// https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#result-set
+    /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#result-set>
     ResultSet(ResultSet),
     Moniker(crate::Moniker),
     PackageInformation(PackageInformation),
@@ -274,7 +274,7 @@ pub struct Document {
     pub language_id: String,
 }
 
-/// https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#result-set
+/// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#result-set>
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ResultSet {
@@ -282,7 +282,7 @@ pub struct ResultSet {
     pub key: Option<String>,
 }
 
-/// https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex
+/// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex>
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Project {
@@ -296,7 +296,7 @@ pub struct Project {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MetaData {
-    /// The version of the LSIF format using semver notation. See https://semver.org/. Please note
+    /// The version of the LSIF format using semver notation. See <https://semver.org/>. Please note
     /// the version numbers starting with 0 don't adhere to semver and adopters have to assume
     /// that each new version is breaking.
     pub version: String,
