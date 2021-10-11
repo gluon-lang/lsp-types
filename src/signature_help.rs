@@ -154,6 +154,7 @@ pub struct SignatureHelp {
 /// can have a label, like a function-name, a doc-comment, and
 /// a set of parameters.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignatureInformation {
     /// The label of this signature. Will be shown in
     /// the UI.
@@ -180,6 +181,7 @@ pub struct SignatureInformation {
 /// Represents a parameter of a callable-signature. A parameter can
 /// have a label and a doc-comment.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ParameterInformation {
     /// The label of this parameter information.
     ///
