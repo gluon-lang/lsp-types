@@ -1,3 +1,13 @@
+<a name="v0.90.1"></a>
+### v0.90.1 (2021-10-11)
+
+
+#### Bug Fixes
+
+*   add missing rename_all serde attribute ([b403cba5](https://github.com/gluon-lang/lsp-types/commit/b403cba5fb568f7f1bda3ea2929822269797f7f3))
+
+
+
 <a name="v0.90.0"></a>
 ## v0.90.0 (2021-09-25)
 
