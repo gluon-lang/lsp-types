@@ -88,11 +88,11 @@ pub struct SignatureHelpRegistrationOptions {
 pub struct SignatureHelpTriggerKind(u8);
 impl SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
-    pub const Invoked: SignatureHelpTriggerKind = SignatureHelpTriggerKind(1);
+    pub const INVOKED: SignatureHelpTriggerKind = SignatureHelpTriggerKind(1);
     ///  Signature help was triggered by a trigger character.
-    pub const TriggerCharacter: SignatureHelpTriggerKind = SignatureHelpTriggerKind(2);
+    pub const TRIGGER_CHARACTER: SignatureHelpTriggerKind = SignatureHelpTriggerKind(2);
     /// Signature help was triggered by the cursor moving or by the document content changing.
-    pub const ContentChange: SignatureHelpTriggerKind = SignatureHelpTriggerKind(3);
+    pub const CONTENT_CHANGE: SignatureHelpTriggerKind = SignatureHelpTriggerKind(3);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

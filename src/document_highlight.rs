@@ -39,11 +39,11 @@ pub struct DocumentHighlight {
 pub struct DocumentHighlightKind(u8);
 impl DocumentHighlightKind {
     /// A textual occurrance.
-    pub const Text: DocumentHighlightKind = DocumentHighlightKind(1);
+    pub const TEXT: DocumentHighlightKind = DocumentHighlightKind(1);
 
     /// Read-access of a symbol, like reading a variable.
-    pub const Read: DocumentHighlightKind = DocumentHighlightKind(2);
+    pub const READ: DocumentHighlightKind = DocumentHighlightKind(2);
 
     /// Write-access of a symbol, like writing to a variable.
-    pub const Write: DocumentHighlightKind = DocumentHighlightKind(3);
+    pub const WRITE: DocumentHighlightKind = DocumentHighlightKind(3);
 }

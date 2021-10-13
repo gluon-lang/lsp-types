@@ -293,13 +293,13 @@ impl Diagnostic {
 pub struct DiagnosticSeverity(u8);
 impl DiagnosticSeverity {
     /// Reports an error.
-    pub const Error: DiagnosticSeverity = DiagnosticSeverity(1);
+    pub const ERROR: DiagnosticSeverity = DiagnosticSeverity(1);
     /// Reports a warning.
-    pub const Warning: DiagnosticSeverity = DiagnosticSeverity(2);
+    pub const WARNING: DiagnosticSeverity = DiagnosticSeverity(2);
     /// Reports an information.
-    pub const Information: DiagnosticSeverity = DiagnosticSeverity(3);
+    pub const INFORMATION: DiagnosticSeverity = DiagnosticSeverity(3);
     /// Reports a hint.
-    pub const Hint: DiagnosticSeverity = DiagnosticSeverity(4);
+    pub const HINT: DiagnosticSeverity = DiagnosticSeverity(4);
 }
 
 /// Represents a related message and source code location for a diagnostic. This
@@ -322,11 +322,11 @@ impl DiagnosticTag {
     /// Unused or unnecessary code.
     /// Clients are allowed to render diagnostics with this tag faded out instead of having
     /// an error squiggle.
-    pub const Unnecessary: DiagnosticTag = DiagnosticTag(1);
+    pub const UNNECESSARY: DiagnosticTag = DiagnosticTag(1);
 
     /// Deprecated or obsolete code.
     /// Clients are allowed to rendered diagnostics with this tag strike through.
-    pub const Deprecated: DiagnosticTag = DiagnosticTag(2);
+    pub const DEPRECATED: DiagnosticTag = DiagnosticTag(2);
 }
 
 /// Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
@@ -1071,32 +1071,32 @@ pub enum FailureHandlingKind {
 #[serde(transparent)]
 pub struct SymbolKind(u8);
 impl SymbolKind {
-    pub const File: SymbolKind = SymbolKind(1);
-    pub const Module: SymbolKind = SymbolKind(2);
-    pub const Namespace: SymbolKind = SymbolKind(3);
-    pub const Package: SymbolKind = SymbolKind(4);
-    pub const Class: SymbolKind = SymbolKind(5);
-    pub const Method: SymbolKind = SymbolKind(6);
-    pub const Property: SymbolKind = SymbolKind(7);
-    pub const Field: SymbolKind = SymbolKind(8);
-    pub const Constructor: SymbolKind = SymbolKind(9);
-    pub const Enum: SymbolKind = SymbolKind(10);
-    pub const Interface: SymbolKind = SymbolKind(11);
-    pub const Function: SymbolKind = SymbolKind(12);
-    pub const Variable: SymbolKind = SymbolKind(13);
-    pub const Constant: SymbolKind = SymbolKind(14);
-    pub const String: SymbolKind = SymbolKind(15);
-    pub const Number: SymbolKind = SymbolKind(16);
-    pub const Boolean: SymbolKind = SymbolKind(17);
-    pub const Array: SymbolKind = SymbolKind(18);
-    pub const Object: SymbolKind = SymbolKind(19);
-    pub const Key: SymbolKind = SymbolKind(20);
-    pub const Null: SymbolKind = SymbolKind(21);
-    pub const EnumMember: SymbolKind = SymbolKind(22);
-    pub const Struct: SymbolKind = SymbolKind(23);
-    pub const Event: SymbolKind = SymbolKind(24);
-    pub const Operator: SymbolKind = SymbolKind(25);
-    pub const TypeParameter: SymbolKind = SymbolKind(26);
+    pub const FILE: SymbolKind = SymbolKind(1);
+    pub const MODULE: SymbolKind = SymbolKind(2);
+    pub const NAMESPACE: SymbolKind = SymbolKind(3);
+    pub const PACKAGE: SymbolKind = SymbolKind(4);
+    pub const CLASS: SymbolKind = SymbolKind(5);
+    pub const METHOD: SymbolKind = SymbolKind(6);
+    pub const PROPERTY: SymbolKind = SymbolKind(7);
+    pub const FIELD: SymbolKind = SymbolKind(8);
+    pub const CONSTRUCTOR: SymbolKind = SymbolKind(9);
+    pub const ENUM: SymbolKind = SymbolKind(10);
+    pub const INTERFACE: SymbolKind = SymbolKind(11);
+    pub const FUNCTION: SymbolKind = SymbolKind(12);
+    pub const VARIABLE: SymbolKind = SymbolKind(13);
+    pub const CONSTANT: SymbolKind = SymbolKind(14);
+    pub const STRING: SymbolKind = SymbolKind(15);
+    pub const NUMBER: SymbolKind = SymbolKind(16);
+    pub const BOOLEAN: SymbolKind = SymbolKind(17);
+    pub const ARRAY: SymbolKind = SymbolKind(18);
+    pub const OBJECT: SymbolKind = SymbolKind(19);
+    pub const KEY: SymbolKind = SymbolKind(20);
+    pub const NULL: SymbolKind = SymbolKind(21);
+    pub const ENUM_MEMBER: SymbolKind = SymbolKind(22);
+    pub const STRUCT: SymbolKind = SymbolKind(23);
+    pub const EVENT: SymbolKind = SymbolKind(24);
+    pub const OPERATOR: SymbolKind = SymbolKind(25);
+    pub const TYPE_PARAMETER: SymbolKind = SymbolKind(26);
 
     // Capturing all unknown enums by this lib.
     pub const Unknown: SymbolKind = SymbolKind(255);
@@ -1511,14 +1511,14 @@ pub struct InitializeError {
 pub struct TextDocumentSyncKind(u8);
 impl TextDocumentSyncKind {
     /// Documents should not be synced at all.
-    pub const None: TextDocumentSyncKind = TextDocumentSyncKind(0);
+    pub const NONE: TextDocumentSyncKind = TextDocumentSyncKind(0);
 
     /// Documents are synced by always sending the full content of the document.
-    pub const Full: TextDocumentSyncKind = TextDocumentSyncKind(1);
+    pub const FULL: TextDocumentSyncKind = TextDocumentSyncKind(1);
 
     /// Documents are synced by sending the full content on open. After that only
     /// incremental updates to the document are sent.
-    pub const Incremental: TextDocumentSyncKind = TextDocumentSyncKind(2);
+    pub const INCREMENTAL: TextDocumentSyncKind = TextDocumentSyncKind(2);
 }
 
 pub type ExecuteCommandClientCapabilities = DynamicRegistrationClientCapabilities;
@@ -2015,13 +2015,13 @@ pub struct TextDocumentSaveReason(u8);
 impl TextDocumentSaveReason {
     /// Manually triggered, e.g. by the user pressing save, by starting debugging,
     /// or by an API call.
-    pub const Manual: TextDocumentSaveReason = TextDocumentSaveReason(1);
+    pub const MANUAL: TextDocumentSaveReason = TextDocumentSaveReason(1);
 
     /// Automatic after a delay.
-    pub const AfterDelay: TextDocumentSaveReason = TextDocumentSaveReason(2);
+    pub const AFTER_DELAY: TextDocumentSaveReason = TextDocumentSaveReason(2);
 
     /// When the editor lost focus.
-    pub const FocusOut: TextDocumentSaveReason = TextDocumentSaveReason(3);
+    pub const FOCUS_OUT: TextDocumentSaveReason = TextDocumentSaveReason(3);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2068,13 +2068,13 @@ pub struct DidChangeWatchedFilesParams {
 pub struct FileChangeType(u8);
 impl FileChangeType {
     /// The file got created.
-    pub const Created: FileChangeType = FileChangeType(1);
+    pub const CREATED: FileChangeType = FileChangeType(1);
 
     /// The file got changed.
-    pub const Changed: FileChangeType = FileChangeType(2);
+    pub const CHANGED: FileChangeType = FileChangeType(2);
 
     /// The file got deleted.
-    pub const Deleted: FileChangeType = FileChangeType(3);
+    pub const DELETED: FileChangeType = FileChangeType(3);
 }
 
 /// An event describing a file change.
@@ -2365,7 +2365,7 @@ pub struct PartialResultParams {
 pub struct SymbolTag(u8);
 impl SymbolTag {
     /// Render a symbol as obsolete, usually using a strike-out.
-    pub const Deprecated: SymbolTag = SymbolTag(1);
+    pub const DEPRECATED: SymbolTag = SymbolTag(1);
 }
 
 #[cfg(test)]

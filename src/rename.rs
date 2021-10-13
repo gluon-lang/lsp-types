@@ -67,7 +67,7 @@ pub struct PrepareSupportDefaultBehavior(u8);
 impl PrepareSupportDefaultBehavior {
     /// The client's default behavior is to select the identifier
     /// according the to language's syntax rule
-    pub const Identifier: PrepareSupportDefaultBehavior = PrepareSupportDefaultBehavior(1);
+    pub const IDENTIFIER: PrepareSupportDefaultBehavior = PrepareSupportDefaultBehavior(1);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

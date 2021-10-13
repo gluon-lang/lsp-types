@@ -15,8 +15,8 @@ use serde_json::Value;
 #[serde(transparent)]
 pub struct InsertTextFormat(u8);
 impl InsertTextFormat {
-    pub const PlainText: InsertTextFormat = InsertTextFormat(1);
-    pub const Snippet: InsertTextFormat = InsertTextFormat(2);
+    pub const PLAIN_TEXT: InsertTextFormat = InsertTextFormat(1);
+    pub const SNIPPET: InsertTextFormat = InsertTextFormat(2);
 }
 
 /// The kind of a completion entry.
@@ -24,31 +24,31 @@ impl InsertTextFormat {
 #[serde(transparent)]
 pub struct CompletionItemKind(u8);
 impl CompletionItemKind {
-    pub const Text: CompletionItemKind = CompletionItemKind(1);
-    pub const Method: CompletionItemKind = CompletionItemKind(2);
-    pub const Function: CompletionItemKind = CompletionItemKind(3);
-    pub const Constructor: CompletionItemKind = CompletionItemKind(4);
-    pub const Field: CompletionItemKind = CompletionItemKind(5);
-    pub const Variable: CompletionItemKind = CompletionItemKind(6);
-    pub const Class: CompletionItemKind = CompletionItemKind(7);
-    pub const Interface: CompletionItemKind = CompletionItemKind(8);
-    pub const Module: CompletionItemKind = CompletionItemKind(9);
-    pub const Property: CompletionItemKind = CompletionItemKind(10);
-    pub const Unit: CompletionItemKind = CompletionItemKind(11);
-    pub const Value: CompletionItemKind = CompletionItemKind(12);
-    pub const Enum: CompletionItemKind = CompletionItemKind(13);
-    pub const Keyword: CompletionItemKind = CompletionItemKind(14);
-    pub const Snippet: CompletionItemKind = CompletionItemKind(15);
-    pub const Color: CompletionItemKind = CompletionItemKind(16);
-    pub const File: CompletionItemKind = CompletionItemKind(17);
-    pub const Reference: CompletionItemKind = CompletionItemKind(18);
-    pub const Folder: CompletionItemKind = CompletionItemKind(19);
-    pub const EnumMember: CompletionItemKind = CompletionItemKind(20);
-    pub const Constant: CompletionItemKind = CompletionItemKind(21);
-    pub const Struct: CompletionItemKind = CompletionItemKind(22);
-    pub const Event: CompletionItemKind = CompletionItemKind(23);
-    pub const Operator: CompletionItemKind = CompletionItemKind(24);
-    pub const TypeParameter: CompletionItemKind = CompletionItemKind(25);
+    pub const TEXT: CompletionItemKind = CompletionItemKind(1);
+    pub const METHOD: CompletionItemKind = CompletionItemKind(2);
+    pub const FUNCTION: CompletionItemKind = CompletionItemKind(3);
+    pub const CONSTRUCTOR: CompletionItemKind = CompletionItemKind(4);
+    pub const FIELD: CompletionItemKind = CompletionItemKind(5);
+    pub const VARIABLE: CompletionItemKind = CompletionItemKind(6);
+    pub const CLASS: CompletionItemKind = CompletionItemKind(7);
+    pub const INTERFACE: CompletionItemKind = CompletionItemKind(8);
+    pub const MODULE: CompletionItemKind = CompletionItemKind(9);
+    pub const PROPERTY: CompletionItemKind = CompletionItemKind(10);
+    pub const UNIT: CompletionItemKind = CompletionItemKind(11);
+    pub const VALUE: CompletionItemKind = CompletionItemKind(12);
+    pub const ENUM: CompletionItemKind = CompletionItemKind(13);
+    pub const KEYWORD: CompletionItemKind = CompletionItemKind(14);
+    pub const SNIPPET: CompletionItemKind = CompletionItemKind(15);
+    pub const COLOR: CompletionItemKind = CompletionItemKind(16);
+    pub const FILE: CompletionItemKind = CompletionItemKind(17);
+    pub const REFERENCE: CompletionItemKind = CompletionItemKind(18);
+    pub const FOLDER: CompletionItemKind = CompletionItemKind(19);
+    pub const ENUM_MEMBER: CompletionItemKind = CompletionItemKind(20);
+    pub const CONSTANT: CompletionItemKind = CompletionItemKind(21);
+    pub const STRUCT: CompletionItemKind = CompletionItemKind(22);
+    pub const EVENT: CompletionItemKind = CompletionItemKind(23);
+    pub const OPERATOR: CompletionItemKind = CompletionItemKind(24);
+    pub const TYPE_PARAMETER: CompletionItemKind = CompletionItemKind(25);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -150,7 +150,7 @@ impl InsertTextMode {
     /// inserted using the indentation defined in the string value.
     /// The client will not apply any kind of adjustments to the
     /// string.
-    pub const AsIs: InsertTextMode = InsertTextMode(1);
+    pub const AS_IS: InsertTextMode = InsertTextMode(1);
 
     /// The editor adjusts leading whitespace of new lines so that
     /// they match the indentation up to the cursor of the line for
@@ -159,14 +159,14 @@ impl InsertTextMode {
     /// Consider a line like this: <2tabs><cursor><3tabs>foo. Accepting a
     /// multi line completion item is indented using 2 tabs all
     /// following lines inserted will be indented using 2 tabs as well.
-    pub const AdjustIndentation: InsertTextMode = InsertTextMode(2);
+    pub const ADJUST_INDENTATION: InsertTextMode = InsertTextMode(2);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct CompletionItemTag(u8);
 impl CompletionItemTag {
-    pub const Deprecated: CompletionItemTag = CompletionItemTag(1);
+    pub const DEPRECATED: CompletionItemTag = CompletionItemTag(1);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -369,9 +369,9 @@ pub struct CompletionContext {
 #[serde(transparent)]
 pub struct CompletionTriggerKind(u8);
 impl CompletionTriggerKind {
-    pub const Invoked: CompletionTriggerKind = CompletionTriggerKind(1);
-    pub const TriggerCharacter: CompletionTriggerKind = CompletionTriggerKind(2);
-    pub const TriggerForIncompleteCompletions: CompletionTriggerKind = CompletionTriggerKind(3);
+    pub const INVOKED: CompletionTriggerKind = CompletionTriggerKind(1);
+    pub const TRIGGER_CHARACTER: CompletionTriggerKind = CompletionTriggerKind(2);
+    pub const TRIGGER_FOR_INCOMPLETE_COMPLETIONS: CompletionTriggerKind = CompletionTriggerKind(3);
 }
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
@@ -564,7 +564,7 @@ mod tests {
 
         let mut t = CompletionItemCapability::default();
         t.tag_support = Some(TagSupport {
-            value_set: vec![CompletionItemTag::Deprecated],
+            value_set: vec![CompletionItemTag::DEPRECATED],
         });
         test_deserialization(r#"{"tagSupport": {"valueSet": [1]}}"#, &t);
     }

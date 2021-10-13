@@ -10,17 +10,16 @@ use crate::Range;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
-
 pub struct MessageType(u8);
 impl MessageType {
     /// An error message.
-    pub const Error: MessageType = MessageType(1);
+    pub const ERROR: MessageType = MessageType(1);
     /// A warning message.
-    pub const Warning: MessageType = MessageType(2);
+    pub const WARNING: MessageType = MessageType(2);
     /// An information message;
-    pub const Info: MessageType = MessageType(3);
+    pub const INFO: MessageType = MessageType(3);
     /// A log message.
-    pub const Log: MessageType = MessageType(4);
+    pub const LOG: MessageType = MessageType(4);
 }
 
 /// Window specific client capabilities.
