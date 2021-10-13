@@ -1,8 +1,6 @@
 use crate::{Range, TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams};
 use serde::{Deserialize, Serialize};
 
-use serde_repr::{Deserialize_repr, Serialize_repr};
-
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenameParams {
@@ -63,12 +61,13 @@ pub struct RenameClientCapabilities {
     pub honors_change_annotations: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize_repr, Deserialize_repr)]
-#[repr(u8)]
-pub enum PrepareSupportDefaultBehavior {
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct PrepareSupportDefaultBehavior(u8);
+impl PrepareSupportDefaultBehavior {
     /// The client's default behavior is to select the identifier
     /// according the to language's syntax rule
-    Identifier = 1,
+    pub const Identifier: PrepareSupportDefaultBehavior = PrepareSupportDefaultBehavior(1);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

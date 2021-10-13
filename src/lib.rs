@@ -21,7 +21,6 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 extern crate bitflags;
 
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 pub use url::Url;
 
@@ -289,17 +288,18 @@ impl Diagnostic {
 }
 
 /// The protocol currently supports the following diagnostic severities:
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum DiagnosticSeverity {
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct DiagnosticSeverity(u8);
+impl DiagnosticSeverity {
     /// Reports an error.
-    Error = 1,
+    pub const Error: DiagnosticSeverity = DiagnosticSeverity(1);
     /// Reports a warning.
-    Warning = 2,
+    pub const Warning: DiagnosticSeverity = DiagnosticSeverity(2);
     /// Reports an information.
-    Information = 3,
+    pub const Information: DiagnosticSeverity = DiagnosticSeverity(3);
     /// Reports a hint.
-    Hint = 4,
+    pub const Hint: DiagnosticSeverity = DiagnosticSeverity(4);
 }
 
 /// Represents a related message and source code location for a diagnostic. This
@@ -315,17 +315,18 @@ pub struct DiagnosticRelatedInformation {
 }
 
 /// The diagnostic tags.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum DiagnosticTag {
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct DiagnosticTag(u8);
+impl DiagnosticTag {
     /// Unused or unnecessary code.
     /// Clients are allowed to render diagnostics with this tag faded out instead of having
     /// an error squiggle.
-    Unnecessary = 1,
+    pub const Unnecessary: DiagnosticTag = DiagnosticTag(1);
 
     /// Deprecated or obsolete code.
     /// Clients are allowed to rendered diagnostics with this tag strike through.
-    Deprecated = 2,
+    pub const Deprecated: DiagnosticTag = DiagnosticTag(2);
 }
 
 /// Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
@@ -1066,38 +1067,39 @@ pub enum FailureHandlingKind {
 }
 
 /// A symbol kind.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize_repr, Deserialize_repr)]
-#[repr(u8)]
-pub enum SymbolKind {
-    File = 1,
-    Module = 2,
-    Namespace = 3,
-    Package = 4,
-    Class = 5,
-    Method = 6,
-    Property = 7,
-    Field = 8,
-    Constructor = 9,
-    Enum = 10,
-    Interface = 11,
-    Function = 12,
-    Variable = 13,
-    Constant = 14,
-    String = 15,
-    Number = 16,
-    Boolean = 17,
-    Array = 18,
-    Object = 19,
-    Key = 20,
-    Null = 21,
-    EnumMember = 22,
-    Struct = 23,
-    Event = 24,
-    Operator = 25,
-    TypeParameter = 26,
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct SymbolKind(u8);
+impl SymbolKind {
+    pub const File: SymbolKind = SymbolKind(1);
+    pub const Module: SymbolKind = SymbolKind(2);
+    pub const Namespace: SymbolKind = SymbolKind(3);
+    pub const Package: SymbolKind = SymbolKind(4);
+    pub const Class: SymbolKind = SymbolKind(5);
+    pub const Method: SymbolKind = SymbolKind(6);
+    pub const Property: SymbolKind = SymbolKind(7);
+    pub const Field: SymbolKind = SymbolKind(8);
+    pub const Constructor: SymbolKind = SymbolKind(9);
+    pub const Enum: SymbolKind = SymbolKind(10);
+    pub const Interface: SymbolKind = SymbolKind(11);
+    pub const Function: SymbolKind = SymbolKind(12);
+    pub const Variable: SymbolKind = SymbolKind(13);
+    pub const Constant: SymbolKind = SymbolKind(14);
+    pub const String: SymbolKind = SymbolKind(15);
+    pub const Number: SymbolKind = SymbolKind(16);
+    pub const Boolean: SymbolKind = SymbolKind(17);
+    pub const Array: SymbolKind = SymbolKind(18);
+    pub const Object: SymbolKind = SymbolKind(19);
+    pub const Key: SymbolKind = SymbolKind(20);
+    pub const Null: SymbolKind = SymbolKind(21);
+    pub const EnumMember: SymbolKind = SymbolKind(22);
+    pub const Struct: SymbolKind = SymbolKind(23);
+    pub const Event: SymbolKind = SymbolKind(24);
+    pub const Operator: SymbolKind = SymbolKind(25);
+    pub const TypeParameter: SymbolKind = SymbolKind(26);
 
     // Capturing all unknown enums by this lib.
-    Unknown = 255,
+    pub const Unknown: SymbolKind = SymbolKind(255);
 }
 
 /// Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
@@ -1504,18 +1506,19 @@ pub struct InitializeError {
 // The server can signal the following capabilities:
 
 /// Defines how the host (editor) should sync document changes to the language server.
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum TextDocumentSyncKind {
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct TextDocumentSyncKind(u8);
+impl TextDocumentSyncKind {
     /// Documents should not be synced at all.
-    None = 0,
+    pub const None: TextDocumentSyncKind = TextDocumentSyncKind(0);
 
     /// Documents are synced by always sending the full content of the document.
-    Full = 1,
+    pub const Full: TextDocumentSyncKind = TextDocumentSyncKind(1);
 
     /// Documents are synced by sending the full content on open. After that only
     /// incremental updates to the document are sent.
-    Incremental = 2,
+    pub const Incremental: TextDocumentSyncKind = TextDocumentSyncKind(2);
 }
 
 pub type ExecuteCommandClientCapabilities = DynamicRegistrationClientCapabilities;
@@ -2006,18 +2009,19 @@ pub struct WillSaveTextDocumentParams {
 }
 
 /// Represents reasons why a text document is saved.
-#[derive(Copy, Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum TextDocumentSaveReason {
+#[derive(Copy, Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct TextDocumentSaveReason(u8);
+impl TextDocumentSaveReason {
     /// Manually triggered, e.g. by the user pressing save, by starting debugging,
     /// or by an API call.
-    Manual = 1,
+    pub const Manual: TextDocumentSaveReason = TextDocumentSaveReason(1);
 
     /// Automatic after a delay.
-    AfterDelay = 2,
+    pub const AfterDelay: TextDocumentSaveReason = TextDocumentSaveReason(2);
 
     /// When the editor lost focus.
-    FocusOut = 3,
+    pub const FocusOut: TextDocumentSaveReason = TextDocumentSaveReason(3);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2059,17 +2063,18 @@ pub struct DidChangeWatchedFilesParams {
 }
 
 /// The file event type.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum FileChangeType {
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct FileChangeType(u8);
+impl FileChangeType {
     /// The file got created.
-    Created = 1,
+    pub const Created: FileChangeType = FileChangeType(1);
 
     /// The file got changed.
-    Changed = 2,
+    pub const Changed: FileChangeType = FileChangeType(2);
 
     /// The file got deleted.
-    Deleted = 3,
+    pub const Deleted: FileChangeType = FileChangeType(3);
 }
 
 /// An event describing a file change.
@@ -2355,11 +2360,12 @@ pub struct PartialResultParams {
 
 /// Symbol tags are extra annotations that tweak the rendering of a symbol.
 /// Since 3.15
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum SymbolTag {
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct SymbolTag(u8);
+impl SymbolTag {
     /// Render a symbol as obsolete, usually using a strike-out.
-    Deprecated = 1,
+    pub const Deprecated: SymbolTag = SymbolTag(1);
 }
 
 #[cfg(test)]
