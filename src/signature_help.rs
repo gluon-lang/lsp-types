@@ -85,7 +85,7 @@ pub struct SignatureHelpRegistrationOptions {
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct SignatureHelpTriggerKind(u8);
+pub struct SignatureHelpTriggerKind(i32);
 impl SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
     pub const INVOKED: SignatureHelpTriggerKind = SignatureHelpTriggerKind(1);

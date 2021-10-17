@@ -13,7 +13,7 @@ use serde_json::Value;
 /// Defines how to interpret the insert text in a completion item
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct InsertTextFormat(u8);
+pub struct InsertTextFormat(i32);
 impl InsertTextFormat {
     pub const PLAIN_TEXT: InsertTextFormat = InsertTextFormat(1);
     pub const SNIPPET: InsertTextFormat = InsertTextFormat(2);
@@ -22,7 +22,7 @@ impl InsertTextFormat {
 /// The kind of a completion entry.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct CompletionItemKind(u8);
+pub struct CompletionItemKind(i32);
 impl CompletionItemKind {
     pub const TEXT: CompletionItemKind = CompletionItemKind(1);
     pub const METHOD: CompletionItemKind = CompletionItemKind(2);
@@ -143,7 +143,7 @@ pub struct InsertTextModeSupport {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct InsertTextMode(u8);
+pub struct InsertTextMode(i32);
 impl InsertTextMode {
     /// The insertion or replace strings is taken as it is. If the
     /// value is multi line the lines below the cursor will be
@@ -164,7 +164,7 @@ impl InsertTextMode {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct CompletionItemTag(u8);
+pub struct CompletionItemTag(i32);
 impl CompletionItemTag {
     pub const DEPRECATED: CompletionItemTag = CompletionItemTag(1);
 }
@@ -367,7 +367,7 @@ pub struct CompletionContext {
 /// How a completion was triggered.
 #[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct CompletionTriggerKind(u8);
+pub struct CompletionTriggerKind(i32);
 impl CompletionTriggerKind {
     pub const INVOKED: CompletionTriggerKind = CompletionTriggerKind(1);
     pub const TRIGGER_CHARACTER: CompletionTriggerKind = CompletionTriggerKind(2);

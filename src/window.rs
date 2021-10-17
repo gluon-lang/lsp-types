@@ -10,7 +10,7 @@ use crate::Range;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct MessageType(u8);
+pub struct MessageType(i32);
 impl MessageType {
     /// An error message.
     pub const ERROR: MessageType = MessageType(1);

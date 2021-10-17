@@ -290,7 +290,7 @@ impl Diagnostic {
 /// The protocol currently supports the following diagnostic severities:
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct DiagnosticSeverity(u8);
+pub struct DiagnosticSeverity(i32);
 impl DiagnosticSeverity {
     /// Reports an error.
     pub const ERROR: DiagnosticSeverity = DiagnosticSeverity(1);
@@ -317,7 +317,7 @@ pub struct DiagnosticRelatedInformation {
 /// The diagnostic tags.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct DiagnosticTag(u8);
+pub struct DiagnosticTag(i32);
 impl DiagnosticTag {
     /// Unused or unnecessary code.
     /// Clients are allowed to render diagnostics with this tag faded out instead of having
@@ -1069,7 +1069,7 @@ pub enum FailureHandlingKind {
 /// A symbol kind.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct SymbolKind(u8);
+pub struct SymbolKind(i32);
 impl SymbolKind {
     pub const FILE: SymbolKind = SymbolKind(1);
     pub const MODULE: SymbolKind = SymbolKind(2);
@@ -1508,7 +1508,7 @@ pub struct InitializeError {
 /// Defines how the host (editor) should sync document changes to the language server.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct TextDocumentSyncKind(u8);
+pub struct TextDocumentSyncKind(i32);
 impl TextDocumentSyncKind {
     /// Documents should not be synced at all.
     pub const NONE: TextDocumentSyncKind = TextDocumentSyncKind(0);
@@ -2011,7 +2011,7 @@ pub struct WillSaveTextDocumentParams {
 /// Represents reasons why a text document is saved.
 #[derive(Copy, Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct TextDocumentSaveReason(u8);
+pub struct TextDocumentSaveReason(i32);
 impl TextDocumentSaveReason {
     /// Manually triggered, e.g. by the user pressing save, by starting debugging,
     /// or by an API call.
@@ -2065,7 +2065,7 @@ pub struct DidChangeWatchedFilesParams {
 /// The file event type.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct FileChangeType(u8);
+pub struct FileChangeType(i32);
 impl FileChangeType {
     /// The file got created.
     pub const CREATED: FileChangeType = FileChangeType(1);
@@ -2362,7 +2362,7 @@ pub struct PartialResultParams {
 /// Since 3.15
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct SymbolTag(u8);
+pub struct SymbolTag(i32);
 impl SymbolTag {
     /// Render a symbol as obsolete, usually using a strike-out.
     pub const DEPRECATED: SymbolTag = SymbolTag(1);

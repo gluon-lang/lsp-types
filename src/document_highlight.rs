@@ -36,7 +36,7 @@ pub struct DocumentHighlight {
 /// A document highlight kind.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct DocumentHighlightKind(u8);
+pub struct DocumentHighlightKind(i32);
 impl DocumentHighlightKind {
     /// A textual occurrance.
     pub const TEXT: DocumentHighlightKind = DocumentHighlightKind(1);

@@ -63,7 +63,7 @@ pub struct RenameClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct PrepareSupportDefaultBehavior(u8);
+pub struct PrepareSupportDefaultBehavior(i32);
 impl PrepareSupportDefaultBehavior {
     /// The client's default behavior is to select the identifier
     /// according the to language's syntax rule
