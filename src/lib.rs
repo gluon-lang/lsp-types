@@ -1097,9 +1097,6 @@ impl SymbolKind {
     pub const EVENT: SymbolKind = SymbolKind(24);
     pub const OPERATOR: SymbolKind = SymbolKind(25);
     pub const TYPE_PARAMETER: SymbolKind = SymbolKind(26);
-
-    // Capturing all unknown enums by this lib.
-    pub const Unknown: SymbolKind = SymbolKind(255);
 }
 
 /// Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
