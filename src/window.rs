@@ -4,23 +4,22 @@ use serde::{Deserialize, Serialize};
 
 use serde_json::Value;
 
-use serde_repr::{Deserialize_repr, Serialize_repr};
-
 use url::Url;
 
 use crate::Range;
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum MessageType {
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct MessageType(i32);
+impl MessageType {
     /// An error message.
-    Error = 1,
+    pub const ERROR: MessageType = MessageType(1);
     /// A warning message.
-    Warning = 2,
-    /// An information message.
-    Info = 3,
+    pub const WARNING: MessageType = MessageType(2);
+    /// An information message;
+    pub const INFO: MessageType = MessageType(3);
     /// A log message.
-    Log = 4,
+    pub const LOG: MessageType = MessageType(4);
 }
 
 /// Window specific client capabilities.

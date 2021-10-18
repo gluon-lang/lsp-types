@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::{
     DynamicRegistrationClientCapabilities, PartialResultParams, Range, TextDocumentPositionParams,
@@ -35,15 +34,16 @@ pub struct DocumentHighlight {
 }
 
 /// A document highlight kind.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum DocumentHighlightKind {
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct DocumentHighlightKind(i32);
+impl DocumentHighlightKind {
     /// A textual occurrance.
-    Text = 1,
+    pub const TEXT: DocumentHighlightKind = DocumentHighlightKind(1);
 
     /// Read-access of a symbol, like reading a variable.
-    Read = 2,
+    pub const READ: DocumentHighlightKind = DocumentHighlightKind(2);
 
     /// Write-access of a symbol, like writing to a variable.
-    Write = 3,
+    pub const WRITE: DocumentHighlightKind = DocumentHighlightKind(3);
 }

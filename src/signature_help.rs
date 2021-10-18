@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::{
     Documentation, MarkupKind, TextDocumentPositionParams, TextDocumentRegistrationOptions,
@@ -82,16 +81,18 @@ pub struct SignatureHelpRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 }
+
 /// Signature help options.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
-pub enum SignatureHelpTriggerKind {
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct SignatureHelpTriggerKind(i32);
+impl SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
-    Invoked = 1,
+    pub const INVOKED: SignatureHelpTriggerKind = SignatureHelpTriggerKind(1);
     ///  Signature help was triggered by a trigger character.
-    TriggerCharacter = 2,
+    pub const TRIGGER_CHARACTER: SignatureHelpTriggerKind = SignatureHelpTriggerKind(2);
     /// Signature help was triggered by the cursor moving or by the document content changing.
-    ContentChange = 3,
+    pub const CONTENT_CHANGE: SignatureHelpTriggerKind = SignatureHelpTriggerKind(3);
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
