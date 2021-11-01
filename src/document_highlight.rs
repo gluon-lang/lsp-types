@@ -34,9 +34,10 @@ pub struct DocumentHighlight {
 }
 
 /// A document highlight kind.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct DocumentHighlightKind(i32);
+lsp_enum! {
 impl DocumentHighlightKind {
     /// A textual occurrance.
     pub const TEXT: DocumentHighlightKind = DocumentHighlightKind(1);
@@ -46,4 +47,5 @@ impl DocumentHighlightKind {
 
     /// Write-access of a symbol, like writing to a variable.
     pub const WRITE: DocumentHighlightKind = DocumentHighlightKind(3);
+}
 }

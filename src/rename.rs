@@ -61,13 +61,15 @@ pub struct RenameClientCapabilities {
     pub honors_change_annotations: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct PrepareSupportDefaultBehavior(i32);
+lsp_enum! {
 impl PrepareSupportDefaultBehavior {
     /// The client's default behavior is to select the identifier
     /// according the to language's syntax rule
     pub const IDENTIFIER: PrepareSupportDefaultBehavior = PrepareSupportDefaultBehavior(1);
+}
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

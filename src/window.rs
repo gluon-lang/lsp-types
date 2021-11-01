@@ -8,9 +8,10 @@ use url::Url;
 
 use crate::Range;
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct MessageType(i32);
+lsp_enum! {
 impl MessageType {
     /// An error message.
     pub const ERROR: MessageType = MessageType(1);
@@ -20,6 +21,7 @@ impl MessageType {
     pub const INFO: MessageType = MessageType(3);
     /// A log message.
     pub const LOG: MessageType = MessageType(4);
+}
 }
 
 /// Window specific client capabilities.
