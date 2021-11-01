@@ -83,9 +83,10 @@ pub struct SignatureHelpRegistrationOptions {
 }
 
 /// Signature help options.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct SignatureHelpTriggerKind(i32);
+lsp_enum! {
 impl SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
     pub const INVOKED: SignatureHelpTriggerKind = SignatureHelpTriggerKind(1);
@@ -93,6 +94,7 @@ impl SignatureHelpTriggerKind {
     pub const TRIGGER_CHARACTER: SignatureHelpTriggerKind = SignatureHelpTriggerKind(2);
     /// Signature help was triggered by the cursor moving or by the document content changing.
     pub const CONTENT_CHANGE: SignatureHelpTriggerKind = SignatureHelpTriggerKind(3);
+}
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

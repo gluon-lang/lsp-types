@@ -11,18 +11,21 @@ use serde_json::Value;
 use std::fmt::Debug;
 
 /// Defines how to interpret the insert text in a completion item
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct InsertTextFormat(i32);
+lsp_enum! {
 impl InsertTextFormat {
     pub const PLAIN_TEXT: InsertTextFormat = InsertTextFormat(1);
     pub const SNIPPET: InsertTextFormat = InsertTextFormat(2);
+}
 }
 
 /// The kind of a completion entry.
 #[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CompletionItemKind(i32);
+lsp_enum! {
 impl CompletionItemKind {
     pub const TEXT: CompletionItemKind = CompletionItemKind(1);
     pub const METHOD: CompletionItemKind = CompletionItemKind(2);
@@ -50,38 +53,6 @@ impl CompletionItemKind {
     pub const OPERATOR: CompletionItemKind = CompletionItemKind(24);
     pub const TYPE_PARAMETER: CompletionItemKind = CompletionItemKind(25);
 }
-
-impl Debug for CompletionItemKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match *self {
-            Self::TEXT => write!(f, "Text"),
-            Self::METHOD => write!(f, "Method"),
-            Self::FUNCTION => write!(f, "Function"),
-            Self::CONSTRUCTOR => write!(f, "Constructor"),
-            Self::FIELD => write!(f, "Field"),
-            Self::VARIABLE => write!(f, "Variable"),
-            Self::CLASS => write!(f, "Class"),
-            Self::INTERFACE => write!(f, "Interface"),
-            Self::MODULE => write!(f, "Module"),
-            Self::PROPERTY => write!(f, "Property"),
-            Self::UNIT => write!(f, "Unit"),
-            Self::VALUE => write!(f, "Value"),
-            Self::ENUM => write!(f, "Enum"),
-            Self::KEYWORD => write!(f, "Keyword"),
-            Self::SNIPPET => write!(f, "Snippet"),
-            Self::COLOR => write!(f, "Color"),
-            Self::FILE => write!(f, "File"),
-            Self::REFERENCE => write!(f, "Reference"),
-            Self::FOLDER => write!(f, "Folder"),
-            Self::ENUM_MEMBER => write!(f, "EnumMember"),
-            Self::CONSTANT => write!(f, "Constant"),
-            Self::STRUCT => write!(f, "Struct"),
-            Self::EVENT => write!(f, "Event"),
-            Self::OPERATOR => write!(f, "Operator"),
-            Self::TYPE_PARAMETER => write!(f, "TypeParameter"),
-            _ => write!(f, "CompletionItemKind({})", self.0),
-        }
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -174,9 +145,10 @@ pub struct InsertTextModeSupport {
 /// item insertion.
 ///
 /// @since 3.16.0
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct InsertTextMode(i32);
+lsp_enum! {
 impl InsertTextMode {
     /// The insertion or replace strings is taken as it is. If the
     /// value is multi line the lines below the cursor will be
@@ -194,12 +166,15 @@ impl InsertTextMode {
     /// following lines inserted will be indented using 2 tabs as well.
     pub const ADJUST_INDENTATION: InsertTextMode = InsertTextMode(2);
 }
+}
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct CompletionItemTag(i32);
+lsp_enum! {
 impl CompletionItemTag {
     pub const DEPRECATED: CompletionItemTag = CompletionItemTag(1);
+}
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -398,13 +373,15 @@ pub struct CompletionContext {
 }
 
 /// How a completion was triggered.
-#[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct CompletionTriggerKind(i32);
+lsp_enum! {
 impl CompletionTriggerKind {
     pub const INVOKED: CompletionTriggerKind = CompletionTriggerKind(1);
     pub const TRIGGER_CHARACTER: CompletionTriggerKind = CompletionTriggerKind(2);
     pub const TRIGGER_FOR_INCOMPLETE_COMPLETIONS: CompletionTriggerKind = CompletionTriggerKind(3);
+}
 }
 
 /// Represents a collection of [completion items](#CompletionItem) to be presented
@@ -600,5 +577,14 @@ mod tests {
             value_set: vec![CompletionItemTag::DEPRECATED],
         });
         test_deserialization(r#"{"tagSupport": {"valueSet": [1]}}"#, &t);
+    }
+
+    #[test]
+    fn test_debug_enum() {
+        assert_eq!(format!("{:?}", CompletionItemKind::TEXT), "Text");
+        assert_eq!(
+            format!("{:?}", CompletionItemKind::TYPE_PARAMETER),
+            "TypeParameter"
+        );
     }
 }

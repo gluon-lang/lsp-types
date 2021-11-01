@@ -30,6 +30,40 @@ use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
 
+fn fmt_pascal_case(f: &mut std::fmt::Formatter<'_>, name: &str) -> std::fmt::Result {
+    for word in name.split('_') {
+        let mut chars = word.chars();
+        let first = chars.next().unwrap();
+        write!(f, "{}", first)?;
+        for rest in chars {
+            write!(f, "{}", rest.to_lowercase())?;
+        }
+    }
+    Ok(())
+}
+
+macro_rules! lsp_enum {
+    (impl $typ: ty { $( $(#[$attr:meta])* pub const $name: ident : $enum_type: ty = $value: expr; )* }) => {
+        impl $typ {
+            $(
+            $(#[$attr])*
+            pub const $name: $enum_type = $value;
+            )*
+        }
+
+        impl std::fmt::Debug for $typ {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                match *self {
+                    $(
+                    Self::$name => crate::fmt_pascal_case(f, stringify!($name)),
+                    )*
+                    _ => write!(f, "{}({})", stringify!($typ), self.0),
+                }
+            }
+        }
+    }
+}
+
 pub mod error_codes;
 pub mod notification;
 pub mod request;
@@ -288,9 +322,10 @@ impl Diagnostic {
 }
 
 /// The protocol currently supports the following diagnostic severities:
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct DiagnosticSeverity(i32);
+lsp_enum! {
 impl DiagnosticSeverity {
     /// Reports an error.
     pub const ERROR: DiagnosticSeverity = DiagnosticSeverity(1);
@@ -300,6 +335,7 @@ impl DiagnosticSeverity {
     pub const INFORMATION: DiagnosticSeverity = DiagnosticSeverity(3);
     /// Reports a hint.
     pub const HINT: DiagnosticSeverity = DiagnosticSeverity(4);
+}
 }
 
 /// Represents a related message and source code location for a diagnostic. This
@@ -315,9 +351,10 @@ pub struct DiagnosticRelatedInformation {
 }
 
 /// The diagnostic tags.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct DiagnosticTag(i32);
+lsp_enum! {
 impl DiagnosticTag {
     /// Unused or unnecessary code.
     /// Clients are allowed to render diagnostics with this tag faded out instead of having
@@ -327,6 +364,7 @@ impl DiagnosticTag {
     /// Deprecated or obsolete code.
     /// Clients are allowed to rendered diagnostics with this tag strike through.
     pub const DEPRECATED: DiagnosticTag = DiagnosticTag(2);
+}
 }
 
 /// Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
@@ -1070,6 +1108,7 @@ pub enum FailureHandlingKind {
 #[derive(Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct SymbolKind(i32);
+lsp_enum! {
 impl SymbolKind {
     pub const FILE: SymbolKind = SymbolKind(1);
     pub const MODULE: SymbolKind = SymbolKind(2);
@@ -1098,39 +1137,6 @@ impl SymbolKind {
     pub const OPERATOR: SymbolKind = SymbolKind(25);
     pub const TYPE_PARAMETER: SymbolKind = SymbolKind(26);
 }
-
-impl Debug for SymbolKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match *self {
-            Self::FILE => write!(f, "File"),
-            Self::MODULE => write!(f, "Module"),
-            Self::NAMESPACE => write!(f, "Namespace"),
-            Self::PACKAGE => write!(f, "Package"),
-            Self::CLASS => write!(f, "Class"),
-            Self::METHOD => write!(f, "Method"),
-            Self::PROPERTY => write!(f, "Property"),
-            Self::FIELD => write!(f, "Field"),
-            Self::CONSTRUCTOR => write!(f, "Constructor"),
-            Self::ENUM => write!(f, "Enum"),
-            Self::INTERFACE => write!(f, "Interface"),
-            Self::FUNCTION => write!(f, "Function"),
-            Self::VARIABLE => write!(f, "Variable"),
-            Self::CONSTANT => write!(f, "Constant"),
-            Self::STRING => write!(f, "String"),
-            Self::NUMBER => write!(f, "Number"),
-            Self::BOOLEAN => write!(f, "Boolean"),
-            Self::ARRAY => write!(f, "Array"),
-            Self::OBJECT => write!(f, "Object"),
-            Self::KEY => write!(f, "Key"),
-            Self::NULL => write!(f, "Null"),
-            Self::ENUM_MEMBER => write!(f, "EnumMember"),
-            Self::STRUCT => write!(f, "Struct"),
-            Self::EVENT => write!(f, "Event"),
-            Self::OPERATOR => write!(f, "Operator"),
-            Self::TYPE_PARAMETER => write!(f, "TypeParameter"),
-            _ => write!(f, "SymbolKind({})", self.0),
-        }
-    }
 }
 
 /// Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
@@ -1537,9 +1543,10 @@ pub struct InitializeError {
 // The server can signal the following capabilities:
 
 /// Defines how the host (editor) should sync document changes to the language server.
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct TextDocumentSyncKind(i32);
+lsp_enum! {
 impl TextDocumentSyncKind {
     /// Documents should not be synced at all.
     pub const NONE: TextDocumentSyncKind = TextDocumentSyncKind(0);
@@ -1550,6 +1557,7 @@ impl TextDocumentSyncKind {
     /// Documents are synced by sending the full content on open. After that only
     /// incremental updates to the document are sent.
     pub const INCREMENTAL: TextDocumentSyncKind = TextDocumentSyncKind(2);
+}
 }
 
 pub type ExecuteCommandClientCapabilities = DynamicRegistrationClientCapabilities;
@@ -2040,9 +2048,10 @@ pub struct WillSaveTextDocumentParams {
 }
 
 /// Represents reasons why a text document is saved.
-#[derive(Copy, Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Copy, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct TextDocumentSaveReason(i32);
+lsp_enum! {
 impl TextDocumentSaveReason {
     /// Manually triggered, e.g. by the user pressing save, by starting debugging,
     /// or by an API call.
@@ -2053,6 +2062,7 @@ impl TextDocumentSaveReason {
 
     /// When the editor lost focus.
     pub const FOCUS_OUT: TextDocumentSaveReason = TextDocumentSaveReason(3);
+}
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2094,9 +2104,10 @@ pub struct DidChangeWatchedFilesParams {
 }
 
 /// The file event type.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct FileChangeType(i32);
+lsp_enum! {
 impl FileChangeType {
     /// The file got created.
     pub const CREATED: FileChangeType = FileChangeType(1);
@@ -2106,6 +2117,7 @@ impl FileChangeType {
 
     /// The file got deleted.
     pub const DELETED: FileChangeType = FileChangeType(3);
+}
 }
 
 /// An event describing a file change.
@@ -2391,12 +2403,14 @@ pub struct PartialResultParams {
 
 /// Symbol tags are extra annotations that tweak the rendering of a symbol.
 /// Since 3.15
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct SymbolTag(i32);
+lsp_enum! {
 impl SymbolTag {
     /// Render a symbol as obsolete, usually using a strike-out.
     pub const DEPRECATED: SymbolTag = SymbolTag(1);
+}
 }
 
 #[cfg(test)]
