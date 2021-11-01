@@ -30,6 +30,18 @@ use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
 
+fn fmt_pascal_case(f: &mut std::fmt::Formatter<'_>, name: &str) -> std::fmt::Result {
+    for word in name.split('_') {
+        let mut chars = word.chars();
+        let first = chars.next().unwrap();
+        write!(f, "{}", first)?;
+        for rest in chars {
+            write!(f, "{}", rest.to_lowercase())?;
+        }
+    }
+    Ok(())
+}
+
 macro_rules! lsp_enum {
     (impl $typ: ty { $( $(#[$attr:meta])* pub const $name: ident : $enum_type: ty = $value: expr; )* }) => {
         impl $typ {
@@ -43,20 +55,10 @@ macro_rules! lsp_enum {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match *self {
                     $(
-                    Self::$name => {
-                        for word in stringify!($name).split('_') {
-                            let mut chars = word.chars();
-                            let first = chars.next().unwrap();
-                            write!(f, "{}", first)?;
-                            for rest in chars {
-                                write!(f, "{}", rest.to_lowercase())?;
-                            }
-                        }
-                    }
+                    Self::$name => crate::fmt_pascal_case(f, stringify!($name)),
                     )*
-                    _ => write!(f, "{}({})", stringify!($typ), self.0)?,
+                    _ => write!(f, "{}({})", stringify!($typ), self.0),
                 }
-                Ok(())
             }
         }
     }
