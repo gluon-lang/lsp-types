@@ -7,8 +7,8 @@ use crate::{
 };
 
 use crate::Range;
-
 use serde_json::Value;
+use std::fmt::Debug;
 
 /// Defines how to interpret the insert text in a completion item
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ impl InsertTextFormat {
 }
 
 /// The kind of a completion entry.
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CompletionItemKind(i32);
 impl CompletionItemKind {
@@ -49,6 +49,39 @@ impl CompletionItemKind {
     pub const EVENT: CompletionItemKind = CompletionItemKind(23);
     pub const OPERATOR: CompletionItemKind = CompletionItemKind(24);
     pub const TYPE_PARAMETER: CompletionItemKind = CompletionItemKind(25);
+}
+
+impl Debug for CompletionItemKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            Self::TEXT => write!(f, "Text"),
+            Self::METHOD => write!(f, "Method"),
+            Self::FUNCTION => write!(f, "Function"),
+            Self::CONSTRUCTOR => write!(f, "Constructor"),
+            Self::FIELD => write!(f, "Field"),
+            Self::VARIABLE => write!(f, "Variable"),
+            Self::CLASS => write!(f, "Class"),
+            Self::INTERFACE => write!(f, "Interface"),
+            Self::MODULE => write!(f, "Module"),
+            Self::PROPERTY => write!(f, "Property"),
+            Self::UNIT => write!(f, "Unit"),
+            Self::VALUE => write!(f, "Value"),
+            Self::ENUM => write!(f, "Enum"),
+            Self::KEYWORD => write!(f, "Keyword"),
+            Self::SNIPPET => write!(f, "Snippet"),
+            Self::COLOR => write!(f, "Color"),
+            Self::FILE => write!(f, "File"),
+            Self::REFERENCE => write!(f, "Reference"),
+            Self::FOLDER => write!(f, "Folder"),
+            Self::ENUM_MEMBER => write!(f, "EnumMember"),
+            Self::CONSTANT => write!(f, "Constant"),
+            Self::STRUCT => write!(f, "Struct"),
+            Self::EVENT => write!(f, "Event"),
+            Self::OPERATOR => write!(f, "Operator"),
+            Self::TYPE_PARAMETER => write!(f, "TypeParameter"),
+            _ => write!(f, "CompletionItemKind({})", self.0),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

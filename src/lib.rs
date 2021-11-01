@@ -21,7 +21,7 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 extern crate bitflags;
 
 use serde::{Deserialize, Serialize};
-
+use std::fmt::Debug;
 pub use url::Url;
 
 use std::collections::HashMap;
@@ -1067,7 +1067,7 @@ pub enum FailureHandlingKind {
 }
 
 /// A symbol kind.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct SymbolKind(i32);
 impl SymbolKind {
@@ -1097,6 +1097,40 @@ impl SymbolKind {
     pub const EVENT: SymbolKind = SymbolKind(24);
     pub const OPERATOR: SymbolKind = SymbolKind(25);
     pub const TYPE_PARAMETER: SymbolKind = SymbolKind(26);
+}
+
+impl Debug for SymbolKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            Self::FILE => write!(f, "File"),
+            Self::MODULE => write!(f, "Module"),
+            Self::NAMESPACE => write!(f, "Namespace"),
+            Self::PACKAGE => write!(f, "Package"),
+            Self::CLASS => write!(f, "Class"),
+            Self::METHOD => write!(f, "Method"),
+            Self::PROPERTY => write!(f, "Property"),
+            Self::FIELD => write!(f, "Field"),
+            Self::CONSTRUCTOR => write!(f, "Constructor"),
+            Self::ENUM => write!(f, "Enum"),
+            Self::INTERFACE => write!(f, "Interface"),
+            Self::FUNCTION => write!(f, "Function"),
+            Self::VARIABLE => write!(f, "Variable"),
+            Self::CONSTANT => write!(f, "Constant"),
+            Self::STRING => write!(f, "String"),
+            Self::NUMBER => write!(f, "Number"),
+            Self::BOOLEAN => write!(f, "Boolean"),
+            Self::ARRAY => write!(f, "Array"),
+            Self::OBJECT => write!(f, "Object"),
+            Self::KEY => write!(f, "Key"),
+            Self::NULL => write!(f, "Null"),
+            Self::ENUM_MEMBER => write!(f, "EnumMember"),
+            Self::STRUCT => write!(f, "Struct"),
+            Self::EVENT => write!(f, "Event"),
+            Self::OPERATOR => write!(f, "Operator"),
+            Self::TYPE_PARAMETER => write!(f, "TypeParameter"),
+            _ => write!(f, "SymbolKind({})", self.0),
+        }
+    }
 }
 
 /// Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
