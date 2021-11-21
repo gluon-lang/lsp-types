@@ -587,4 +587,14 @@ mod tests {
             "TypeParameter"
         );
     }
+
+    #[test]
+    fn test_try_from_enum() {
+        use std::convert::TryInto;
+        assert_eq!("Text".try_into(), Ok(CompletionItemKind::TEXT));
+        assert_eq!(
+            "TypeParameter".try_into(),
+            Ok(CompletionItemKind::TYPE_PARAMETER)
+        );
+    }
 }

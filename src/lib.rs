@@ -15,8 +15,7 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 
 */
 #![allow(non_upper_case_globals)]
-#![forbid(unsafe_code)]
-
+#[forbid(unsafe_code)]
 #[macro_use]
 extern crate bitflags;
 
@@ -29,6 +28,32 @@ use std::collections::HashMap;
 use serde::de;
 use serde::de::Error as Error_;
 use serde_json::Value;
+
+const fn fmt_pascal_case_const(name: &str) -> ([u8; 128], usize) {
+    let mut buf = [0; 128];
+    let mut buf_i = 0;
+    let mut name_i = 0;
+    let name = name.as_bytes();
+    while name_i < name.len() {
+        let first = name[name_i];
+        name_i += 1;
+
+        buf[buf_i] = first;
+        buf_i += 1;
+
+        while name_i < name.len() {
+            let rest = name[name_i];
+            name_i += 1;
+            if rest == b'_' {
+                break;
+            }
+
+            buf[buf_i] = rest.to_ascii_lowercase();
+            buf_i += 1;
+        }
+    }
+    (buf, buf_i)
+}
 
 fn fmt_pascal_case(f: &mut std::fmt::Formatter<'_>, name: &str) -> std::fmt::Result {
     for word in name.split('_') {
@@ -43,7 +68,7 @@ fn fmt_pascal_case(f: &mut std::fmt::Formatter<'_>, name: &str) -> std::fmt::Res
 }
 
 macro_rules! lsp_enum {
-    (impl $typ: ty { $( $(#[$attr:meta])* pub const $name: ident : $enum_type: ty = $value: expr; )* }) => {
+    (impl $typ: ident { $( $(#[$attr:meta])* pub const $name: ident : $enum_type: ty = $value: expr; )* }) => {
         impl $typ {
             $(
             $(#[$attr])*
@@ -61,6 +86,19 @@ macro_rules! lsp_enum {
                 }
             }
         }
+
+        impl std::convert::TryFrom<&str> for $typ {
+            type Error = &'static str;
+            fn try_from(value: &str) -> Result<Self, Self::Error> {
+                match value {
+                    $(
+                        _ if { let (buf, len)  = crate::fmt_pascal_case_const(stringify!($name)); &buf[..len] == value.as_bytes() } => Ok(Self::$name),
+                    )*
+                    _ => Err("unknown enum variant"),
+                }
+            }
+        }
+
     }
 }
 
