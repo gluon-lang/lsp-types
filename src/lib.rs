@@ -61,6 +61,18 @@ macro_rules! lsp_enum {
                 }
             }
         }
+
+        impl std::convert::TryFrom<&String> for $typ {
+            type Error = &'static str;
+            fn try_from(value: &String) -> Result<Self, Self::Error> {
+                match value {
+                    $(
+                        _ if *value == format!("{:?}", Self::$name) => Ok(Self::$name),
+                    )*
+                    _ => Err("unknown enum variant"),
+                }
+            }
+        }
     }
 }
 
