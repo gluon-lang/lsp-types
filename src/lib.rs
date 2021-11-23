@@ -19,18 +19,16 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 #[macro_use]
 extern crate bitflags;
 
-use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
+
+use serde::{de, de::Error as Error_, Deserialize, Serialize};
+use serde_json::Value;
 pub use url::Url;
 
-use std::collections::HashMap;
-
-use serde::de;
-use serde::de::Error as Error_;
-use serde_json::Value;
-
-const fn fmt_pascal_case_const(name: &str) -> ([u8; 128], usize) {
-    let mut buf = [0; 128];
+// Large enough to contain any enumeration name defined in this crate
+type PascalCaseBuf = [u8; 32];
+const fn fmt_pascal_case_const(name: &str) -> (PascalCaseBuf, usize) {
+    let mut buf = [0; 32];
     let mut buf_i = 0;
     let mut name_i = 0;
     let name = name.as_bytes();
@@ -90,9 +88,13 @@ macro_rules! lsp_enum {
         impl std::convert::TryFrom<&str> for $typ {
             type Error = &'static str;
             fn try_from(value: &str) -> Result<Self, Self::Error> {
-                match value {
+                match () {
                     $(
-                        _ if { let (buf, len)  = crate::fmt_pascal_case_const(stringify!($name)); &buf[..len] == value.as_bytes() } => Ok(Self::$name),
+                        _ if {
+                            const X: (crate::PascalCaseBuf, usize) = crate::fmt_pascal_case_const(stringify!($name));
+                            let (buf, len) = X;
+                            &buf[..len] == value.as_bytes()
+                        } => Ok(Self::$name),
                     )*
                     _ => Err("unknown enum variant"),
                 }
@@ -706,9 +708,9 @@ pub struct ConfigurationItem {
 }
 
 mod url_map {
-    use super::*;
-
     use std::fmt;
+
+    use super::*;
 
     pub fn deserialize<'de, D>(
         deserializer: D,
@@ -2453,8 +2455,9 @@ impl SymbolTag {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde::{Deserialize, Serialize};
+
+    use super::*;
 
     pub(crate) fn test_serialization<SER>(ms: &SER, expected: &str)
     where
