@@ -160,7 +160,7 @@ macro_rules! lsp_request {
         $crate::request::WillDeleteFiles
     };
     ("workspace/semanticTokens/refresh") => {
-        $crate::request::SemanticTokensRefesh
+        $crate::request::SemanticTokensRefresh
     };
     ("workspace/codeLens/refresh") => {
         $crate::request::CodeLensRefresh
@@ -706,9 +706,9 @@ impl Request for SemanticTokensRangeRequest {
 /// As a result the client should ask the server to recompute the semantic tokens for these editors.
 /// This is useful if a server detects a project wide configuration change which requires a re-calculation of all semantic tokens.
 /// Note that the client still has the freedom to delay the re-calculation of the semantic tokens if for example an editor is currently not visible.
-pub enum SemanticTokensRefesh {}
+pub enum SemanticTokensRefresh {}
 
-impl Request for SemanticTokensRefesh {
+impl Request for SemanticTokensRefresh {
     type Params = ();
     type Result = ();
     const METHOD: &'static str = "workspace/semanticTokens/refresh";
