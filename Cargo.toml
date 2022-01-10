@@ -10,7 +10,7 @@ documentation = "https://docs.rs/lsp-types"
 
 readme = "README.md"
 
-keywords = ["language", "server", "lsp", "vscode"]
+keywords = ["language", "server", "lsp", "vscode", "lsif"]
 
 license = "MIT"
 
