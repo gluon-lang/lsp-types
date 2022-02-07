@@ -1,3 +1,17 @@
+<a name="v0.91.2"></a>
+### v0.91.2 (2022-02-07)
+
+
+#### Features
+
+*   Add a TryFrom<&str> implementation for enumerations ([19b85cf4](https://github.com/gluon-lang/lsp-types/commit/19b85cf4a7b5396a89d364e271c3867eb6c840e4), closes [#223](https://github.com/gluon-lang/lsp-types/issues/223))
+
+#### Bug Fixes
+
+*   Ensure that the pascal_case_name is evaluated at compile time ([7337535b](https://github.com/gluon-lang/lsp-types/commit/7337535b79000912f859319455cd371af77d1899))
+
+
+
 <a name="v0.91.1"></a>
 ### v0.91.1 (2021-11-01)
 
