@@ -1665,6 +1665,41 @@ pub struct TextDocumentSyncOptions {
     pub save: Option<TextDocumentSyncSaveOptions>,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookDocumentSelector {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_filter: NotebookDocumentFilter,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cell_selector: Option<Language>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookDocumentSyncOptions {
+    /// Open and close notifications are sent to the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_selector: Option<NotebookDocumentSelector>,
+
+    /// Change notifications are sent to the server. See TextDocumentSyncKind.None, TextDocumentSyncKind.Full
+    /// and TextDocumentSyncKindIncremental.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change: Option<TextDocumentSyncKind>,
+
+    /// Will save notifications are sent to the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub will_save: Option<bool>,
+
+    /// Will save wait until requests are sent to the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub will_save_wait_until: Option<bool>,
+
+    /// Save notifications are sent to the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub save: Option<TextDocumentSyncSaveOptions>,
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum OneOf<A, B> {
