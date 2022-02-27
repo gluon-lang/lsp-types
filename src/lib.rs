@@ -878,6 +878,47 @@ impl VersionedTextDocumentIdentifier {
     }
 }
 
+/// An identifier to denote a specific version of a text document. This information usually flows from the client to the server.
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct VersionedNotebookDocumentIdentifier {
+    // This field was "mixed-in" from TextDocumentIdentifier
+    /// The text document's URI.
+    pub uri: Url,
+
+    /// The version number of this document.
+    ///
+    /// The version number of a document will increase after each change,
+    /// including undo/redo. The number doesn't need to be consecutive.
+    pub version: i32,
+}
+
+#[cfg(feature = "proposed")]
+impl VersionedNotebookDocumentIdentifier {
+    pub fn new(uri: Url, version: i32) -> VersionedTextDocumentIdentifier {
+        VersionedTextDocumentIdentifier { uri, version }
+    }
+}
+
+/// Text documents are identified using a URI. On the protocol level, URIs are passed as strings.
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct NotebookDocumentIdentifier {
+    // !!!!!! Note:
+    // In the spec VersionedTextDocumentIdentifier extends TextDocumentIdentifier
+    // This modelled by "mixing-in" TextDocumentIdentifier in VersionedTextDocumentIdentifier,
+    // so any changes to this type must be effected in the sub-type as well.
+    /// The text document's URI.
+    pub uri: Url,
+}
+
+#[cfg(feature = "proposed")]
+impl NotebookDocumentIdentifier {
+    pub fn new(uri: Url) -> TextDocumentIdentifier {
+        TextDocumentIdentifier { uri }
+    }
+}
+
 /// An identifier which optionally denotes a specific version of a text document. This information usually flows from the server to the client
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct OptionalVersionedTextDocumentIdentifier {
@@ -952,6 +993,15 @@ pub struct DocumentFilter {
     /// A glob pattern, like `*.{ts,js}`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pattern: Option<String>,
+}
+
+// #[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct NotebookCellTextDocumentFilter {
+    pub notebook_document: NotebookDocumentFilter,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cell_language: Option<String>,
 }
 
 /// A document selector is the combination of one or many document filters.
@@ -1269,6 +1319,15 @@ pub struct TextDocumentSyncClientCapabilities {
     /// The client supports did save notifications.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub did_save: Option<bool>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookDocumentSyncClientCapabilities {
+    /// Whether notbook document synchronization supports dynamic registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1665,16 +1724,28 @@ pub struct TextDocumentSyncOptions {
     pub save: Option<TextDocumentSyncSaveOptions>,
 }
 
+
+#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NotebookDocumentSelector {
+pub struct NotebookDocumentSyncRegistrationOption {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub notebook_document_filter: NotebookDocumentFilter,
+    pub id: Option<String>,
+    /// Open and close notifications are sent to the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_selector: Option<NotebookDocumentSelector>,
 
+    /// Notebook will sync an entire document, cellContent will sync
+    /// just one cell using `textDocument/Did*`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cell_selector: Option<Language>,
+    pub mode: Option<String>,
+
+    /// Save notifications are sent to the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub save: Option<TextDocumentSyncSaveOptions>,
 }
 
+#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotebookDocumentSyncOptions {
@@ -1682,22 +1753,101 @@ pub struct NotebookDocumentSyncOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notebook_document_selector: Option<NotebookDocumentSelector>,
 
-    /// Change notifications are sent to the server. See TextDocumentSyncKind.None, TextDocumentSyncKind.Full
-    /// and TextDocumentSyncKindIncremental.
+    /// Notebook will sync an entire document, cellContent will sync
+    /// just one cell using `textDocument/Did*`
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub change: Option<TextDocumentSyncKind>,
-
-    /// Will save notifications are sent to the server.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub will_save: Option<bool>,
-
-    /// Will save wait until requests are sent to the server.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub will_save_wait_until: Option<bool>,
+    pub mode: Option<String>,
 
     /// Save notifications are sent to the server.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub save: Option<TextDocumentSyncSaveOptions>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookDocument {
+    // Notebook document's uri
+    pub uri: Url,
+    // The type of notebook
+    pub notebook_type: String,
+    // Version number of the document
+    pub version: i32,
+    // Metadata for the notebook document
+    pub metadata: Option<String>,
+    // Contains the sepcific cells of a Notebook document
+    pub cells: Vec<NotebookCell>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookCell {
+    /// Markup or code
+    pub kind: NotebookCellType,
+    /// The uri of the specific cell
+    pub document: Url,
+    // TODO: Spec doesn't specifiy what an LSPObject is, need to figure out what this is
+    /// Metadata stored within the cell
+    pub metadata: Option<String>,
+}
+
+#[cfg(feature = "proposed")]
+/// The type of cell
+#[derive(Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct NotebookCellType(i32);
+#[cfg(feature = "proposed")]
+lsp_enum! {
+    impl NotebookCellType {
+        /// Contains markup
+        pub const MARKUP: NotebookCellType = NotebookCellType(1);
+
+        /// Contains source code
+        pub const CODE: NotebookCellType = NotebookCellType(2);
+    }
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookDocumentSelector {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_filter: Option<NotebookDocumentFilter>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cell_selector: Option<Vec<NotebookLanguageFilter>>,
+}
+
+/// A document filter denotes a document through properties like language, schema or pattern.
+/// Examples are a filter that applies to TypeScript files on disk or a filter the applies to JSON
+/// files with name package.json:
+///
+/// { language: 'typescript', scheme: 'file' }
+/// { language: 'json', pattern: '**/package.json' }
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct NotebookDocumentFilter {
+    /// A language id, like `typescript`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_type: Option<String>,
+
+    /// A Uri [scheme](#Uri.scheme), like `file` or `untitled`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scheme: Option<String>,
+
+    /// A glob pattern, like `*.{ts,js}`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pattern: Option<String>,
+}
+
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+pub struct NotebookLanguageFilter {
+    /// A language id, like `typescript`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -1723,6 +1873,22 @@ impl From<TextDocumentSyncOptions> for TextDocumentSyncCapability {
 impl From<TextDocumentSyncKind> for TextDocumentSyncCapability {
     fn from(from: TextDocumentSyncKind) -> Self {
         Self::Kind(from)
+    }
+}
+
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum NotebookDocumentSyncCapability {
+    Kind(TextDocumentSyncKind),
+    Options(NotebookDocumentSyncOptions),
+}
+
+#[cfg(feature = "proposed")]
+impl From<NotebookDocumentSyncOptions> for TextDocumentSyncCapability {
+    fn from(from: TextDocumentSyncOptions) -> Self {
+        Self::Options(from)
     }
 }
 
@@ -1770,6 +1936,10 @@ pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document_sync: Option<TextDocumentSyncCapability>,
+
+    /// Defines how notebook documents are synced.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_sync: Option<NotebookDocumentSyncCapability>,
 
     /// Capabilities specific to `textDocument/selectionRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1963,6 +2133,9 @@ pub struct StaticRegistrationOptions {
     pub id: Option<String>,
 }
 
+
+
+
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressOptions {
@@ -2066,6 +2239,28 @@ pub struct DidOpenTextDocumentParams {
     pub text_document: TextDocumentItem,
 }
 
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidOpenNotebookDocumentParams {
+    /// The document that was opened.
+    pub notebook_document: NotebookDocument,
+
+    /// The content of notebook cells as text documents    pub notebook_document: NotebookDocument,
+    pub cell_text_documents: Vec<TextDocumentItem>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidCloseNotebookDocumentParams {
+    /// The document that was opened.
+    pub notebook_document: NotebookDocument,
+
+    /// The content of notebook cells as text documents    pub notebook_document: NotebookDocument,
+    pub cell_text_documents: Vec<TextDocumentItem>,
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DidChangeTextDocumentParams {
@@ -2075,6 +2270,18 @@ pub struct DidChangeTextDocumentParams {
     pub text_document: VersionedTextDocumentIdentifier,
     /// The actual content changes.
     pub content_changes: Vec<TextDocumentContentChangeEvent>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidChangeNotebookDocumentParams {
+    /// The document that did change. The version number points
+    /// to the version after all provided content changes have
+    /// been applied.
+    pub notebook_document: VersionedNotebookDocumentIdentifier,
+    /// The actual content changes.
+    pub change: NotebookDocumentChangeEvent,
 }
 
 /// An event describing a change to a text document. If range and rangeLength are omitted
@@ -2094,6 +2301,70 @@ pub struct TextDocumentContentChangeEvent {
 
     /// The new text of the document.
     pub text: String,
+}
+
+/// An event describing a change to a notebook document.
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookDocumentChangeEvent {
+    // TODO: This is meant to be an LSPObject, figure out what that is and fix this
+    /// Changed metadata
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cell_structure: Option<CellStructure>,
+
+    /// The range of the document that changed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range: Option<Range>,
+
+    /// The length of the range that got replaced.
+    ///
+    /// Deprecated: Use range instead
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub range_length: Option<u32>,
+
+    /// The new text of the document.
+    pub text: String,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CellStructure {
+    pub array: NotebookCellArrayChange,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub did_open: Option<Vec<TextDocumentItem>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub did_close: Option<Vec<TextDocumentIdentifier>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cell_data: Option<Vec<NotebookCell>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cell_text_documents: Option<CellTextDocument>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CellTextDocument {
+    text_document: VersionedTextDocumentIdentifier,
+    content_changes: Vec<TextDocumentContentChangeEvent>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NotebookCellArrayChange {
+    pub start: u32,
+    pub delete_count: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cells: Option<NotebookCell>,
 }
 
 /// Descibe options to be used when registered for text document change events.
@@ -2157,6 +2428,25 @@ pub struct DidSaveTextDocumentParams {
     /// when the save notification was requested.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidCloseNotbookDocumentParams {
+    /// The document that was closed.
+    pub notebook_document: NotebookDocumentIdentifier,
+}
+
+#[cfg(feature = "proposed")]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidSaveNotebookDocumentParams {
+    /// The document that was saved.
+    pub notebook_document: NotebookDocumentIdentifier,
+
+    /// Contains all the cell uris of the notebook that was saved
+    pub cell_text_documents: Vec<TextDocumentIdentifier>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
