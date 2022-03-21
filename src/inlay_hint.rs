@@ -11,15 +11,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum InlayHintServerCapabilities {
-	Options(InlayHintOptions),
-	RegistrationOptions(InlayHintRegistrationOptions),
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InlayHintClientCapabilitiesResolveSupport {
-    /// The properties that a client can resolve lazily.
-    pub properties: Vec<String>,
+    Options(InlayHintOptions),
+    RegistrationOptions(InlayHintRegistrationOptions),
 }
 
 /// Inlay hint client capabilities.
@@ -35,7 +28,7 @@ pub struct InlayHintClientCapabilities {
     /// Indicates which properties a client can resolve lazily on a inlay
     /// hint.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub resolve_support: Option<InlayHintClientCapabilitiesResolveSupport>,
+    pub resolve_support: Option<InlayHintResolveClientCapabilities>,
 }
 
 /// Inlay hint options used during static registration.
@@ -258,4 +251,27 @@ impl InlayHintKind {
     /// An inlay hint that is for a parameter.
     pub const PARAMETER: InlayHintKind = InlayHintKind(2);
 }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InlayHintResolveClientCapabilities {
+    pub properties: Vec<String>,
+}
+
+/// Client workspace capabilities specific to inlay hints.
+///
+/// @since 3.17.0 - proposed state
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InlayHintWorkspaceClientCapabilities {
+    /// Whether the client implementation supports a refresh request sent from
+    /// the server to the client.
+    ///
+    /// Note that this event is global and will force the client to refresh all
+    /// inlay hints currently shown. It should be used with absolute care and
+    /// is useful for situation where a server for example detects a project wide
+    /// change that requires such a calculation.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub refresh_support: Option<bool>,
 }
