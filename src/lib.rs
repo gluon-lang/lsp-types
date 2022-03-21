@@ -203,6 +203,24 @@ pub struct CancelParams {
 
 /* ----------------- Basic JSON Structures ----------------- */
 
+/// The LSP any type
+///
+/// @since 3.17.0
+#[cfg(feature = "proposed")]
+pub type LSPAny = serde_json::Value;
+
+/// LSP object definition.
+///
+/// @since 3.17.0
+#[cfg(feature = "proposed")]
+pub type LSPObject = serde_json::Map<String, serde_json::Value>;
+
+/// LSP arrays.
+///
+/// @since 3.17.0
+#[cfg(feature = "proposed")]
+pub type LSPArray = Vec<serde_json::Value>;
+
 /// Position in a text document expressed as zero-based line and character offset.
 /// A position is between two characters like an 'insert' cursor in a editor.
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize)]
@@ -1255,8 +1273,8 @@ pub struct WorkspaceClientCapabilities {
 
 
     #[serde(skip_serializing_if = "Option::is_none")]
-		#[cfg(feature = "proposed")]
-		pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
+    #[cfg(feature = "proposed")]
+    pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
