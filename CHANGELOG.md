@@ -1,3 +1,20 @@
+<a name="v0.92.1"></a>
+### v0.92.1 (2022-03-21)
+
+
+#### Bug Fixes
+
+* **inlayHint:**  typo in prop name ([7f7ada31](https://github.com/gluon-lang/lsp-types/commit/7f7ada310fa045ef628dc36f97b8564408fcec6a))
+
+#### Features
+
+* **inlayHint:**
+  *  add request impls ([393aefa1](https://github.com/gluon-lang/lsp-types/commit/393aefa18b3c900c3f1ac8f6337b7098bdc4365a))
+  *  add inlayHint provider ([69f21e71](https://github.com/gluon-lang/lsp-types/commit/69f21e714df305643aa727cbf745b439bbd8c112))
+  *  implement inlayHint basic types ([29a50e71](https://github.com/gluon-lang/lsp-types/commit/29a50e71461f72d2fa2aea90fa03f61adf062074))
+
+
+
 <a name="v0.92.0"></a>
 ## v0.92.0 (2022-02-07)
 
