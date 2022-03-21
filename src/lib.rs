@@ -144,6 +144,11 @@ pub use formatting::*;
 mod hover;
 pub use hover::*;
 
+#[cfg(feature = "proposed")]
+mod inlay_hint;
+#[cfg(feature = "proposed")]
+pub use inlay_hint::*;
+
 mod moniker;
 pub use moniker::*;
 
@@ -1451,6 +1456,13 @@ pub struct TextDocumentClientCapabilities {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker: Option<MonikerClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/inlayHint` request.
+    ///
+    /// @since 3.17.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub inlay_hint: Option<InlayHintClientCapabilities>,
 }
 
 /// Where ClientCapabilities are currently empty:
