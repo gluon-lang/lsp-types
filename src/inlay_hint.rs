@@ -275,3 +275,5 @@ pub struct InlayHintWorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refresh_support: Option<bool>,
 }
+
+// TODO(sno2): add tests once stabilized
