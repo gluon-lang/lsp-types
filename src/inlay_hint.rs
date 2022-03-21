@@ -7,6 +7,14 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+pub enum InlayHintServerCapabilities {
+	Options(InlayHintOptions),
+	RegistrationOptions(InlayHintRegistrationOptions),
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InlayHintClientCapabilitiesResolveSupport {

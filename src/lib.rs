@@ -1852,6 +1852,13 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
 
+    /// The server provides inlay hints.
+    ///
+    /// @since 3.17.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub inlay_hint_provider: Option<OneOf<bool, InlayHintServerCapabilities>>,
+
     /// The server provides linked editing range support.
     ///
     /// @since 3.16.0
