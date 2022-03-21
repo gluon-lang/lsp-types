@@ -53,7 +53,7 @@ pub struct InlayHintOptions {
 #[serde(rename_all = "camelCase")]
 pub struct InlayHintRegistrationOptions {
     #[serde(flatten)]
-    pub inlay_hints_options: InlayHintOptions,
+    pub inlay_hint_options: InlayHintOptions,
 
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
