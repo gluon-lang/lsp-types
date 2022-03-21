@@ -771,6 +771,36 @@ impl Request for MonikerRequest {
     const METHOD: &'static str = "textDocument/moniker";
 }
 
+#[cfg(feature = "proposed")]
+pub enum InlayHintRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for InlayHintRequest {
+    type Params = InlayHintParams;
+    type Result = Option<Vec<InlayHint>>;
+    const METHOD: &'static str = "textDocument/inlayHint";
+}
+
+#[cfg(feature = "proposed")]
+pub enum InlayHintResolveRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for InlayHintResolveRequest {
+    type Params = InlayHint;
+    type Result = InlayHint;
+    const METHOD: &'static str = "inlayHint/resolve";
+}
+
+#[cfg(feature = "proposed")]
+pub enum InlayHintRefreshRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for InlayHintRefreshRequest {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = "workspace/inlayHint/refresh";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

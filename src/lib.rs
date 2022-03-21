@@ -144,6 +144,11 @@ pub use formatting::*;
 mod hover;
 pub use hover::*;
 
+#[cfg(feature = "proposed")]
+mod inlay_hint;
+#[cfg(feature = "proposed")]
+pub use inlay_hint::*;
+
 mod moniker;
 pub use moniker::*;
 
@@ -1247,6 +1252,11 @@ pub struct WorkspaceClientCapabilities {
     /// since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
+
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+		#[cfg(feature = "proposed")]
+		pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1451,6 +1461,13 @@ pub struct TextDocumentClientCapabilities {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker: Option<MonikerClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/inlayHint` request.
+    ///
+    /// @since 3.17.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub inlay_hint: Option<InlayHintClientCapabilities>,
 }
 
 /// Where ClientCapabilities are currently empty:
@@ -1839,6 +1856,13 @@ pub struct ServerCapabilities {
     /// Whether server provides moniker support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
+
+    /// The server provides inlay hints.
+    ///
+    /// @since 3.17.0 - proposed state
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub inlay_hint_provider: Option<OneOf<bool, InlayHintServerCapabilities>>,
 
     /// The server provides linked editing range support.
     ///
