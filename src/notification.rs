@@ -12,6 +12,12 @@ macro_rules! lsp_notification {
     ("$/cancelRequest") => {
         $crate::notification::Cancel
     };
+    ("$/setTrace") => {
+        $crate::notification::SetTrace
+    };
+    ("$/logTrace") => {
+        $crate::notification::LogTrace
+    };
     ("initialized") => {
         $crate::notification::Initialized
     };
@@ -87,6 +93,29 @@ pub enum Cancel {}
 impl Notification for Cancel {
     type Params = CancelParams;
     const METHOD: &'static str = "$/cancelRequest";
+}
+
+/// A notification that should be used by the client to modify the trace
+/// setting of the server.
+#[derive(Debug)]
+pub enum SetTrace {}
+
+impl Notification for SetTrace {
+    type Params = SetTraceParams;
+    const METHOD: &'static str = "$/setTrace";
+}
+
+/// A notification to log the trace of the server’s execution.
+/// The amount and content of these notifications depends on the current trace configuration.
+///
+/// `LogTrace` should be used for systematic trace reporting. For single debugging messages,
+/// the server should send `LogMessage` notifications.
+#[derive(Debug)]
+pub enum LogTrace {}
+
+impl Notification for LogTrace {
+    type Params = LogTraceParams;
+    const METHOD: &'static str = "$/logTrace";
 }
 
 /// The initialized notification is sent from the client to the server after the client received
@@ -304,6 +333,8 @@ mod test {
     fn check_macro_definitions() {
         check_macro!("$/cancelRequest");
         check_macro!("$/progress");
+        check_macro!("$/logTrace");
+        check_macro!("$/setTrace");
         check_macro!("initialized");
         check_macro!("exit");
         check_macro!("window/showMessage");
