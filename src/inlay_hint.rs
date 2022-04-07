@@ -1,7 +1,7 @@
 #![cfg(feature = "proposed")]
 
 use crate::{
-    Command, Location, MarkupContent, Position, Range, StaticRegistrationOptions,
+    Command, LSPAny, Location, MarkupContent, Position, Range, StaticRegistrationOptions,
     TextDocumentIdentifier, TextDocumentRegistrationOptions, TextEdit, WorkDoneProgressOptions,
     WorkDoneProgressParams,
 };
@@ -131,11 +131,11 @@ pub struct InlayHint {
     /// to visually align/separate an inlay hint.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub padding_right: Option<bool>,
-    // FIXME(sno2): add [`data`] field after [`LSPAny`] is implemented
-    // /// A data entry field that is preserved on a inlay hint between
-    // /// a `textDocument/inlayHint` and a `inlayHint/resolve` request.
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // pub data: Option<crate::LSPAny>,
+
+    /// A data entry field that is preserved on a inlay hint between
+    /// a `textDocument/inlayHint` and a `inlayHint/resolve` request.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<LSPAny>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
