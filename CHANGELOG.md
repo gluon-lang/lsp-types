@@ -1,3 +1,13 @@
+<a name="v0.93.0"></a>
+## v0.93.0 (2022-04-08)
+
+
+#### Features
+
+* **helperTypes:**  implement new JSON types ([bd9bb2e7](https://github.com/gluon-lang/lsp-types/commit/bd9bb2e74171b0194be51085c822c3ccbbb68b7b))
+
+
+
 <a name="v0.92.1"></a>
 ### v0.92.1 (2022-03-21)
 
