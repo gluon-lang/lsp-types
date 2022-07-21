@@ -1099,6 +1099,7 @@ pub struct GotoCapability {
     pub dynamic_registration: Option<bool>,
 
     /// The client supports additional metadata in the form of definition links.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub link_support: Option<bool>,
 }
 
