@@ -1782,7 +1782,7 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub type_definition_provider: Option<TypeDefinitionProviderCapability>,
 
-    /// the server provides goto implementation support.
+    /// The server provides goto implementation support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub implementation_provider: Option<ImplementationProviderCapability>,
 
