@@ -10,8 +10,7 @@ use crate::{
 /// A set of predefined token types. This set is not fixed
 /// and clients can specify additional token types via the
 /// corresponding client capabilities.
-///
-/// @since 3.16.0
+/// since @3.16.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
 pub struct SemanticTokenType(Cow<'static, str>);
 
@@ -38,6 +37,10 @@ impl SemanticTokenType {
     pub const NUMBER: SemanticTokenType = SemanticTokenType::new("number");
     pub const REGEXP: SemanticTokenType = SemanticTokenType::new("regexp");
     pub const OPERATOR: SemanticTokenType = SemanticTokenType::new("operator");
+
+    /// since @3.17.0
+    #[cfg(feature = "proposed")]
+    pub const DECORATOR: SemanticTokenType = SemanticTokenType::new("decorator");
 
     pub const fn new(tag: &'static str) -> Self {
         SemanticTokenType(Cow::Borrowed(tag))
@@ -365,6 +368,31 @@ pub struct SemanticTokensClientCapabilities {
     /// Whether the client supports tokens that can span multiple lines.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub multiline_token_support: Option<bool>,
+
+    /// Whether the client allows the server to actively cancel a
+    /// semantic token request, e.g. supports returning
+    /// ErrorCodes.ServerCancelled. If a server does the client
+    /// needs to retrigger the request.
+    ///
+    /// since @3.17.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub server_cancel_support: Option<bool>,
+
+
+    /// Whether the client uses semantic tokens to augment existing
+    /// syntax tokens. If set to `true` client side created syntax
+    /// tokens and semantic tokens are both used for colorization. If
+    /// set to `false` the client only uses the returned semantic tokens
+    /// for colorization.
+    ///
+    /// If the value is `undefined` then the client behavior is not
+    /// specified.
+    ///
+    /// @since 3.17.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub augments_syntax_tokens: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
