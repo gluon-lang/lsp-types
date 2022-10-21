@@ -230,9 +230,8 @@ pub type LSPArray = Vec<serde_json::Value>;
 pub struct Position {
     /// Line position in a document (zero-based).
     pub line: u32,
-    /// Character offset on a line in a document (zero-based). Assuming that
-    /// the line is represented as a string, the `character` value represents
-    /// the gap between the `character` and `character + 1`.
+    /// Character offset on a line in a document (zero-based). The meaning of this
+    /// offset is determined by the negotiated `PositionEncodingKind`.
     ///
     /// If the character value is greater than the line length it defaults back
     /// to the line length.
@@ -293,6 +292,55 @@ pub struct LocationLink {
 
     /// The span of this link.
     pub target_selection_range: Range,
+}
+
+/// A type indicating how positions are encoded,
+/// specifically what column offsets mean.
+///
+/// @since 3.17.0
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg(feature = "proposed")]
+pub struct PositionEncodingKind(std::borrow::Cow<'static, str>);
+
+#[cfg(feature = "proposed")]
+impl PositionEncodingKind {
+    /// Character offsets count UTF-8 code units.
+    pub const UTF8: PositionEncodingKind = PositionEncodingKind::new("utf-8");
+
+    /// Character offsets count UTF-16 code units.
+    ///
+    /// This is the default and must always be supported
+    /// by servers
+    pub const UTF16: PositionEncodingKind = PositionEncodingKind::new("utf-16");
+
+    /// Character offsets count UTF-32 code units.
+    ///
+    /// Implementation note: these are the same as Unicode code points,
+    /// so this `PositionEncodingKind` may also be used for an
+    /// encoding-agnostic representation of character offsets.
+    pub const UTF32: PositionEncodingKind = PositionEncodingKind::new("utf-32");
+
+    pub const fn new(tag: &'static str) -> Self {
+        PositionEncodingKind(std::borrow::Cow::Borrowed(tag))
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<String> for PositionEncodingKind {
+    fn from(from: String) -> Self {
+        PositionEncodingKind(std::borrow::Cow::from(from))
+    }
+}
+
+#[cfg(feature = "proposed")]
+impl From<&'static str> for PositionEncodingKind {
+    fn from(from: &'static str) -> Self {
+        PositionEncodingKind::new(from)
+    }
 }
 
 /// Represents a diagnostic, such as a compiler error or warning.
@@ -1524,6 +1572,28 @@ pub struct GeneralClientCapabilities {
     #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stale_request_support: Option<StaleRequestSupportClientCapabilities>,
+
+    /// The position encodings supported by the client. Client and server
+    /// have to agree on the same position encoding to ensure that offsets
+    /// (e.g. character position in a line) are interpreted the same on both
+    /// side.
+    ///
+    /// To keep the protocol backwards compatible the following applies: if
+    /// the value 'utf-16' is missing from the array of position encodings
+    /// servers can assume that the client supports UTF-16. UTF-16 is
+    /// therefore a mandatory encoding.
+    ///
+    /// If omitted it defaults to ['utf-16'].
+    ///
+    /// Implementation considerations: since the conversion from one encoding
+    /// into another requires the content of the file / line the conversion
+    /// is best done where the file is read which is usually on the server
+    /// side.
+    ///
+    /// @since 3.17.0
+    #[cfg(feature = "proposed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub position_encodings: Option<Vec<PositionEncodingKind>>,
 }
 
 /// Client capability that signals how the client
@@ -1754,6 +1824,19 @@ impl From<bool> for TypeDefinitionProviderCapability {
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerCapabilities {
+    /// The position encoding the server picked from the encodings offered
+    /// by the client via the client capability `general.positionEncodings`.
+    ///
+    /// If the client didn't provide any position encodings the only valid
+    /// value that a server can return is 'utf-16'.
+    ///
+    /// If omitted it defaults to 'utf-16'.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub position_encoding: Option<PositionEncodingKind>,
+
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document_sync: Option<TextDocumentSyncCapability>,
