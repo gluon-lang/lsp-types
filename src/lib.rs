@@ -2256,7 +2256,7 @@ pub struct DidChangeWatchedFilesParams {
 }
 
 /// The file event type.
-#[derive(Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Hash, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct FileChangeType(i32);
 lsp_enum! {
@@ -2273,7 +2273,7 @@ impl FileChangeType {
 }
 
 /// An event describing a file change.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
 pub struct FileEvent {
     /// The file's URI.
     pub uri: Url,
