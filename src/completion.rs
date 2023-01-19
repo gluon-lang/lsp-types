@@ -214,7 +214,6 @@ pub struct CompletionClientCapabilities {
     /// `insertTextMode` property.
     ///
     /// @since 3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub insert_text_mode: Option<InsertTextMode>,
 }
@@ -463,9 +462,11 @@ pub struct CompletionItem {
     pub insert_text_format: Option<InsertTextFormat>,
 
     /// How whitespace and indentation is handled during completion
-    /// item insertion. If not provided the client's default value is used.
+    /// item insertion. If not provided the client's default value depends on
+    /// the `textDocument.completion.insertTextMode` client capability.
     ///
     /// @since 3.16.0
+    /// @since 3.17.0 - support for `textDocument.completion.insertTextMode`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub insert_text_mode: Option<InsertTextMode>,
 
