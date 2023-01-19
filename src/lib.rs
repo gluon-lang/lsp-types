@@ -1644,6 +1644,13 @@ pub struct MarkdownClientCapabilities {
     /// The version of the parser.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+
+    /// A list of HTML tags that the client allows / supports in
+    /// Markdown.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allowed_tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
