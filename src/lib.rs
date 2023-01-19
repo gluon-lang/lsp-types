@@ -147,6 +147,9 @@ pub use hover::*;
 mod inlay_hint;
 pub use inlay_hint::*;
 
+mod inline_value;
+pub use inline_value::*;
+
 mod moniker;
 pub use moniker::*;
 
@@ -1302,6 +1305,11 @@ pub struct WorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
 
+    /// Client workspace capabilities specific to inline values.
+    /// since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_value: Option<InlineValueWorkspaceClientCapabilities>,
+
     /// Client workspace capabilities specific to inlay hints.
     /// since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1510,6 +1518,12 @@ pub struct TextDocumentClientCapabilities {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker: Option<MonikerClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/inlineValue` request.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_value: Option<InlineValueClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/inlayHint` request.
     ///
@@ -1939,6 +1953,12 @@ pub struct ServerCapabilities {
     /// Whether server provides moniker support.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
+
+    /// The server provides inline values.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_value_provider: Option<OneOf<bool, InlineValueServerCapabilities>>,
 
     /// The server provides inlay hints.
     ///

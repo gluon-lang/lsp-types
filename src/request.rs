@@ -153,6 +153,9 @@ macro_rules! lsp_request {
     ("textDocument/inlayHint") => {
         $crate::request::InlayHintRequest
     };
+    ("textDocument/inlineValue") => {
+        $crate::request::InlineValueRequest
+    };
     ("workspace/willCreateFiles") => {
         $crate::request::WillCreateFiles
     };
@@ -170,6 +173,9 @@ macro_rules! lsp_request {
     };
     ("workspace/inlayHint/refresh") => {
         $crate::request::InlayHintRefreshRequest
+    };
+    ("workspace/inlineValue/refresh") => {
+        $crate::request::InlineValueRefreshRequest
     };
     ("codeAction/resolve") => {
         $crate::request::CodeActionResolveRequest
@@ -816,6 +822,30 @@ impl Request for InlayHintRefreshRequest {
     const METHOD: &'static str = "workspace/inlayHint/refresh";
 }
 
+/// The inline value request is sent from the client to the server to compute inline values for a
+/// given text document that may be rendered in the editor at the end of lines.
+pub enum InlineValueRequest {}
+
+impl Request for InlineValueRequest {
+    type Params = InlineValueParams;
+    type Result = Option<InlineValue>;
+    const METHOD: &'static str = "textDocument/inlineValue";
+}
+
+/// The `workspace/inlineValue/refresh` request is sent from the server to the client. Servers can
+/// use it to ask clients to refresh the inline values currently shown in editors. As a result the
+/// client should ask the server to recompute the inline values for these editors. This is useful if
+/// a server detects a configuration change which requires a re-calculation of all inline values.
+/// Note that the client still has the freedom to delay the re-calculation of the inline values if
+/// for example an editor is currently not visible.
+pub enum InlineValueRefreshRequest {}
+
+impl Request for InlineValueRefreshRequest {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = "workspace/inlineValue/refresh";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -879,6 +909,7 @@ mod test {
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
         check_macro!("textDocument/inlayHint");
+        check_macro!("textDocument/inlineValue");
 
         check_macro!("workspace/applyEdit");
         check_macro!("workspace/symbol");
@@ -891,13 +922,14 @@ mod test {
         check_macro!("workspace/semanticTokens/refresh");
         check_macro!("workspace/codeLens/refresh");
         check_macro!("workspace/inlayHint/refresh");
+        check_macro!("workspace/inlineValue/refresh");
 
+        check_macro!("callHierarchy/incomingCalls");
+        check_macro!("callHierarchy/outgoingCalls");
         check_macro!("codeAction/resolve");
         check_macro!("codeLens/resolve");
         check_macro!("completionItem/resolve");
         check_macro!("documentLink/resolve");
-        check_macro!("callHierarchy/incomingCalls");
-        check_macro!("callHierarchy/outgoingCalls");
         check_macro!("inlayHint/resolve");
     }
 
