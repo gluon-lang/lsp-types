@@ -47,6 +47,28 @@ pub struct FoldingProviderOptions {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct FoldingRangeKindCapability {
+    /// The folding range kind values the client supports. When this
+    /// property exists the client also guarantees that it will
+    /// handle values outside its set gracefully and falls back
+    /// to a default value when unknown.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value_set: Option<Vec<FoldingRangeKind>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FoldingRangeCapability {
+    /// If set, the client signals that it supports setting collapsedText on
+    /// folding ranges to display custom labels instead of the default text.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub collapsed_text: Option<bool>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FoldingRangeClientCapabilities {
     /// Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
     /// the client supports the new `(FoldingRangeProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
@@ -58,10 +80,22 @@ pub struct FoldingRangeClientCapabilities {
     /// hint, servers are free to follow the limit.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub range_limit: Option<u32>,
+
     /// If set, the client signals that it only supports folding complete lines. If set, client will
     /// ignore specified `startCharacter` and `endCharacter` properties in a FoldingRange.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_folding_only: Option<bool>,
+
+    /// Specific options for the folding range kind.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folding_range_kind: Option<FoldingRangeKindCapability>,
+
+    /// Specific options for the folding range.
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub folding_range: Option<FoldingRangeCapability>,
 }
 
 /// Enum of known range kinds
@@ -99,4 +133,12 @@ pub struct FoldingRange {
     /// [FoldingRangeKind](#FoldingRangeKind) for an enumeration of standardized kinds.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<FoldingRangeKind>,
+
+    /// The text that the client should show when the specified range is
+    /// collapsed. If not defined or not supported by the client, a default
+    /// will be chosen by the client.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub collapsed_text: Option<String>,
 }
