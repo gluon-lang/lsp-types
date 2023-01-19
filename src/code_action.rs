@@ -294,9 +294,29 @@ pub struct CodeActionDisabled {
     pub reason: String,
 }
 
+/// The reason why code actions were requested.
+///
+/// @since 3.17.0
+#[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct CodeActionTriggerKind(i32);
+lsp_enum! {
+impl CodeActionTriggerKind {
+    /// Code actions were explicitly requested by the user or by an extension.
+    pub const INVOKED: CodeActionTriggerKind = CodeActionTriggerKind(1);
+
+    /// Code actions were requested automatically.
+    ///
+    /// This typically happens when current selection in a file changes, but can
+    /// also be triggered when file content changes.
+    pub const AUTOMATIC: CodeActionTriggerKind = CodeActionTriggerKind(2);
+}
+}
+
 /// Contains additional diagnostic information about the context in which
 /// a code action is run.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CodeActionContext {
     /// An array of diagnostics.
     pub diagnostics: Vec<Diagnostic>,
@@ -307,6 +327,12 @@ pub struct CodeActionContext {
     /// can omit computing them.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub only: Option<Vec<CodeActionKind>>,
+
+    /// The reason why code actions were requested.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trigger_kind: Option<CodeActionTriggerKind>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
