@@ -121,9 +121,7 @@ pub struct CompletionItemCapability {
     /// The client has support for completion item label
     /// details (see also `CompletionItemLabelDetails`).
     ///
-    /// @since 3.17.0 - proposed state
-    ///
-    #[cfg(feature = "proposed")]
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label_details_support: Option<bool>,
 }
@@ -295,13 +293,11 @@ pub struct CompletionOptions {
     /// The server supports the following `CompletionItem` specific
     /// capabilities.
     ///
-    /// @since 3.17.0 - proposed state
-    #[cfg(feature = "proposed")]
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub completion_item: Option<CompletionOptionsCompletionItem>,
 }
 
-#[cfg(feature = "proposed")]
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionOptionsCompletionItem {
@@ -309,7 +305,7 @@ pub struct CompletionOptionsCompletionItem {
     /// details (see also `CompletionItemLabelDetails`) when receiving
     /// a completion item in a resolve call.
     ///
-    /// @since 3.17.0 - proposed state
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label_details_support: Option<bool>,
 }
@@ -407,9 +403,7 @@ pub struct CompletionItem {
 
     /// Additional details for the label
     ///
-    /// @since 3.17.0 - proposed state
-    ///
-    #[cfg(feature = "proposed")]
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label_details: Option<CompletionItemLabelDetails>,
 
@@ -537,8 +531,7 @@ impl CompletionItem {
 
 /// Additional details for a completion item label.
 ///
-/// @since 3.17.0 - proposed state
-#[cfg(feature = "proposed")]
+/// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionItemLabelDetails {
