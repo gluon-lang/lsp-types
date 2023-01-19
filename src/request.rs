@@ -141,6 +141,9 @@ macro_rules! lsp_request {
     ("textDocument/prepareCallHierarchy") => {
         $crate::request::CallHierarchyPrepare
     };
+    ("textDocument/prepareTypeHierarchy") => {
+        $crate::request::TypeHierarchyPrepare
+    };
     ("textDocument/semanticTokens/full") => {
         $crate::request::SemanticTokensFullRequest
     };
@@ -155,6 +158,12 @@ macro_rules! lsp_request {
     };
     ("textDocument/inlineValue") => {
         $crate::request::InlineValueRequest
+    };
+    ("typeHierarchy/supertypes") => {
+        $crate::request::TypeHierarchySupertypes
+    };
+    ("typeHierarchy/subtypes") => {
+        $crate::request::TypeHierarchySubtypes
     };
     ("workspace/willCreateFiles") => {
         $crate::request::WillCreateFiles
@@ -857,6 +866,45 @@ impl Request for InlineValueRefreshRequest {
     const METHOD: &'static str = "workspace/inlineValue/refresh";
 }
 
+/// The type hierarchy request is sent from the client to the server to return a type hierarchy for
+/// the language element of given text document positions. Will return null if the server couldn’t
+/// infer a valid type from the position. The type hierarchy requests are executed in two steps:
+///
+/// 1. first a type hierarchy item is prepared for the given text document position.
+/// 2. for a type hierarchy item the supertype or subtype type hierarchy items are resolved.
+pub enum TypeHierarchyPrepare {}
+
+impl Request for TypeHierarchyPrepare {
+    type Params = TypeHierarchyPrepareParams;
+    type Result = Option<Vec<TypeHierarchyItem>>;
+    const METHOD: &'static str = "textDocument/prepareTypeHierarchy";
+}
+
+/// The `typeHierarchy/supertypes` request is sent from the client to the server to resolve the
+/// supertypes for a given type hierarchy item. Will return null if the server couldn’t infer a
+/// valid type from item in the params. The request doesn’t define its own client and server
+/// capabilities. It is only issued if a server registers for the
+/// `textDocument/prepareTypeHierarchy` request.
+pub enum TypeHierarchySupertypes {}
+
+impl Request for TypeHierarchySupertypes {
+    type Params = TypeHierarchySupertypesParams;
+    type Result = Option<Vec<TypeHierarchyItem>>;
+    const METHOD: &'static str = "typeHierarchy/supertypes";
+}
+
+/// The `typeHierarchy/subtypes` request is sent from the client to the server to resolve the
+/// subtypes for a given type hierarchy item. Will return null if the server couldn’t infer a valid
+/// type from item in the params. The request doesn’t define its own client and server capabilities.
+/// It is only issued if a server registers for the textDocument/prepareTypeHierarchy request.
+pub enum TypeHierarchySubtypes {}
+
+impl Request for TypeHierarchySubtypes {
+    type Params = TypeHierarchySubtypesParams;
+    type Result = Option<Vec<TypeHierarchyItem>>;
+    const METHOD: &'static str = "typeHierarchy/subtypes";
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -916,6 +964,7 @@ mod test {
         check_macro!("textDocument/moniker");
         check_macro!("textDocument/linkedEditingRange");
         check_macro!("textDocument/prepareCallHierarchy");
+        check_macro!("textDocument/prepareTypeHierarchy");
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
@@ -942,6 +991,8 @@ mod test {
         check_macro!("completionItem/resolve");
         check_macro!("documentLink/resolve");
         check_macro!("inlayHint/resolve");
+        check_macro!("typeHierarchy/subtypes");
+        check_macro!("typeHierarchy/supertypes");
     }
 
     #[test]

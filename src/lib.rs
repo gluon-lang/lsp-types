@@ -171,6 +171,9 @@ pub use semantic_tokens::*;
 mod signature_help;
 pub use signature_help::*;
 
+mod type_hierarchy;
+pub use type_hierarchy::*;
+
 mod linked_editing;
 pub use linked_editing::*;
 
@@ -1514,6 +1517,12 @@ pub struct TextDocumentClientCapabilities {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker: Option<MonikerClientCapabilities>,
+
+    /// Capabilities specific to the various type hierarchy requests.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub type_hierarchy: Option<TypeHierarchyClientCapabilities>,
 
     /// Capabilities specific to the `textDocument/inlineValue` request.
     ///
