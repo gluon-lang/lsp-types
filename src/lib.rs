@@ -209,19 +209,16 @@ pub struct CancelParams {
 /// The LSP any type
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 pub type LSPAny = serde_json::Value;
 
 /// LSP object definition.
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 pub type LSPObject = serde_json::Map<String, serde_json::Value>;
 
 /// LSP arrays.
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 pub type LSPArray = Vec<serde_json::Value>;
 
 /// Position in a text document expressed as zero-based line and character offset.
