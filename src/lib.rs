@@ -1768,7 +1768,7 @@ pub struct TextDocumentSyncOptions {
     pub save: Option<TextDocumentSyncSaveOptions>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum OneOf<A, B> {
     Left(A),
@@ -2269,7 +2269,22 @@ pub struct TextDocumentSaveRegistrationOptions {
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 }
 
-pub type DidChangeWatchedFilesClientCapabilities = DynamicRegistrationClientCapabilities;
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidChangeWatchedFilesClientCapabilities {
+    /// Did change watched files notification supports dynamic registration.
+    /// Please note that the current protocol doesn't support static
+    /// configuration for file changes from the server side.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Whether the client has support for relative patterns
+    /// or not.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub relative_pattern_support: Option<bool>,
+}
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
@@ -2321,14 +2336,73 @@ pub struct DidChangeWatchedFilesRegistrationOptions {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FileSystemWatcher {
-    /// The  glob pattern to watch
-    pub glob_pattern: String,
+    /// The glob pattern to watch. See {@link GlobPattern glob pattern}
+    /// for more detail.
+    ///
+    /// @since 3.17.0 support for relative patterns.
+    pub glob_pattern: GlobPattern,
 
     /// The kind of events of interest. If omitted it defaults to WatchKind.Create |
     /// WatchKind.Change | WatchKind.Delete which is 7.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<WatchKind>,
 }
+
+/// The glob pattern. Either a string pattern or a relative pattern.
+///
+/// @since 3.17.0
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum GlobPattern {
+    String(Pattern),
+    Relative(RelativePattern),
+}
+
+impl From<Pattern> for GlobPattern {
+    #[inline]
+    fn from(from: Pattern) -> Self {
+        Self::String(from)
+    }
+}
+
+impl From<RelativePattern> for GlobPattern {
+    #[inline]
+    fn from(from: RelativePattern) -> Self {
+        Self::Relative(from)
+    }
+}
+
+/// A relative pattern is a helper to construct glob patterns that are matched
+/// relatively to a base URI. The common value for a `baseUri` is a workspace
+/// folder root, but it can be another absolute URI as well.
+///
+/// @since 3.17.0
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RelativePattern {
+    /// A workspace folder or a base URI to which this pattern will be matched
+    /// against relatively.
+    pub base_uri: OneOf<WorkspaceFolder, Url>,
+
+    /// The actual glob pattern.
+    pub pattern: Pattern,
+}
+
+/// The glob pattern to watch relative to the base path. Glob patterns can have
+/// the following syntax:
+/// - `*` to match one or more characters in a path segment
+/// - `?` to match on one character in a path segment
+/// - `**` to match any number of path segments, including none
+/// - `{}` to group conditions (e.g. `**​/*.{ts,js}` matches all TypeScript
+///   and JavaScript files)
+/// - `[]` to declare a range of characters to match in a path segment
+///   (e.g., `example.[0-9]` to match on `example.0`, `example.1`, …)
+/// - `[!...]` to negate a range of characters to match in a path segment
+///   (e.g., `example.[!0-9]` to match on `example.a`, `example.b`,
+///   but not `example.0`)
+///
+/// @since 3.17.0
+pub type Pattern = String;
 
 bitflags! {
 pub struct WatchKind: u8 {
