@@ -203,6 +203,15 @@ impl CodeActionKind {
     pub const SOURCE_ORGANIZE_IMPORTS: CodeActionKind =
         CodeActionKind::new("source.organizeImports");
 
+    /// Base kind for a 'fix all' source action: `source.fixAll`.
+    ///
+    /// 'Fix all' actions automatically fix errors that have a clear fix that
+    /// do not require user input. They should not suppress errors or perform
+    /// unsafe fixes such as generating new types or classes.
+    ///
+    /// @since 3.17.0
+    pub const SOURCE_FIX_ALL: CodeActionKind = CodeActionKind::new("source.fixAll");
+
     pub const fn new(tag: &'static str) -> Self {
         CodeActionKind(Cow::Borrowed(tag))
     }
