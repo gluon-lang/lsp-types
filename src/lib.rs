@@ -2115,6 +2115,13 @@ pub struct DocumentHighlightOptions {
 pub struct WorkspaceSymbolOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
+
+    /// The server provides support to resolve additional
+    /// information for a workspace symbol.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolve_provider: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

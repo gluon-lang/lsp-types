@@ -29,7 +29,7 @@ macro_rules! lsp_request {
     };
 
     ("workspace/symbol") => {
-        $crate::request::WorkspaceSymbol
+        $crate::request::WorkspaceSymbolRequest
     };
     ("workspace/executeCommand") => {
         $crate::request::ExecuteCommand
@@ -395,12 +395,23 @@ impl Request for DocumentSymbolRequest {
 /// The workspace symbol request is sent from the client to the server to list project-wide symbols
 /// matching the query string.
 #[derive(Debug)]
-pub enum WorkspaceSymbol {}
+pub enum WorkspaceSymbolRequest {}
 
-impl Request for WorkspaceSymbol {
+impl Request for WorkspaceSymbolRequest {
     type Params = WorkspaceSymbolParams;
-    type Result = Option<Vec<SymbolInformation>>;
+    type Result = Option<WorkspaceSymbolResponse>;
     const METHOD: &'static str = "workspace/symbol";
+}
+
+/// The `workspaceSymbol/resolve` request is sent from the client to the server to resolve
+/// additional information for a given workspace symbol.
+#[derive(Debug)]
+pub enum WorkspaceSymbolResolve {}
+
+impl Request for WorkspaceSymbolResolve {
+    type Params = WorkspaceSymbol;
+    type Result = WorkspaceSymbol;
+    const METHOD: &'static str = "workspaceSymbol/resolve";
 }
 
 /// The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server.
