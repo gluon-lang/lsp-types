@@ -297,10 +297,8 @@ pub struct LocationLink {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 pub struct PositionEncodingKind(std::borrow::Cow<'static, str>);
 
-#[cfg(feature = "proposed")]
 impl PositionEncodingKind {
     /// Character offsets count UTF-8 code units.
     pub const UTF8: PositionEncodingKind = PositionEncodingKind::new("utf-8");
@@ -327,14 +325,12 @@ impl PositionEncodingKind {
     }
 }
 
-#[cfg(feature = "proposed")]
 impl From<String> for PositionEncodingKind {
     fn from(from: String) -> Self {
         PositionEncodingKind(std::borrow::Cow::from(from))
     }
 }
 
-#[cfg(feature = "proposed")]
 impl From<&'static str> for PositionEncodingKind {
     fn from(from: &'static str) -> Self {
         PositionEncodingKind::new(from)
@@ -1600,7 +1596,6 @@ pub struct GeneralClientCapabilities {
     /// side.
     ///
     /// @since 3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub position_encodings: Option<Vec<PositionEncodingKind>>,
 }
@@ -1850,7 +1845,6 @@ pub struct ServerCapabilities {
     ///
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub position_encoding: Option<PositionEncodingKind>,
 
     /// Defines how text documents are synced.
