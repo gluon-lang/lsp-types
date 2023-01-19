@@ -1582,8 +1582,10 @@ pub struct GeneralClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markdown: Option<MarkdownClientCapabilities>,
 
+    /// Client capability that signals how the client handles stale requests (e.g. a request for
+    /// which the client will not process the response anymore since the information is outdated).
+    ///
     /// @since 3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stale_request_support: Option<StaleRequestSupportClientCapabilities>,
 
@@ -1615,7 +1617,6 @@ pub struct GeneralClientCapabilities {
 /// anymore since the information is outdated).
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StaleRequestSupportClientCapabilities {
