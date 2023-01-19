@@ -192,6 +192,21 @@ pub struct CompletionItemKindCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct CompletionListCapability {
+    /// The client supports the following itemDefaults on
+    /// a completion list.
+    ///
+    /// The value lists the supported property names of the
+    /// `CompletionList.itemDefaults` object. If omitted
+    /// no properties are supported.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub item_defaults: Option<Vec<String>>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CompletionClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -216,6 +231,13 @@ pub struct CompletionClientCapabilities {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub insert_text_mode: Option<InsertTextMode>,
+
+    /// The client supports the following `CompletionList` specific
+    /// capabilities.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completion_list: Option<CompletionListCapability>,
 }
 
 /// A special text edit to provide an insert and a replace operation.
