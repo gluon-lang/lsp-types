@@ -39,7 +39,6 @@ impl SemanticTokenType {
     pub const OPERATOR: SemanticTokenType = SemanticTokenType::new("operator");
 
     /// since @3.17.0
-    #[cfg(feature = "proposed")]
     pub const DECORATOR: SemanticTokenType = SemanticTokenType::new("decorator");
 
     pub const fn new(tag: &'static str) -> Self {
@@ -142,9 +141,7 @@ pub struct SemanticTokensLegend {
     pub token_modifiers: Vec<SemanticTokenModifier>,
 }
 
-/// The actual tokens. For a detailed description about how the data is
-/// structured please see
-/// <https://github.com/microsoft/vscode-extension-samples/blob/5ae1f7787122812dcc84e37427ca90af5ee09f14/semantic-tokens-sample/vscode.proposed.d.ts#L71>
+/// The actual tokens.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Default)]
 pub struct SemanticToken {
     pub delta_line: u32,
@@ -375,10 +372,8 @@ pub struct SemanticTokensClientCapabilities {
     /// needs to retrigger the request.
     ///
     /// since @3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server_cancel_support: Option<bool>,
-
 
     /// Whether the client uses semantic tokens to augment existing
     /// syntax tokens. If set to `true` client side created syntax
@@ -390,7 +385,6 @@ pub struct SemanticTokensClientCapabilities {
     /// specified.
     ///
     /// @since 3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub augments_syntax_tokens: Option<bool>,
 }

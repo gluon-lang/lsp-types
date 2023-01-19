@@ -13,7 +13,6 @@ pub const LSP_RESERVED_ERROR_RANGE_START: i64 = -32899;
 // server cancellable.
 //
 // @since 3.17.0
-#[cfg(feature = "proposed")]
 pub const SERVER_CANCELLED: i64 = -32802;
 
 // The server detected that the content of a document got
