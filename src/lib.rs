@@ -144,9 +144,7 @@ pub use formatting::*;
 mod hover;
 pub use hover::*;
 
-#[cfg(feature = "proposed")]
 mod inlay_hint;
-#[cfg(feature = "proposed")]
 pub use inlay_hint::*;
 
 mod moniker;
@@ -1304,8 +1302,9 @@ pub struct WorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
 
+    /// Client workspace capabilities specific to inlay hints.
+    /// since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
 }
 
@@ -1514,9 +1513,8 @@ pub struct TextDocumentClientCapabilities {
 
     /// Capabilities specific to the `textDocument/inlayHint` request.
     ///
-    /// @since 3.17.0 - proposed state
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub inlay_hint: Option<InlayHintClientCapabilities>,
 }
 
@@ -1944,9 +1942,8 @@ pub struct ServerCapabilities {
 
     /// The server provides inlay hints.
     ///
-    /// @since 3.17.0 - proposed state
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub inlay_hint_provider: Option<OneOf<bool, InlayHintServerCapabilities>>,
 
     /// The server provides linked editing range support.

@@ -150,6 +150,9 @@ macro_rules! lsp_request {
     ("textDocument/semanticTokens/range") => {
         $crate::request::SemanticTokensRangeRequest
     };
+    ("textDocument/inlayHint") => {
+        $crate::request::InlayHintRequest
+    };
     ("workspace/willCreateFiles") => {
         $crate::request::WillCreateFiles
     };
@@ -165,8 +168,14 @@ macro_rules! lsp_request {
     ("workspace/codeLens/refresh") => {
         $crate::request::CodeLensRefresh
     };
+    ("workspace/inlayHint/refresh") => {
+        $crate::request::InlayHintRefreshRequest
+    };
     ("codeAction/resolve") => {
         $crate::request::CodeActionResolveRequest
+    };
+    ("inlayHint/resolve") => {
+        $crate::request::InlayHintResolveRequest
     };
     ("window/showDocument") => {
         $crate::request::ShowDocument
@@ -771,30 +780,36 @@ impl Request for MonikerRequest {
     const METHOD: &'static str = "textDocument/moniker";
 }
 
-#[cfg(feature = "proposed")]
+/// The inlay hints request is sent from the client to the server to compute inlay hints for a given
+/// [text document, range] tuple that may be rendered in the editor in place with other text.
 pub enum InlayHintRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for InlayHintRequest {
     type Params = InlayHintParams;
     type Result = Option<Vec<InlayHint>>;
     const METHOD: &'static str = "textDocument/inlayHint";
 }
 
-#[cfg(feature = "proposed")]
+/// The `inlayHint/resolve` request is sent from the client to the server to resolve additional
+/// information for a given inlay hint. This is usually used to compute the tooltip, location or
+/// command properties of a inlay hint’s label part to avoid its unnecessary computation during the
+/// `textDocument/inlayHint` request.
 pub enum InlayHintResolveRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for InlayHintResolveRequest {
     type Params = InlayHint;
     type Result = InlayHint;
     const METHOD: &'static str = "inlayHint/resolve";
 }
 
-#[cfg(feature = "proposed")]
+/// The `workspace/inlayHint/refresh` request is sent from the server to the client. Servers can use
+/// it to ask clients to refresh the inlay hints currently shown in editors. As a result the client
+/// should ask the server to recompute the inlay hints for these editors. This is useful if a server
+/// detects a configuration change which requires a re-calculation of all inlay hints. Note that the
+/// client still has the freedom to delay the re-calculation of the inlay hints if for example an
+/// editor is currently not visible.
 pub enum InlayHintRefreshRequest {}
 
-#[cfg(feature = "proposed")]
 impl Request for InlayHintRefreshRequest {
     type Params = ();
     type Result = ();
@@ -863,6 +878,7 @@ mod test {
         check_macro!("textDocument/semanticTokens/full");
         check_macro!("textDocument/semanticTokens/full/delta");
         check_macro!("textDocument/semanticTokens/range");
+        check_macro!("textDocument/inlayHint");
 
         check_macro!("workspace/applyEdit");
         check_macro!("workspace/symbol");
@@ -874,6 +890,7 @@ mod test {
         check_macro!("workspace/workspaceFolders");
         check_macro!("workspace/semanticTokens/refresh");
         check_macro!("workspace/codeLens/refresh");
+        check_macro!("workspace/inlayHint/refresh");
 
         check_macro!("codeAction/resolve");
         check_macro!("codeLens/resolve");
@@ -881,6 +898,7 @@ mod test {
         check_macro!("documentLink/resolve");
         check_macro!("callHierarchy/incomingCalls");
         check_macro!("callHierarchy/outgoingCalls");
+        check_macro!("inlayHint/resolve");
     }
 
     #[test]
