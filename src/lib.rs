@@ -144,10 +144,11 @@ pub use formatting::*;
 mod hover;
 pub use hover::*;
 
-#[cfg(feature = "proposed")]
 mod inlay_hint;
-#[cfg(feature = "proposed")]
 pub use inlay_hint::*;
+
+mod inline_value;
+pub use inline_value::*;
 
 mod moniker;
 pub use moniker::*;
@@ -169,6 +170,9 @@ pub use semantic_tokens::*;
 
 mod signature_help;
 pub use signature_help::*;
+
+mod type_hierarchy;
+pub use type_hierarchy::*;
 
 mod linked_editing;
 pub use linked_editing::*;
@@ -209,19 +213,16 @@ pub struct CancelParams {
 /// The LSP any type
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 pub type LSPAny = serde_json::Value;
 
 /// LSP object definition.
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 pub type LSPObject = serde_json::Map<String, serde_json::Value>;
 
 /// LSP arrays.
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 pub type LSPArray = Vec<serde_json::Value>;
 
 /// Position in a text document expressed as zero-based line and character offset.
@@ -299,10 +300,8 @@ pub struct LocationLink {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-#[cfg(feature = "proposed")]
 pub struct PositionEncodingKind(std::borrow::Cow<'static, str>);
 
-#[cfg(feature = "proposed")]
 impl PositionEncodingKind {
     /// Character offsets count UTF-8 code units.
     pub const UTF8: PositionEncodingKind = PositionEncodingKind::new("utf-8");
@@ -329,14 +328,12 @@ impl PositionEncodingKind {
     }
 }
 
-#[cfg(feature = "proposed")]
 impl From<String> for PositionEncodingKind {
     fn from(from: String) -> Self {
         PositionEncodingKind(std::borrow::Cow::from(from))
     }
 }
 
-#[cfg(feature = "proposed")]
 impl From<&'static str> for PositionEncodingKind {
     fn from(from: &'static str) -> Self {
         PositionEncodingKind::new(from)
@@ -1307,8 +1304,14 @@ pub struct WorkspaceClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
 
+    /// Client workspace capabilities specific to inline values.
+    /// since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
+    pub inline_value: Option<InlineValueWorkspaceClientCapabilities>,
+
+    /// Client workspace capabilities specific to inlay hints.
+    /// since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
 }
 
@@ -1515,11 +1518,22 @@ pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker: Option<MonikerClientCapabilities>,
 
+    /// Capabilities specific to the various type hierarchy requests.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub type_hierarchy: Option<TypeHierarchyClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/inlineValue` request.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_value: Option<InlineValueClientCapabilities>,
+
     /// Capabilities specific to the `textDocument/inlayHint` request.
     ///
-    /// @since 3.17.0 - proposed state
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub inlay_hint: Option<InlayHintClientCapabilities>,
 }
 
@@ -1568,8 +1582,10 @@ pub struct GeneralClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markdown: Option<MarkdownClientCapabilities>,
 
+    /// Client capability that signals how the client handles stale requests (e.g. a request for
+    /// which the client will not process the response anymore since the information is outdated).
+    ///
     /// @since 3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stale_request_support: Option<StaleRequestSupportClientCapabilities>,
 
@@ -1591,7 +1607,6 @@ pub struct GeneralClientCapabilities {
     /// side.
     ///
     /// @since 3.17.0
-    #[cfg(feature = "proposed")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub position_encodings: Option<Vec<PositionEncodingKind>>,
 }
@@ -1602,7 +1617,6 @@ pub struct GeneralClientCapabilities {
 /// anymore since the information is outdated).
 ///
 /// @since 3.17.0
-#[cfg(feature = "proposed")]
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StaleRequestSupportClientCapabilities {
@@ -1635,6 +1649,13 @@ pub struct MarkdownClientCapabilities {
     /// The version of the parser.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+
+    /// A list of HTML tags that the client allows / supports in
+    /// Markdown.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allowed_tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1757,7 +1778,7 @@ pub struct TextDocumentSyncOptions {
     pub save: Option<TextDocumentSyncSaveOptions>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum OneOf<A, B> {
     Left(A),
@@ -1834,7 +1855,6 @@ pub struct ServerCapabilities {
     ///
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub position_encoding: Option<PositionEncodingKind>,
 
     /// Defines how text documents are synced.
@@ -1945,11 +1965,16 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
 
+    /// The server provides inline values.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_value_provider: Option<OneOf<bool, InlineValueServerCapabilities>>,
+
     /// The server provides inlay hints.
     ///
-    /// @since 3.17.0 - proposed state
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg(feature = "proposed")]
     pub inlay_hint_provider: Option<OneOf<bool, InlayHintServerCapabilities>>,
 
     /// The server provides linked editing range support.
@@ -2101,6 +2126,13 @@ pub struct DocumentHighlightOptions {
 pub struct WorkspaceSymbolOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
+
+    /// The server provides support to resolve additional
+    /// information for a workspace symbol.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolve_provider: Option<bool>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2247,7 +2279,22 @@ pub struct TextDocumentSaveRegistrationOptions {
     pub text_document_registration_options: TextDocumentRegistrationOptions,
 }
 
-pub type DidChangeWatchedFilesClientCapabilities = DynamicRegistrationClientCapabilities;
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DidChangeWatchedFilesClientCapabilities {
+    /// Did change watched files notification supports dynamic registration.
+    /// Please note that the current protocol doesn't support static
+    /// configuration for file changes from the server side.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dynamic_registration: Option<bool>,
+
+    /// Whether the client has support for relative patterns
+    /// or not.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub relative_pattern_support: Option<bool>,
+}
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct DidChangeWatchedFilesParams {
@@ -2299,14 +2346,73 @@ pub struct DidChangeWatchedFilesRegistrationOptions {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FileSystemWatcher {
-    /// The  glob pattern to watch
-    pub glob_pattern: String,
+    /// The glob pattern to watch. See {@link GlobPattern glob pattern}
+    /// for more detail.
+    ///
+    /// @since 3.17.0 support for relative patterns.
+    pub glob_pattern: GlobPattern,
 
     /// The kind of events of interest. If omitted it defaults to WatchKind.Create |
     /// WatchKind.Change | WatchKind.Delete which is 7.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<WatchKind>,
 }
+
+/// The glob pattern. Either a string pattern or a relative pattern.
+///
+/// @since 3.17.0
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum GlobPattern {
+    String(Pattern),
+    Relative(RelativePattern),
+}
+
+impl From<Pattern> for GlobPattern {
+    #[inline]
+    fn from(from: Pattern) -> Self {
+        Self::String(from)
+    }
+}
+
+impl From<RelativePattern> for GlobPattern {
+    #[inline]
+    fn from(from: RelativePattern) -> Self {
+        Self::Relative(from)
+    }
+}
+
+/// A relative pattern is a helper to construct glob patterns that are matched
+/// relatively to a base URI. The common value for a `baseUri` is a workspace
+/// folder root, but it can be another absolute URI as well.
+///
+/// @since 3.17.0
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RelativePattern {
+    /// A workspace folder or a base URI to which this pattern will be matched
+    /// against relatively.
+    pub base_uri: OneOf<WorkspaceFolder, Url>,
+
+    /// The actual glob pattern.
+    pub pattern: Pattern,
+}
+
+/// The glob pattern to watch relative to the base path. Glob patterns can have
+/// the following syntax:
+/// - `*` to match one or more characters in a path segment
+/// - `?` to match on one character in a path segment
+/// - `**` to match any number of path segments, including none
+/// - `{}` to group conditions (e.g. `**​/*.{ts,js}` matches all TypeScript
+///   and JavaScript files)
+/// - `[]` to declare a range of characters to match in a path segment
+///   (e.g., `example.[0-9]` to match on `example.0`, `example.1`, …)
+/// - `[!...]` to negate a range of characters to match in a path segment
+///   (e.g., `example.[!0-9]` to match on `example.a`, `example.b`,
+///   but not `example.0`)
+///
+/// @since 3.17.0
+pub type Pattern = String;
 
 bitflags! {
 pub struct WatchKind: u8 {

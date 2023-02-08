@@ -9,6 +9,6 @@ Proposed 3.17 features can be activated using the `proposed` feature flag.
 
 ## Links
 
-[Stable Protocol reference](https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-16.md)
+[Stable Protocol reference](https://github.com/microsoft/language-server-protocol/tree/gh-pages/_specifications/lsp/3.17/specification.md)
 
-[Proposed Protocol reference](https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/lsp/3.17/specification.md)
+[Proposed Protocol reference](https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/lsp/3.18/specification.md)
