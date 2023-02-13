@@ -50,7 +50,7 @@ pub struct FormattingOptions {
     #[serde(flatten)]
     pub properties: HashMap<String, FormattingProperty>,
 
-    /// Trim trailing whitespaces on a line.
+    /// Trim trailing whitespace on a line.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trim_trailing_whitespace: Option<bool>,
 

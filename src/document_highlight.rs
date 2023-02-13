@@ -39,7 +39,7 @@ pub struct DocumentHighlight {
 pub struct DocumentHighlightKind(i32);
 lsp_enum! {
 impl DocumentHighlightKind {
-    /// A textual occurrance.
+    /// A textual occurrence.
     pub const TEXT: DocumentHighlightKind = DocumentHighlightKind(1);
 
     /// Read-access of a symbol, like reading a variable.

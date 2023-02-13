@@ -19,7 +19,7 @@ pub struct SignatureInformationSettings {
     /// The client support the `activeParameter` property on `SignatureInformation`
     ///  literal.
     ///
-    ///  @since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_parameter_support: Option<bool>,
 }

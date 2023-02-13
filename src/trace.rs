@@ -11,20 +11,15 @@ pub struct SetTraceParams {
 ///
 /// The initial trace value is set by the client at initialization and can be modified
 /// later using the `SetTrace` notification.
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub enum TraceValue {
     /// The server should not send any `$/logTrace` notification
+    #[default]
     Off,
     /// The server should not add the 'verbose' field in the `LogTraceParams`
     Messages,
     Verbose,
-}
-
-impl Default for TraceValue {
-    fn default() -> TraceValue {
-        TraceValue::Off
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

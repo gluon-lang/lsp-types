@@ -4,8 +4,8 @@
 //!
 //! Based on <https://microsoft.github.io/language-server-protocol/specifications/lsif/0.6.0/specification/>
 
+use crate::{Range, Url};
 use serde::{Deserialize, Serialize};
-use crate::{Url, Range};
 
 pub type Id = crate::NumberOrString;
 
@@ -83,7 +83,6 @@ pub struct DefinitionTag {
     #[serde(skip_serializing_if = "Option::is_none")]
     detail: Option<String>,
 }
-
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -183,7 +182,6 @@ pub enum EventScope {
     Document,
     Project,
 }
-
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Event {

@@ -39,14 +39,12 @@ pub struct WindowClientCapabilities {
     /// Capabilities specific to the showMessage request.
     ///
     /// @since 3.16.0
-    ///
     #[serde(skip_serializing_if = "Option::is_none")]
     pub show_message: Option<ShowMessageRequestClientCapabilities>,
 
     /// Client capabilities for the show document request.
     ///
     /// @since 3.16.0
-    ///
     #[serde(skip_serializing_if = "Option::is_none")]
     pub show_document: Option<ShowDocumentClientCapabilities>,
 }
@@ -63,7 +61,7 @@ pub struct ShowMessageRequestClientCapabilities {
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MessageActionItemCapabilities {
-    /// Whether the client supports additional attribues which
+    /// Whether the client supports additional attributes which
     /// are preserved and send back to the server in the
     /// request's response.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -137,7 +135,6 @@ pub struct ShowDocumentClientCapabilities {
 /// Params to show a document.
 ///
 /// @since 3.16.0
-///
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShowDocumentParams {
