@@ -280,8 +280,8 @@ impl Location {
 pub struct LocationLink {
     /// Span of the origin of this link.
     ///
-    ///  Used as the underlined span for mouse interaction. Defaults to the word range at
-    ///  the mouse position.
+    /// Used as the underlined span for mouse interaction. Defaults to the word range at
+    /// the mouse position.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub origin_selection_range: Option<Range>,
 
@@ -380,7 +380,7 @@ pub struct Diagnostic {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<DiagnosticTag>>,
 
-    ///  A data entry field that is preserved between a `textDocument/publishDiagnostics`
+    /// A data entry field that is preserved between a `textDocument/publishDiagnostics`
     /// notification and `textDocument/codeAction` request.
     ///
     /// @since 3.16.0
@@ -1362,13 +1362,13 @@ pub struct PublishDiagnosticsClientCapabilities {
     /// Whether the client interprets the version property of the
     /// `textDocument/publishDiagnostics` notification's parameter.
     ///
-    ///  3.15.0
+    /// @since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version_support: Option<bool>,
 
     /// Client supports a codeDescription property
     ///
-    ///  3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_description_support: Option<bool>,
 
@@ -1376,7 +1376,7 @@ pub struct PublishDiagnosticsClientCapabilities {
     /// preserved between a `textDocument/publishDiagnostics` and
     /// `textDocument/codeAction` request.
     ///
-    ///  3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_support: Option<bool>,
 }
@@ -2641,6 +2641,7 @@ pub enum MarkupKind {
 /// If the format is `markdown` the content should follow the [GitHub Flavored Markdown Specification](https://github.github.com/gfm/).
 ///
 /// Here is an example how such a string can be constructed using JavaScript / TypeScript:
+///
 /// ```ignore
 /// let markdown: MarkupContent = {
 ///     kind: MarkupKind::Markdown,
@@ -2655,7 +2656,7 @@ pub enum MarkupKind {
 /// };
 /// ```
 ///
-/// Please Note* that clients might sanitize the return markdown. A client could decide to
+/// Please *Note* that clients might sanitize the return markdown. A client could decide to
 /// remove HTML from the markdown to avoid script execution.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 pub struct MarkupContent {

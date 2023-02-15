@@ -42,7 +42,7 @@ pub struct ToolInfo {
     pub version: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone, Copy)]
 pub enum Encoding {
     /// Currently only 'utf-16' is supported due to the limitations in LSP.
     #[serde(rename = "utf-16")]

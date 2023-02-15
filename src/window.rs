@@ -147,17 +147,17 @@ pub struct ShowDocumentParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub external: Option<bool>,
 
-    ///  An optional property to indicate whether the editor
-    ///  showing the document should take focus or not.
-    ///  Clients might ignore this property if an external
-    ///  program in started.
+    /// An optional property to indicate whether the editor
+    /// showing the document should take focus or not.
+    /// Clients might ignore this property if an external
+    /// program in started.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub take_focus: Option<bool>,
 
-    ///  An optional selection range if the document is a text
-    ///  document. Clients might ignore the property if an
-    ///  external program is started or the file is not a text
-    ///  file.
+    /// An optional selection range if the document is a text
+    /// document. Clients might ignore the property if an
+    /// external program is started or the file is not a text
+    /// file.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selection: Option<Range>,
 }

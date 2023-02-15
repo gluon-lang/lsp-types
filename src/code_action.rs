@@ -344,7 +344,7 @@ pub struct CodeActionContext {
     pub trigger_kind: Option<CodeActionTriggerKind>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeActionOptions {
     /// CodeActionKinds that this server may return.
