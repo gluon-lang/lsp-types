@@ -1085,6 +1085,11 @@ pub struct InitializeParams {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
+
+    /// The LSP server may report about initialization progress to the client
+    /// by using the following work done token if it was passed by the client.
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
