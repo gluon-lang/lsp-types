@@ -183,6 +183,9 @@ pub use linked_editing::*;
 mod window;
 pub use window::*;
 
+mod workspace_diagnostic;
+pub use workspace_diagnostic::*;
+
 mod workspace_folders;
 pub use workspace_folders::*;
 
@@ -1338,6 +1341,11 @@ pub struct WorkspaceClientCapabilities {
     /// since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
+
+    /// Client workspace capabilities specific to diagnostics.
+    /// since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostic: Option<DiagnosticWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

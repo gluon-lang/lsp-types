@@ -162,6 +162,12 @@ macro_rules! lsp_request {
     ("textDocument/diagnostic") => {
         $crate::request::DocumentDiagnosticRequest
     };
+    ("workspace/diagnostic") => {
+        $crate::request::WorkspaceDiagnosticRequest
+    };
+    ("workspace/diagnostic/refresh") => {
+        $crate::request::WorkspaceDiagnosticRefresh
+    };
     ("typeHierarchy/supertypes") => {
         $crate::request::TypeHierarchySupertypes
     };
@@ -881,6 +887,34 @@ impl Request for DocumentDiagnosticRequest {
     const METHOD: &'static str = "textDocument/diagnostic";
 }
 
+/// The workspace diagnostic request is sent from the client to the server to ask the server to
+/// compute workspace wide diagnostics which previously where pushed from the server to the client.
+/// In contrast to the document diagnostic request the workspace request can be long running and is
+/// not bound to a specific workspace or document state. If the client supports streaming for the
+/// workspace diagnostic pull it is legal to provide a document diagnostic report multiple times
+/// for the same document URI. The last one reported will win over previous reports.
+#[derive(Debug)]
+pub enum WorkspaceDiagnosticRequest {}
+
+impl Request for WorkspaceDiagnosticRequest {
+    type Params = WorkspaceDiagnosticParams;
+    const METHOD: &'static str = "workspace/diagnostic";
+    type Result = WorkspaceDiagnosticReportResult;
+}
+
+/// The `workspace/diagnostic/refresh` request is sent from the server to the client. Servers can
+/// use it to ask clients to refresh all needed document and workspace diagnostics. This is useful
+/// if a server detects a project wide configuration change which requires a re-calculation of all
+/// diagnostics.
+#[derive(Debug)]
+pub enum WorkspaceDiagnosticRefresh {}
+
+impl Request for WorkspaceDiagnosticRefresh {
+    type Params = ();
+    type Result = ();
+    const METHOD: &'static str = "workspace/diagnostic/refresh";
+}
+
 /// The type hierarchy request is sent from the client to the server to return a type hierarchy for
 /// the language element of given text document positions. Will return null if the server couldn’t
 /// infer a valid type from the position. The type hierarchy requests are executed in two steps:
@@ -991,6 +1025,8 @@ mod test {
         check_macro!("workspace/symbol");
         check_macro!("workspace/executeCommand");
         check_macro!("workspace/configuration");
+        check_macro!("workspace/diagnostic");
+        check_macro!("workspace/diagnostic/refresh");
         check_macro!("workspace/willCreateFiles");
         check_macro!("workspace/willRenameFiles");
         check_macro!("workspace/willDeleteFiles");
