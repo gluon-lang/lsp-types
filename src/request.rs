@@ -159,6 +159,9 @@ macro_rules! lsp_request {
     ("textDocument/inlineValue") => {
         $crate::request::InlineValueRequest
     };
+    ("textDocument/diagnostic") => {
+        $crate::request::DocumentDiagnosticRequest
+    };
     ("typeHierarchy/supertypes") => {
         $crate::request::TypeHierarchySupertypes
     };
@@ -866,6 +869,18 @@ impl Request for InlineValueRefreshRequest {
     const METHOD: &'static str = "workspace/inlineValue/refresh";
 }
 
+/// The text document diagnostic request is sent from the client to the server to ask the server to
+/// compute the diagnostics for a given document. As with other pull requests the server is asked
+/// to compute the diagnostics for the currently synced version of the document.
+#[derive(Debug)]
+pub enum DocumentDiagnosticRequest {}
+
+impl Request for DocumentDiagnosticRequest {
+    type Params = DocumentDiagnosticParams;
+    type Result = DocumentDiagnosticReportResult;
+    const METHOD: &'static str = "textDocument/diagnostic";
+}
+
 /// The type hierarchy request is sent from the client to the server to return a type hierarchy for
 /// the language element of given text document positions. Will return null if the server couldn’t
 /// infer a valid type from the position. The type hierarchy requests are executed in two steps:
@@ -970,6 +985,7 @@ mod test {
         check_macro!("textDocument/semanticTokens/range");
         check_macro!("textDocument/inlayHint");
         check_macro!("textDocument/inlineValue");
+        check_macro!("textDocument/diagnostic");
 
         check_macro!("workspace/applyEdit");
         check_macro!("workspace/symbol");
