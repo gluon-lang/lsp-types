@@ -31,6 +31,9 @@ macro_rules! lsp_request {
     ("workspace/symbol") => {
         $crate::request::WorkspaceSymbolRequest
     };
+    ("workspaceSymbol/resolve") => {
+        $crate::request::WorkspaceSymbolResolve
+    };
     ("workspace/executeCommand") => {
         $crate::request::ExecuteCommand
     };
@@ -993,6 +996,7 @@ mod test {
         check_macro!("inlayHint/resolve");
         check_macro!("typeHierarchy/subtypes");
         check_macro!("typeHierarchy/supertypes");
+        check_macro!("workspaceSymbol/resolve");
     }
 
     #[test]
