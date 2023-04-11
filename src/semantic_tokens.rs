@@ -424,7 +424,7 @@ pub struct SemanticTokensOptions {
     /// The legend used by the server
     pub legend: SemanticTokensLegend,
 
-    /// Server supports providing semantic tokens for a sepcific range
+    /// Server supports providing semantic tokens for a specific range
     /// of a document.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub range: Option<bool>,
