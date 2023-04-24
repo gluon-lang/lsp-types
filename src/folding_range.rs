@@ -93,6 +93,7 @@ pub struct FoldingRangeClientCapabilities {
     pub folding_range_kind: Option<FoldingRangeKindCapability>,
 
     /// Specific options for the folding range.
+    ///
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub folding_range: Option<FoldingRangeCapability>,

@@ -83,7 +83,8 @@ pub struct DocumentSymbol {
     /// The kind of this symbol.
     pub kind: SymbolKind,
     /// Tags for this completion item.
-    ///  since 3.16.0
+    ///
+    /// @since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<SymbolTag>>,
     /// Indicates if this symbol is deprecated.
@@ -114,7 +115,8 @@ pub struct SymbolInformation {
     pub kind: SymbolKind,
 
     /// Tags for this completion item.
-    ///  since 3.16.0
+    ///
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<SymbolTag>>,
 

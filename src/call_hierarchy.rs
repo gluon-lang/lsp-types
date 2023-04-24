@@ -9,14 +9,14 @@ use crate::{
 
 pub type CallHierarchyClientCapabilities = DynamicRegistrationClientCapabilities;
 
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct CallHierarchyOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
 #[serde(untagged)]
 pub enum CallHierarchyServerCapability {
     Simple(bool),
@@ -72,7 +72,7 @@ pub struct CallHierarchyItem {
     /// Must be contained by the [`range`](#CallHierarchyItem.range).
     pub selection_range: Range,
 
-    /// A data entry field that is preserved between a call hierarchy prepare and incloming calls or outgoing calls requests.
+    /// A data entry field that is preserved between a call hierarchy prepare and incoming calls or outgoing calls requests.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
 }

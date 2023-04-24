@@ -42,13 +42,13 @@ pub struct CodeActionClientCapabilities {
 
     /// Whether code action supports the `isPreferred` property.
     ///
-    /// since 3.15.0
+    /// @since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_preferred_support: Option<bool>,
 
     /// Whether code action supports the `disabled` property.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disabled_support: Option<bool>,
 
@@ -56,14 +56,14 @@ pub struct CodeActionClientCapabilities {
     /// preserved between a `textDocument/codeAction` and a
     /// `codeAction/resolve` request.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_support: Option<bool>,
 
     /// Whether the client supports resolving additional code action
     /// properties via a separate `codeAction/resolve` request.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_support: Option<CodeActionCapabilityResolveSupport>,
 
@@ -79,9 +79,9 @@ pub struct CodeActionClientCapabilities {
 }
 
 /// Whether the client supports resolving additional code action
-///  properties via a separate `codeAction/resolve` request.
+/// properties via a separate `codeAction/resolve` request.
 ///
-/// since 3.16.0
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeActionCapabilityResolveSupport {
@@ -137,8 +137,8 @@ pub enum CodeActionOrCommand {
 }
 
 impl From<Command> for CodeActionOrCommand {
-    fn from(comand: Command) -> Self {
-        CodeActionOrCommand::Command(comand)
+    fn from(command: Command) -> Self {
+        CodeActionOrCommand::Command(command)
     }
 }
 
@@ -263,7 +263,7 @@ pub struct CodeAction {
     /// A quick fix should be marked preferred if it properly addresses the underlying error.
     /// A refactoring should be marked preferred if it is the most reasonable choice of actions to take.
     ///
-    /// since 3.15.0
+    /// @since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_preferred: Option<bool>,
 
@@ -282,14 +282,14 @@ pub struct CodeAction {
     ///   actions are returned, the client should show the user an error message with `reason`
     ///   in the editor.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disabled: Option<CodeActionDisabled>,
 
     /// A data entry field that is preserved on a code action between
     /// a `textDocument/codeAction` and a `codeAction/resolve` request.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
 }
@@ -344,7 +344,7 @@ pub struct CodeActionContext {
     pub trigger_kind: Option<CodeActionTriggerKind>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeActionOptions {
     /// CodeActionKinds that this server may return.
@@ -360,7 +360,7 @@ pub struct CodeActionOptions {
     /// The server provides support to resolve additional
     /// information for a code action.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolve_provider: Option<bool>,
 }

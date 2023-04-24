@@ -221,7 +221,7 @@ pub struct CompletionClientCapabilities {
     pub completion_item_kind: Option<CompletionItemKindCapability>,
 
     /// The client supports to send additional context information for a
-    /// `textDocument/completion` requestion.
+    /// `textDocument/completion` request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context_support: Option<bool>,
 

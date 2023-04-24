@@ -20,7 +20,6 @@ pub struct WorkspaceSymbolClientCapabilities {
     /// Clients supporting tags have to handle unknown tags gracefully.
     ///
     /// @since 3.16.0
-    ///
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",

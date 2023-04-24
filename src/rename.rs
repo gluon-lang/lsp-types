@@ -37,7 +37,7 @@ pub struct RenameClientCapabilities {
 
     /// Client supports testing for validity of rename operations before execution.
     ///
-    /// since 3.12.0
+    /// @since 3.12.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_support: Option<bool>,
 
@@ -46,7 +46,7 @@ pub struct RenameClientCapabilities {
     /// The value indicates the default behavior used by the
     /// client.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prepare_support_default_behavior: Option<PrepareSupportDefaultBehavior>,
 

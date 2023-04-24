@@ -17,9 +17,9 @@ pub struct SignatureInformationSettings {
     pub parameter_information: Option<ParameterInformationSettings>,
 
     /// The client support the `activeParameter` property on `SignatureInformation`
-    ///  literal.
+    /// literal.
     ///
-    ///  @since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_parameter_support: Option<bool>,
 }
@@ -65,7 +65,7 @@ pub struct SignatureHelpOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_characters: Option<Vec<String>>,
 
-    ///  List of characters that re-trigger signature help.
+    /// List of characters that re-trigger signature help.
     /// These trigger characters are only active when signature help is already showing. All trigger characters
     /// are also counted as re-trigger characters.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -90,7 +90,7 @@ lsp_enum! {
 impl SignatureHelpTriggerKind {
     /// Signature help was invoked manually by the user or by a command.
     pub const INVOKED: SignatureHelpTriggerKind = SignatureHelpTriggerKind(1);
-    ///  Signature help was triggered by a trigger character.
+    /// Signature help was triggered by a trigger character.
     pub const TRIGGER_CHARACTER: SignatureHelpTriggerKind = SignatureHelpTriggerKind(2);
     /// Signature help was triggered by the cursor moving or by the document content changing.
     pub const CONTENT_CHANGE: SignatureHelpTriggerKind = SignatureHelpTriggerKind(3);
@@ -115,7 +115,7 @@ pub struct SignatureHelpParams {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignatureHelpContext {
-    ///  Action that caused signature help to be triggered.
+    /// Action that caused signature help to be triggered.
     pub trigger_kind: SignatureHelpTriggerKind,
 
     /// Character that caused signature help to be triggered.

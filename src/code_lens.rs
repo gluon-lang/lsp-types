@@ -9,7 +9,7 @@ use crate::{
 pub type CodeLensClientCapabilities = DynamicRegistrationClientCapabilities;
 
 /// Code Lens options.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeLensOptions {
     /// Code lens has a resolve provider as well.

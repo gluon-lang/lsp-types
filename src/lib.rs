@@ -15,7 +15,7 @@ able to parse any URI, such as `urn:isbn:0451450523`.
 
 */
 #![allow(non_upper_case_globals)]
-#[forbid(unsafe_code)]
+#![forbid(unsafe_code)]
 #[macro_use]
 extern crate bitflags;
 
@@ -280,8 +280,8 @@ impl Location {
 pub struct LocationLink {
     /// Span of the origin of this link.
     ///
-    ///  Used as the underlined span for mouse interaction. Defaults to the word range at
-    ///  the mouse position.
+    /// Used as the underlined span for mouse interaction. Defaults to the word range at
+    /// the mouse position.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub origin_selection_range: Option<Range>,
 
@@ -359,7 +359,7 @@ pub struct Diagnostic {
 
     /// An optional property to describe the error code.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_description: Option<CodeDescription>,
 
@@ -380,10 +380,10 @@ pub struct Diagnostic {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<DiagnosticTag>>,
 
-    ///  A data entry field that is preserved between a `textDocument/publishDiagnostics`
+    /// A data entry field that is preserved between a `textDocument/publishDiagnostics`
     /// notification and `textDocument/codeAction` request.
     ///
-    /// since 3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<serde_json::Value>,
 }
@@ -479,8 +479,10 @@ impl DiagnosticTag {
 }
 
 /// Represents a reference to a command. Provides a title which will be used to represent a command in the UI.
-/// Commands are identitifed using a string identifier and the protocol currently doesn't specify a set of
-/// well known commands. So executing a command requires some tool extension code.
+/// Commands are identified by a string identifier. The recommended way to handle commands is to implement
+/// their execution on the server side if the client and server provides the corresponding capabilities.
+/// Alternatively the tool extension code could handle the command.
+/// The protocol currently doesn’t specify a set of well-known commands.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct Command {
     /// Title of the command, like `save`.
@@ -528,12 +530,12 @@ impl TextEdit {
 /// An identifier referring to a change annotation managed by a workspace
 /// edit.
 ///
-/// @since 3.16.0.
+/// @since 3.16.0
 pub type ChangeAnnotationIdentifier = String;
 
 /// A special text edit with an additional change annotation.
 ///
-/// @since 3.16.0.
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AnnotatedTextEdit {
@@ -564,7 +566,7 @@ pub struct TextDocumentEdit {
 
 /// Additional information that describes document changes.
 ///
-/// @since 3.16.0.
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeAnnotation {
@@ -615,7 +617,7 @@ pub struct CreateFile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<CreateFileOptions>,
 
-    /// An optional annotation identifer describing the operation.
+    /// An optional annotation identifier describing the operation.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -646,7 +648,7 @@ pub struct RenameFile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<RenameFileOptions>,
 
-    /// An optional annotation identifer describing the operation.
+    /// An optional annotation identifier describing the operation.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -664,7 +666,7 @@ pub struct DeleteFileOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_if_not_exists: Option<bool>,
 
-    /// An optional annotation identifer describing the operation.
+    /// An optional annotation identifier describing the operation.
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -716,7 +718,6 @@ pub struct WorkspaceEdit {
     /// `workspace.changeAnnotationSupport`.
     ///
     /// @since 3.16.0
-    ///
     #[serde(skip_serializing_if = "Option::is_none")]
     pub change_annotations: Option<HashMap<ChangeAnnotationIdentifier, ChangeAnnotation>>,
 }
@@ -1160,16 +1161,14 @@ pub struct WorkspaceEditClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resource_operations: Option<Vec<ResourceOperationKind>>,
 
-    /// The failure handling strategy of a client if applying the workspace edit
-    /// failes.
+    /// The failure handling strategy of a client if applying the workspace edit fails.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub failure_handling: Option<FailureHandlingKind>,
 
     /// Whether the client normalizes line endings to the client specific
     /// setting.
     /// If set to `true` the client will normalize line ending characters
-    /// in a workspace edit containg to the client specific new line
-    /// character.
+    /// in a workspace edit to the client specific new line character(s).
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1280,37 +1279,44 @@ pub struct WorkspaceClientCapabilities {
     pub execute_command: Option<ExecuteCommandClientCapabilities>,
 
     /// The client has support for workspace folders.
-    /// since 3.6.0
+    ///
+    /// @since 3.6.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace_folders: Option<bool>,
 
     /// The client supports `workspace/configuration` requests.
-    /// since 3.6.0
+    ///
+    /// @since 3.6.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub configuration: Option<bool>,
 
-    /// Capabilities specific to the semantic token requsts scoped to the workspace.
-    /// since 3.16.0
+    /// Capabilities specific to the semantic token requests scoped to the workspace.
+    ///
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semantic_tokens: Option<SemanticTokensWorkspaceClientCapabilities>,
 
     /// Capabilities specific to the code lens requests scoped to the workspace.
-    /// since 3.16.0
+    ///
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_lens: Option<CodeLensWorkspaceClientCapabilities>,
 
     /// The client has support for file requests/notifications.
-    /// since 3.16.0
+    ///
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_operations: Option<WorkspaceFileOperationsClientCapabilities>,
 
     /// Client workspace capabilities specific to inline values.
-    /// since 3.17.0
+    ///
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_value: Option<InlineValueWorkspaceClientCapabilities>,
 
     /// Client workspace capabilities specific to inlay hints.
-    /// since 3.17.0
+    ///
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
 }
@@ -1356,13 +1362,13 @@ pub struct PublishDiagnosticsClientCapabilities {
     /// Whether the client interprets the version property of the
     /// `textDocument/publishDiagnostics` notification's parameter.
     ///
-    ///  3.15.0
+    /// @since 3.15.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version_support: Option<bool>,
 
     /// Client supports a codeDescription property
     ///
-    ///  3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub code_description_support: Option<bool>,
 
@@ -1370,7 +1376,7 @@ pub struct PublishDiagnosticsClientCapabilities {
     /// preserved between a `textDocument/publishDiagnostics` and
     /// `textDocument/codeAction` request.
     ///
-    ///  3.16.0
+    /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_support: Option<bool>,
 }
@@ -1573,11 +1579,13 @@ pub struct ClientCapabilities {
 #[serde(rename_all = "camelCase")]
 pub struct GeneralClientCapabilities {
     /// Client capabilities specific to regular expressions.
+    ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub regular_expressions: Option<RegularExpressionsClientCapabilities>,
 
     /// Client capabilities specific to the client's markdown parser.
+    ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markdown: Option<MarkdownClientCapabilities>,
@@ -1687,9 +1695,11 @@ pub struct ServerInfo {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct InitializeError {
-    /// Indicates whether the client should retry to send the
-    /// initilize request after showing the message provided
-    /// in the ResponseError.
+    /// Indicates whether the client execute the following retry logic:
+    ///
+    /// - (1) show the message provided by the ResponseError to the user
+    /// - (2) user selects retry or cancel
+    /// - (3) if user selected retry the initialize method is sent again.
     pub retry: bool,
 }
 
@@ -2065,7 +2075,7 @@ pub struct StaticRegistrationOptions {
     pub id: Option<String>,
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2205,7 +2215,7 @@ pub struct TextDocumentContentChangeEvent {
     pub text: String,
 }
 
-/// Descibe options to be used when registered for text document change events.
+/// Describe options to be used when registering for text document change events.
 ///
 /// Extends TextDocumentRegistrationOptions
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -2480,14 +2490,16 @@ pub enum Documentation {
     MarkupContent(MarkupContent),
 }
 
-/// The marked string is rendered:
-/// - as markdown if it is represented as a string
-/// - as code block of the given langauge if it is represented as a pair of a language and a value
+/// MarkedString can be used to render human readable text. It is either a
+/// markdown string or a code-block that provides a language and a code snippet.
+/// The language identifier is semantically equal to the optional language
+/// identifier in fenced code blocks in GitHub issues.
 ///
 /// The pair of a language and a value is an equivalent to markdown:
-///     ```${language}
-///     ${value}
-///     ```
+///
+/// ```${language}
+/// ${value}
+/// ```
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum MarkedString {
@@ -2629,6 +2641,7 @@ pub enum MarkupKind {
 /// If the format is `markdown` the content should follow the [GitHub Flavored Markdown Specification](https://github.github.com/gfm/).
 ///
 /// Here is an example how such a string can be constructed using JavaScript / TypeScript:
+///
 /// ```ignore
 /// let markdown: MarkupContent = {
 ///     kind: MarkupKind::Markdown,
@@ -2643,7 +2656,7 @@ pub enum MarkupKind {
 /// };
 /// ```
 ///
-/// Please Note* that clients might sanitize the return markdown. A client could decide to
+/// Please *Note* that clients might sanitize the return markdown. A client could decide to
 /// remove HTML from the markdown to avoid script execution.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 pub struct MarkupContent {
@@ -2660,7 +2673,8 @@ pub struct PartialResultParams {
 }
 
 /// Symbol tags are extra annotations that tweak the rendering of a symbol.
-/// Since 3.15
+///
+/// @since 3.16.0
 #[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct SymbolTag(i32);

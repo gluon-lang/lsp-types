@@ -22,8 +22,8 @@ pub enum ProgressParamsValue {
     WorkDone(WorkDoneProgress),
 }
 
-/// The `window/workDoneProgress/create` request is sent from the server
-/// to the clientto ask the client to create a work done progress.
+/// The `window/workDoneProgress/create` request is sent
+/// from the server to the client to ask the client to create a work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkDoneProgressCreateParams {

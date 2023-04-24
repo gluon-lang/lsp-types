@@ -90,9 +90,9 @@ pub struct FileOperationFilter {
 }
 
 /// A pattern kind describing if a glob pattern matches a file a folder or
-///  both.
+/// both.
 ///
-///  @since 3.16.0
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum FileOperationPatternKind {
@@ -147,9 +147,9 @@ pub struct FileOperationPattern {
 }
 
 /// The parameters sent in notifications/requests for user-initiated creation
-///  of files.
+/// of files.
 ///
-///  @since 3.16.0
+/// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateFilesParams {
