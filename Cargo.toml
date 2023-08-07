@@ -1,6 +1,6 @@
 [package]
 name = "lsp-types"
-version = "0.94.0"
+version = "0.94.1"
 authors = ["Markus Westerlind <marwes91@gmail.com>", "Bruno Medeiros <bruno.do.medeiros@gmail.com>"]
 edition = "2018"
 description = "Types for interaction with a language server, using VSCode's Language Server Protocol"
