@@ -123,6 +123,9 @@ pub use color::*;
 mod completion;
 pub use completion::*;
 
+mod document_diagnostic;
+pub use document_diagnostic::*;
+
 mod document_highlight;
 pub use document_highlight::*;
 
@@ -179,6 +182,9 @@ pub use linked_editing::*;
 
 mod window;
 pub use window::*;
+
+mod workspace_diagnostic;
+pub use workspace_diagnostic::*;
 
 mod workspace_folders;
 pub use workspace_folders::*;
@@ -781,18 +787,28 @@ pub struct ConfigurationItem {
 
 mod url_map {
     use std::fmt;
+    use std::marker::PhantomData;
 
     use super::*;
 
-    pub fn deserialize<'de, D>(
-        deserializer: D,
-    ) -> Result<Option<HashMap<Url, Vec<TextEdit>>>, D::Error>
+    pub fn deserialize<'de, D, V>(deserializer: D) -> Result<Option<HashMap<Url, V>>, D::Error>
     where
         D: serde::Deserializer<'de>,
+        V: de::DeserializeOwned,
     {
-        struct UrlMapVisitor;
-        impl<'de> de::Visitor<'de> for UrlMapVisitor {
-            type Value = HashMap<Url, Vec<TextEdit>>;
+        struct UrlMapVisitor<V> {
+            _marker: PhantomData<V>,
+        }
+
+        impl<V: de::DeserializeOwned> Default for UrlMapVisitor<V> {
+            fn default() -> Self {
+                UrlMapVisitor {
+                    _marker: PhantomData,
+                }
+            }
+        }
+        impl<'de, V: de::DeserializeOwned> de::Visitor<'de> for UrlMapVisitor<V> {
+            type Value = HashMap<Url, V>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("map")
@@ -814,9 +830,18 @@ mod url_map {
             }
         }
 
-        struct OptionUrlMapVisitor;
-        impl<'de> de::Visitor<'de> for OptionUrlMapVisitor {
-            type Value = Option<HashMap<Url, Vec<TextEdit>>>;
+        struct OptionUrlMapVisitor<V> {
+            _marker: PhantomData<V>,
+        }
+        impl<V: de::DeserializeOwned> Default for OptionUrlMapVisitor<V> {
+            fn default() -> Self {
+                OptionUrlMapVisitor {
+                    _marker: PhantomData,
+                }
+            }
+        }
+        impl<'de, V: de::DeserializeOwned> de::Visitor<'de> for OptionUrlMapVisitor<V> {
+            type Value = Option<HashMap<Url, V>>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("option")
@@ -843,21 +868,24 @@ mod url_map {
             where
                 D: serde::Deserializer<'de>,
             {
-                deserializer.deserialize_map(UrlMapVisitor).map(Some)
+                deserializer
+                    .deserialize_map(UrlMapVisitor::<V>::default())
+                    .map(Some)
             }
         }
 
         // Instantiate our Visitor and ask the Deserializer to drive
         // it over the input data, resulting in an instance of MyMap.
-        deserializer.deserialize_option(OptionUrlMapVisitor)
+        deserializer.deserialize_option(OptionUrlMapVisitor::default())
     }
 
-    pub fn serialize<S>(
-        changes: &Option<HashMap<Url, Vec<TextEdit>>>,
+    pub fn serialize<S, V>(
+        changes: &Option<HashMap<Url, V>>,
         serializer: S,
     ) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
+        V: serde::Serialize,
     {
         use serde::ser::SerializeMap;
 
@@ -1319,6 +1347,11 @@ pub struct WorkspaceClientCapabilities {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inlay_hint: Option<InlayHintWorkspaceClientCapabilities>,
+
+    /// Client workspace capabilities specific to diagnostics.
+    /// since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostic: Option<DiagnosticWorkspaceClientCapabilities>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1541,6 +1574,12 @@ pub struct TextDocumentClientCapabilities {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inlay_hint: Option<InlayHintClientCapabilities>,
+
+    /// Capabilities specific to the diagnostic pull model.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostic: Option<DiagnosticClientCapabilities>,
 }
 
 /// Where ClientCapabilities are currently empty:
@@ -1975,6 +2014,12 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
 
+    /// The server provides linked editing range support.
+    ///
+    /// @since 3.16.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linked_editing_range_provider: Option<LinkedEditingRangeServerCapabilities>,
+
     /// The server provides inline values.
     ///
     /// @since 3.17.0
@@ -1987,11 +2032,11 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inlay_hint_provider: Option<OneOf<bool, InlayHintServerCapabilities>>,
 
-    /// The server provides linked editing range support.
+    /// The server has support for pull model diagnostics.
     ///
-    /// @since 3.16.0
+    /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub linked_editing_range_provider: Option<LinkedEditingRangeServerCapabilities>,
+    pub diagnostic_provider: Option<DiagnosticServerCapabilities>,
 
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
