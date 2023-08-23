@@ -3,8 +3,8 @@ use super::*;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub trait Request {
-    type Params: DeserializeOwned + Serialize;
-    type Result: DeserializeOwned + Serialize;
+    type Params: DeserializeOwned + Serialize + Send + Sync + 'static;
+    type Result: DeserializeOwned + Serialize + Send + Sync + 'static;
     const METHOD: &'static str;
 }
 

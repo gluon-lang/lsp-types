@@ -3,7 +3,7 @@ use super::*;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub trait Notification {
-    type Params: DeserializeOwned + Serialize;
+    type Params: DeserializeOwned + Serialize + Send + Sync + 'static;
     const METHOD: &'static str;
 }
 
