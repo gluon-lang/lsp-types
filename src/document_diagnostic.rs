@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use url::Url;
 
 use crate::{
     Diagnostic, PartialResultParams, StaticRegistrationOptions, TextDocumentIdentifier,
-    TextDocumentRegistrationOptions, WorkDoneProgressOptions, WorkDoneProgressParams,
+    TextDocumentRegistrationOptions, Uri, WorkDoneProgressOptions, WorkDoneProgressParams,
 };
 
 /// Client capabilities specific to diagnostic pull requests.
@@ -158,10 +157,9 @@ pub struct RelatedFullDocumentDiagnosticReport {
     /// macro definitions in a file `a.cpp` result in errors in a header file `b.hpp`.
     ///
     /// @since 3.17.0
-    #[serde(with = "crate::url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Url, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
     #[serde(flatten)]
     pub full_document_diagnostic_report: FullDocumentDiagnosticReport,
@@ -180,10 +178,9 @@ pub struct RelatedUnchangedDocumentDiagnosticReport {
     /// macro definitions in a file `a.cpp` result in errors in a header file `b.hpp`.
     ///
     /// @since 3.17.0
-    #[serde(with = "crate::url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Url, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
     #[serde(flatten)]
     pub unchanged_document_diagnostic_report: UnchangedDocumentDiagnosticReport,
@@ -223,10 +220,9 @@ impl From<RelatedUnchangedDocumentDiagnosticReport> for DocumentDiagnosticReport
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentDiagnosticReportPartialResult {
-    #[serde(with = "crate::url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Url, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
 }
 

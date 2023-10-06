@@ -4,7 +4,7 @@
 //!
 //! Based on <https://microsoft.github.io/language-server-protocol/specifications/lsif/0.6.0/specification/>
 
-use crate::{Range, Url};
+use crate::{Range, Uri};
 use serde::{Deserialize, Serialize};
 
 pub type Id = crate::NumberOrString;
@@ -268,7 +268,7 @@ pub struct Item {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Document {
-    pub uri: Url,
+    pub uri: Uri,
     pub language_id: String,
 }
 
@@ -285,7 +285,7 @@ pub struct ResultSet {
 #[serde(rename_all = "camelCase")]
 pub struct Project {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub resource: Option<Url>,
+    pub resource: Option<Uri>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
     pub kind: String,
@@ -300,7 +300,7 @@ pub struct MetaData {
     pub version: String,
 
     /// The project root (in form of an URI) used to compute this dump.
-    pub project_root: Url,
+    pub project_root: Uri,
 
     /// The string encoding used to compute line and character values in
     /// positions and ranges.
@@ -326,7 +326,7 @@ pub struct PackageInformation {
     pub name: String,
     pub manager: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub uri: Option<Url>,
+    pub uri: Option<Uri>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
