@@ -306,44 +306,23 @@ pub struct LocationLink {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-pub struct PositionEncodingKind(std::borrow::Cow<'static, str>);
-
-impl PositionEncodingKind {
+pub enum PositionEncodingKind {
     /// Character offsets count UTF-8 code units.
-    pub const UTF8: PositionEncodingKind = PositionEncodingKind::new("utf-8");
-
+    #[serde(rename = "utf-8")]
+    Utf8,
     /// Character offsets count UTF-16 code units.
     ///
     /// This is the default and must always be supported
     /// by servers
-    pub const UTF16: PositionEncodingKind = PositionEncodingKind::new("utf-16");
-
+    #[serde(rename = "utf-16")]
+    Utf16,
     /// Character offsets count UTF-32 code units.
     ///
     /// Implementation note: these are the same as Unicode code points,
     /// so this `PositionEncodingKind` may also be used for an
     /// encoding-agnostic representation of character offsets.
-    pub const UTF32: PositionEncodingKind = PositionEncodingKind::new("utf-32");
-
-    pub const fn new(tag: &'static str) -> Self {
-        PositionEncodingKind(std::borrow::Cow::Borrowed(tag))
-    }
-
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-impl From<String> for PositionEncodingKind {
-    fn from(from: String) -> Self {
-        PositionEncodingKind(std::borrow::Cow::from(from))
-    }
-}
-
-impl From<&'static str> for PositionEncodingKind {
-    fn from(from: &'static str) -> Self {
-        PositionEncodingKind::new(from)
-    }
+    #[serde(rename = "utf-32")]
+    Utf32,
 }
 
 /// Represents a diagnostic, such as a compiler error or warning.
@@ -2846,12 +2825,24 @@ mod tests {
     #[test]
     fn test_resource_operation_kind() {
         test_serialization(
-            &vec![
+            &[
                 ResourceOperationKind::Create,
                 ResourceOperationKind::Rename,
                 ResourceOperationKind::Delete,
             ],
             r#"["create","rename","delete"]"#,
         );
+    }
+
+    #[test]
+    fn serializes_position_encoding_kind() {
+        test_serialization(
+            &[
+                PositionEncodingKind::Utf8,
+                PositionEncodingKind::Utf16,
+                PositionEncodingKind::Utf32,
+            ],
+            r#"["utf-8","utf-16","utf-32"]"#,
+        )
     }
 }
