@@ -128,6 +128,9 @@ pub use document_link::*;
 mod document_symbols;
 pub use document_symbols::*;
 
+mod notebook;
+pub use notebook::*;
+
 mod file_operations;
 pub use file_operations::*;
 
@@ -1469,6 +1472,12 @@ pub struct ClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document: Option<TextDocumentClientCapabilities>,
 
+    /// Capabilities specific to the notebook document support.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document: Option<NotebookDocumentClientCapabilities>,
+
     /// Window specific client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window: Option<WindowClientCapabilities>,
@@ -1784,6 +1793,13 @@ pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document_sync: Option<TextDocumentSyncCapability>,
+
+    /// Defines how notebook documents are synced.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_sync:
+        Option<OneOf<NotebookDocumentSyncOptions, NotebookDocumentSyncRegistrationOptions>>,
 
     /// Capabilities specific to `textDocument/selectionRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
