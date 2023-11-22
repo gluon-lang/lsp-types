@@ -167,7 +167,7 @@ impl Notification for LogMessage {
 pub enum TelemetryEvent {}
 
 impl Notification for TelemetryEvent {
-    type Params = serde_json::Value;
+    type Params = OneOf<LSPObject, LSPArray>;
     const METHOD: &'static str = "telemetry/event";
 }
 
