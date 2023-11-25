@@ -93,23 +93,11 @@ pub struct WorkspaceUnchangedDocumentDiagnosticReport {
 /// A workspace diagnostic document report.
 ///
 /// @since 3.17.0
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone, derive_more::From)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum WorkspaceDocumentDiagnosticReport {
     Full(WorkspaceFullDocumentDiagnosticReport),
     Unchanged(WorkspaceUnchangedDocumentDiagnosticReport),
-}
-
-impl From<WorkspaceFullDocumentDiagnosticReport> for WorkspaceDocumentDiagnosticReport {
-    fn from(from: WorkspaceFullDocumentDiagnosticReport) -> Self {
-        WorkspaceDocumentDiagnosticReport::Full(from)
-    }
-}
-
-impl From<WorkspaceUnchangedDocumentDiagnosticReport> for WorkspaceDocumentDiagnosticReport {
-    fn from(from: WorkspaceUnchangedDocumentDiagnosticReport) -> Self {
-        WorkspaceDocumentDiagnosticReport::Unchanged(from)
-    }
 }
 
 /// A workspace diagnostic report.
@@ -128,21 +116,9 @@ pub struct WorkspaceDiagnosticReportPartialResult {
     pub items: Vec<WorkspaceDocumentDiagnosticReport>,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone, derive_more::From)]
 #[serde(untagged)]
 pub enum WorkspaceDiagnosticReportResult {
     Report(WorkspaceDiagnosticReport),
     Partial(WorkspaceDiagnosticReportPartialResult),
-}
-
-impl From<WorkspaceDiagnosticReport> for WorkspaceDiagnosticReportResult {
-    fn from(from: WorkspaceDiagnosticReport) -> Self {
-        WorkspaceDiagnosticReportResult::Report(from)
-    }
-}
-
-impl From<WorkspaceDiagnosticReportPartialResult> for WorkspaceDiagnosticReportResult {
-    fn from(from: WorkspaceDiagnosticReportPartialResult) -> Self {
-        WorkspaceDiagnosticReportResult::Partial(from)
-    }
 }

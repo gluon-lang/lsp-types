@@ -12,6 +12,7 @@ extern crate bitflags;
 
 use std::{collections::HashMap, fmt::Debug};
 
+use derive_more::From;
 use serde::{de, de::Error, Deserialize, Serialize};
 use serde_json::Value;
 
@@ -301,8 +302,8 @@ pub struct LocationLink {
 /// specifically what column offsets mean.
 ///
 /// @since 3.17.0
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-pub struct PositionEncodingKind(std::borrow::Cow<'static, str>);
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize, From)]
+pub struct PositionEncodingKind(#[from(forward)] std::borrow::Cow<'static, str>);
 
 impl PositionEncodingKind {
     /// Character offsets count UTF-8 code units.
@@ -327,18 +328,6 @@ impl PositionEncodingKind {
 
     pub fn as_str(&self) -> &str {
         &self.0
-    }
-}
-
-impl From<String> for PositionEncodingKind {
-    fn from(from: String) -> Self {
-        PositionEncodingKind(std::borrow::Cow::from(from))
-    }
-}
-
-impl From<&'static str> for PositionEncodingKind {
-    fn from(from: &'static str) -> Self {
-        PositionEncodingKind::new(from)
     }
 }
 
@@ -1667,23 +1656,11 @@ pub struct SaveOptions {
     pub include_text: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(untagged)]
 pub enum TextDocumentSyncSaveOptions {
     Supported(bool),
     SaveOptions(SaveOptions),
-}
-
-impl From<SaveOptions> for TextDocumentSyncSaveOptions {
-    fn from(from: SaveOptions) -> Self {
-        Self::SaveOptions(from)
-    }
-}
-
-impl From<bool> for TextDocumentSyncSaveOptions {
-    fn from(from: bool) -> Self {
-        Self::Supported(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -1718,61 +1695,25 @@ pub enum OneOf<A, B> {
     Right(B),
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(untagged)]
 pub enum TextDocumentSyncCapability {
     Kind(TextDocumentSyncKind),
     Options(TextDocumentSyncOptions),
 }
 
-impl From<TextDocumentSyncOptions> for TextDocumentSyncCapability {
-    fn from(from: TextDocumentSyncOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<TextDocumentSyncKind> for TextDocumentSyncCapability {
-    fn from(from: TextDocumentSyncKind) -> Self {
-        Self::Kind(from)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(untagged)]
 pub enum ImplementationProviderCapability {
     Simple(bool),
     Options(StaticTextDocumentRegistrationOptions),
 }
 
-impl From<StaticTextDocumentRegistrationOptions> for ImplementationProviderCapability {
-    fn from(from: StaticTextDocumentRegistrationOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for ImplementationProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(untagged)]
 pub enum TypeDefinitionProviderCapability {
     Simple(bool),
     Options(StaticTextDocumentRegistrationOptions),
-}
-
-impl From<StaticTextDocumentRegistrationOptions> for TypeDefinitionProviderCapability {
-    fn from(from: StaticTextDocumentRegistrationOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for TypeDefinitionProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -2307,25 +2248,11 @@ pub struct FileSystemWatcher {
 /// The glob pattern. Either a string pattern or a relative pattern.
 ///
 /// @since 3.17.0
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize, From)]
 #[serde(untagged)]
 pub enum GlobPattern {
     String(Pattern),
     Relative(RelativePattern),
-}
-
-impl From<Pattern> for GlobPattern {
-    #[inline]
-    fn from(from: Pattern) -> Self {
-        Self::String(from)
-    }
-}
-
-impl From<RelativePattern> for GlobPattern {
-    #[inline]
-    fn from(from: RelativePattern) -> Self {
-        Self::Relative(from)
-    }
 }
 
 /// A relative pattern is a helper to construct glob patterns that are matched
@@ -2476,30 +2403,12 @@ pub struct GotoDefinitionParams {
 }
 
 /// GotoDefinition response can be single location, or multiple Locations or a link.
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone, From)]
 #[serde(untagged)]
 pub enum GotoDefinitionResponse {
     Scalar(Location),
     Array(Vec<Location>),
     Link(Vec<LocationLink>),
-}
-
-impl From<Location> for GotoDefinitionResponse {
-    fn from(location: Location) -> Self {
-        GotoDefinitionResponse::Scalar(location)
-    }
-}
-
-impl From<Vec<Location>> for GotoDefinitionResponse {
-    fn from(locations: Vec<Location>) -> Self {
-        GotoDefinitionResponse::Array(locations)
-    }
-}
-
-impl From<Vec<LocationLink>> for GotoDefinitionResponse {
-    fn from(locations: Vec<LocationLink>) -> Self {
-        GotoDefinitionResponse::Link(locations)
-    }
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]

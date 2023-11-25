@@ -7,23 +7,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use std::borrow::Cow;
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum CodeActionProviderCapability {
     Simple(bool),
     Options(CodeActionOptions),
-}
-
-impl From<CodeActionOptions> for CodeActionProviderCapability {
-    fn from(from: CodeActionOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for CodeActionProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
@@ -129,27 +117,15 @@ pub struct CodeActionParams {
 /// response for CodeActionRequest
 pub type CodeActionResponse = Vec<CodeActionOrCommand>;
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum CodeActionOrCommand {
     Command(Command),
     CodeAction(CodeAction),
 }
 
-impl From<Command> for CodeActionOrCommand {
-    fn from(command: Command) -> Self {
-        CodeActionOrCommand::Command(command)
-    }
-}
-
-impl From<CodeAction> for CodeActionOrCommand {
-    fn from(action: CodeAction) -> Self {
-        CodeActionOrCommand::CodeAction(action)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-pub struct CodeActionKind(Cow<'static, str>);
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize, derive_more::From)]
+pub struct CodeActionKind(#[from(forward)] Cow<'static, str>);
 
 impl CodeActionKind {
     /// Empty kind.
@@ -221,17 +197,6 @@ impl CodeActionKind {
     }
 }
 
-impl From<String> for CodeActionKind {
-    fn from(from: String) -> Self {
-        CodeActionKind(Cow::from(from))
-    }
-}
-
-impl From<&'static str> for CodeActionKind {
-    fn from(from: &'static str) -> Self {
-        CodeActionKind::new(from)
-    }
-}
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
