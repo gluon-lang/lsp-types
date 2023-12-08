@@ -860,7 +860,7 @@ pub enum InlineValueRequest {}
 
 impl Request for InlineValueRequest {
     type Params = InlineValueParams;
-    type Result = Option<InlineValue>;
+    type Result = Option<Vec<InlineValue>>;
     const METHOD: &'static str = "textDocument/inlineValue";
 }
 
