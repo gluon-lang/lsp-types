@@ -21,30 +21,12 @@ pub struct StaticTextDocumentColorProviderOptions {
     pub id: Option<String>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum ColorProviderCapability {
     Simple(bool),
     ColorProvider(ColorProviderOptions),
     Options(StaticTextDocumentColorProviderOptions),
-}
-
-impl From<ColorProviderOptions> for ColorProviderCapability {
-    fn from(from: ColorProviderOptions) -> Self {
-        Self::ColorProvider(from)
-    }
-}
-
-impl From<StaticTextDocumentColorProviderOptions> for ColorProviderCapability {
-    fn from(from: StaticTextDocumentColorProviderOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for ColorProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

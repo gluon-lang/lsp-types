@@ -36,23 +36,11 @@ pub struct HoverRegistrationOptions {
     pub hover_options: HoverOptions,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum HoverProviderCapability {
     Simple(bool),
     Options(HoverOptions),
-}
-
-impl From<HoverOptions> for HoverProviderCapability {
-    fn from(from: HoverOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for HoverProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

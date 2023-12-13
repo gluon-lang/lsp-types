@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use url::Url;
 
 use crate::{
     Diagnostic, PartialResultParams, StaticRegistrationOptions, TextDocumentIdentifier,
-    TextDocumentRegistrationOptions, WorkDoneProgressOptions, WorkDoneProgressParams,
+    TextDocumentRegistrationOptions, Uri, WorkDoneProgressOptions, WorkDoneProgressParams,
 };
 
 /// Client capabilities specific to diagnostic pull requests.
@@ -124,25 +123,13 @@ pub struct UnchangedDocumentDiagnosticReport {
 /// The document diagnostic report kinds.
 ///
 /// @since 3.17.0
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone, derive_more::From)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum DocumentDiagnosticReportKind {
     /// A diagnostic report with a full set of problems.
     Full(FullDocumentDiagnosticReport),
     /// A report indicating that the last returned report is still accurate.
     Unchanged(UnchangedDocumentDiagnosticReport),
-}
-
-impl From<FullDocumentDiagnosticReport> for DocumentDiagnosticReportKind {
-    fn from(from: FullDocumentDiagnosticReport) -> Self {
-        DocumentDiagnosticReportKind::Full(from)
-    }
-}
-
-impl From<UnchangedDocumentDiagnosticReport> for DocumentDiagnosticReportKind {
-    fn from(from: UnchangedDocumentDiagnosticReport) -> Self {
-        DocumentDiagnosticReportKind::Unchanged(from)
-    }
 }
 
 /// A full diagnostic report with a set of related documents.
@@ -158,10 +145,9 @@ pub struct RelatedFullDocumentDiagnosticReport {
     /// macro definitions in a file `a.cpp` result in errors in a header file `b.hpp`.
     ///
     /// @since 3.17.0
-    #[serde(with = "crate::url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Url, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
     #[serde(flatten)]
     pub full_document_diagnostic_report: FullDocumentDiagnosticReport,
@@ -180,10 +166,9 @@ pub struct RelatedUnchangedDocumentDiagnosticReport {
     /// macro definitions in a file `a.cpp` result in errors in a header file `b.hpp`.
     ///
     /// @since 3.17.0
-    #[serde(with = "crate::url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Url, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
     #[serde(flatten)]
     pub unchanged_document_diagnostic_report: UnchangedDocumentDiagnosticReport,
@@ -196,7 +181,7 @@ pub struct RelatedUnchangedDocumentDiagnosticReport {
 /// to the last pull request.
 ///
 /// @since 3.17.0
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone, derive_more::From)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum DocumentDiagnosticReport {
     /// A diagnostic report with a full set of problems.
@@ -205,48 +190,23 @@ pub enum DocumentDiagnosticReport {
     Unchanged(RelatedUnchangedDocumentDiagnosticReport),
 }
 
-impl From<RelatedFullDocumentDiagnosticReport> for DocumentDiagnosticReport {
-    fn from(from: RelatedFullDocumentDiagnosticReport) -> Self {
-        DocumentDiagnosticReport::Full(from)
-    }
-}
-
-impl From<RelatedUnchangedDocumentDiagnosticReport> for DocumentDiagnosticReport {
-    fn from(from: RelatedUnchangedDocumentDiagnosticReport) -> Self {
-        DocumentDiagnosticReport::Unchanged(from)
-    }
-}
-
 /// A partial result for a document diagnostic report.
 ///
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DocumentDiagnosticReportPartialResult {
-    #[serde(with = "crate::url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Url, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone, derive_more::From)]
 #[serde(untagged)]
 pub enum DocumentDiagnosticReportResult {
     Report(DocumentDiagnosticReport),
     Partial(DocumentDiagnosticReportPartialResult),
-}
-
-impl From<DocumentDiagnosticReport> for DocumentDiagnosticReportResult {
-    fn from(from: DocumentDiagnosticReport) -> Self {
-        DocumentDiagnosticReportResult::Report(from)
-    }
-}
-
-impl From<DocumentDiagnosticReportPartialResult> for DocumentDiagnosticReportResult {
-    fn from(from: DocumentDiagnosticReportPartialResult) -> Self {
-        DocumentDiagnosticReportResult::Partial(from)
-    }
 }
 
 /// Cancellation data returned from a diagnostic request.

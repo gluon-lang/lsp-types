@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use url::Url;
 
 use crate::{
     DynamicRegistrationClientCapabilities, PartialResultParams, Range, SymbolKind, SymbolTag,
-    TextDocumentPositionParams, WorkDoneProgressOptions, WorkDoneProgressParams,
+    TextDocumentPositionParams, Uri, WorkDoneProgressOptions, WorkDoneProgressParams,
 };
 
 pub type CallHierarchyClientCapabilities = DynamicRegistrationClientCapabilities;
@@ -16,23 +15,11 @@ pub struct CallHierarchyOptions {
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy, derive_more::From)]
 #[serde(untagged)]
 pub enum CallHierarchyServerCapability {
     Simple(bool),
     Options(CallHierarchyOptions),
-}
-
-impl From<CallHierarchyOptions> for CallHierarchyServerCapability {
-    fn from(from: CallHierarchyOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for CallHierarchyServerCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -63,7 +50,7 @@ pub struct CallHierarchyItem {
     pub detail: Option<String>,
 
     /// The resource identifier of this item.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// The range enclosing this symbol not including leading/trailing whitespace but everything else, e.g. comments and code.
     pub range: Range,

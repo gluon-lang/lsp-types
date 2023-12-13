@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use derive_more::From;
 use serde::ser::SerializeSeq;
 use serde::{Deserialize, Serialize};
 
@@ -12,8 +13,8 @@ use crate::{
 /// corresponding client capabilities.
 ///
 /// @since 3.16.0
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-pub struct SemanticTokenType(Cow<'static, str>);
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize, From)]
+pub struct SemanticTokenType(#[from(forward)] Cow<'static, str>);
 
 impl SemanticTokenType {
     pub const NAMESPACE: SemanticTokenType = SemanticTokenType::new("namespace");
@@ -51,25 +52,13 @@ impl SemanticTokenType {
     }
 }
 
-impl From<String> for SemanticTokenType {
-    fn from(from: String) -> Self {
-        SemanticTokenType(Cow::from(from))
-    }
-}
-
-impl From<&'static str> for SemanticTokenType {
-    fn from(from: &'static str) -> Self {
-        SemanticTokenType::new(from)
-    }
-}
-
 /// A set of predefined token modifiers. This set is not fixed
 /// and clients can specify additional token types via the
 /// corresponding client capabilities.
 ///
 /// @since 3.16.0
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-pub struct SemanticTokenModifier(Cow<'static, str>);
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize, From)]
+pub struct SemanticTokenModifier(#[from(forward)] Cow<'static, str>);
 
 impl SemanticTokenModifier {
     pub const DECLARATION: SemanticTokenModifier = SemanticTokenModifier::new("declaration");
@@ -92,20 +81,8 @@ impl SemanticTokenModifier {
     }
 }
 
-impl From<String> for SemanticTokenModifier {
-    fn from(from: String) -> Self {
-        SemanticTokenModifier(Cow::from(from))
-    }
-}
-
-impl From<&'static str> for SemanticTokenModifier {
-    fn from(from: &'static str) -> Self {
-        SemanticTokenModifier::new(from)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
-pub struct TokenFormat(Cow<'static, str>);
+#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize, From)]
+pub struct TokenFormat(#[from(forward)] Cow<'static, str>);
 
 impl TokenFormat {
     pub const RELATIVE: TokenFormat = TokenFormat::new("relative");
@@ -116,18 +93,6 @@ impl TokenFormat {
 
     pub fn as_str(&self) -> &str {
         &self.0
-    }
-}
-
-impl From<String> for TokenFormat {
-    fn from(from: String) -> Self {
-        TokenFormat(Cow::from(from))
-    }
-}
-
-impl From<&'static str> for TokenFormat {
-    fn from(from: &'static str) -> Self {
-        TokenFormat::new(from)
     }
 }
 
@@ -260,24 +225,12 @@ pub struct SemanticTokensPartialResult {
     pub data: Vec<SemanticToken>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum SemanticTokensResult {
     Tokens(SemanticTokens),
     Partial(SemanticTokensPartialResult),
-}
-
-impl From<SemanticTokens> for SemanticTokensResult {
-    fn from(from: SemanticTokens) -> Self {
-        SemanticTokensResult::Tokens(from)
-    }
-}
-
-impl From<SemanticTokensPartialResult> for SemanticTokensResult {
-    fn from(from: SemanticTokensPartialResult) -> Self {
-        SemanticTokensResult::Partial(from)
-    }
 }
 
 /// @since 3.16.0
@@ -296,25 +249,13 @@ pub struct SemanticTokensEdit {
     pub data: Option<Vec<SemanticToken>>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum SemanticTokensFullDeltaResult {
     Tokens(SemanticTokens),
     TokensDelta(SemanticTokensDelta),
     PartialTokensDelta { edits: Vec<SemanticTokensEdit> },
-}
-
-impl From<SemanticTokens> for SemanticTokensFullDeltaResult {
-    fn from(from: SemanticTokens) -> Self {
-        SemanticTokensFullDeltaResult::Tokens(from)
-    }
-}
-
-impl From<SemanticTokensDelta> for SemanticTokensFullDeltaResult {
-    fn from(from: SemanticTokensDelta) -> Self {
-        SemanticTokensFullDeltaResult::TokensDelta(from)
-    }
 }
 
 /// @since 3.16.0
@@ -448,24 +389,12 @@ pub struct SemanticTokensRegistrationOptions {
     pub static_registration_options: StaticRegistrationOptions,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum SemanticTokensServerCapabilities {
     SemanticTokensOptions(SemanticTokensOptions),
     SemanticTokensRegistrationOptions(SemanticTokensRegistrationOptions),
-}
-
-impl From<SemanticTokensOptions> for SemanticTokensServerCapabilities {
-    fn from(from: SemanticTokensOptions) -> Self {
-        SemanticTokensServerCapabilities::SemanticTokensOptions(from)
-    }
-}
-
-impl From<SemanticTokensRegistrationOptions> for SemanticTokensServerCapabilities {
-    fn from(from: SemanticTokensRegistrationOptions) -> Self {
-        SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
@@ -527,24 +456,12 @@ pub struct SemanticTokensRangeParams {
     pub range: Range,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, From)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum SemanticTokensRangeResult {
     Tokens(SemanticTokens),
     Partial(SemanticTokensPartialResult),
-}
-
-impl From<SemanticTokens> for SemanticTokensRangeResult {
-    fn from(tokens: SemanticTokens) -> Self {
-        SemanticTokensRangeResult::Tokens(tokens)
-    }
-}
-
-impl From<SemanticTokensPartialResult> for SemanticTokensRangeResult {
-    fn from(partial: SemanticTokensPartialResult) -> Self {
-        SemanticTokensRangeResult::Partial(partial)
-    }
 }
 
 #[cfg(test)]

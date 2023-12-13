@@ -256,23 +256,11 @@ pub struct InsertReplaceEdit {
     pub replace: Range,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum CompletionTextEdit {
     Edit(TextEdit),
     InsertAndReplace(InsertReplaceEdit),
-}
-
-impl From<TextEdit> for CompletionTextEdit {
-    fn from(edit: TextEdit) -> Self {
-        CompletionTextEdit::Edit(edit)
-    }
-}
-
-impl From<InsertReplaceEdit> for CompletionTextEdit {
-    fn from(edit: InsertReplaceEdit) -> Self {
-        CompletionTextEdit::InsertAndReplace(edit)
-    }
 }
 
 /// Completion options.
@@ -340,23 +328,11 @@ pub struct CompletionRegistrationOptions {
     pub completion_options: CompletionOptions,
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, derive_more::From)]
 #[serde(untagged)]
 pub enum CompletionResponse {
     Array(Vec<CompletionItem>),
     List(CompletionList),
-}
-
-impl From<Vec<CompletionItem>> for CompletionResponse {
-    fn from(items: Vec<CompletionItem>) -> Self {
-        CompletionResponse::Array(items)
-    }
-}
-
-impl From<CompletionList> for CompletionResponse {
-    fn from(list: CompletionList) -> Self {
-        CompletionResponse::List(list)
-    }
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
