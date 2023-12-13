@@ -1081,9 +1081,8 @@ pub struct InitializeParams {
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
-    ///
-    /// Deprecated in favour of `workspaceFolders`
     #[serde(default)]
+    #[deprecated(note = "Use `workspace_folders` instead when possible")]
     pub root_uri: Option<Url>,
 
     /// User provided initialization options.
