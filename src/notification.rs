@@ -58,6 +58,19 @@ macro_rules! lsp_notification {
         $crate::notification::PublishDiagnostics
     };
 
+    ("notebookDocument/didOpen") => {
+        $crate::notification::DidOpenNotebookDocument
+    };
+    ("notebookDocument/didChange") => {
+        $crate::notification::DidChangeNotebookDocument
+    };
+    ("notebookDocument/didSave") => {
+        $crate::notification::DidSaveNotebookDocument
+    };
+    ("notebookDocument/didClose") => {
+        $crate::notification::DidCloseNotebookDocument
+    };
+
     ("workspace/didChangeConfiguration") => {
         $crate::notification::DidChangeConfiguration
     };
@@ -229,6 +242,34 @@ pub enum DidSaveTextDocument {}
 impl Notification for DidSaveTextDocument {
     type Params = DidSaveTextDocumentParams;
     const METHOD: &'static str = "textDocument/didSave";
+}
+
+#[derive(Debug)]
+pub enum DidOpenNotebookDocument {}
+impl Notification for DidOpenNotebookDocument {
+    type Params = DidOpenNotebookDocumentParams;
+    const METHOD: &'static str = "notebookDocument/didOpen";
+}
+
+#[derive(Debug)]
+pub enum DidChangeNotebookDocument {}
+impl Notification for DidChangeNotebookDocument {
+    type Params = DidChangeNotebookDocumentParams;
+    const METHOD: &'static str = "notebookDocument/didChange";
+}
+
+#[derive(Debug)]
+pub enum DidSaveNotebookDocument {}
+impl Notification for DidSaveNotebookDocument {
+    type Params = DidSaveNotebookDocumentParams;
+    const METHOD: &'static str = "notebookDocument/didSave";
+}
+
+#[derive(Debug)]
+pub enum DidCloseNotebookDocument {}
+impl Notification for DidCloseNotebookDocument {
+    type Params = DidCloseNotebookDocumentParams;
+    const METHOD: &'static str = "notebookDocument/didClose";
 }
 
 /// The watched files notification is sent from the client to the server when the client detects changes to files and folders

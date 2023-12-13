@@ -4,15 +4,6 @@ Language Server Protocol types for Rust.
 
 Based on: <https://microsoft.github.io/language-server-protocol/specification>
 
-This library uses the URL crate for parsing URIs.  Note that there is
-some confusion on the meaning of URLs vs URIs:
-<http://stackoverflow.com/a/28865728/393898>.  According to that
-information, on the classical sense of "URLs", "URLs" are a subset of
-URIs, But on the modern/new meaning of URLs, they are the same as
-URIs.  The important take-away aspect is that the URL crate should be
-able to parse any URI, such as `urn:isbn:0451450523`.
-
-
 */
 #![allow(non_upper_case_globals)]
 #![forbid(unsafe_code)]
@@ -21,9 +12,11 @@ extern crate bitflags;
 
 use std::{collections::HashMap, fmt::Debug};
 
-use serde::{de, de::Error as Error_, Deserialize, Serialize};
+use serde::{de, de::Error, Deserialize, Serialize};
 use serde_json::Value;
-pub use url::Url;
+
+pub use uri::Uri;
+mod uri;
 
 // Large enough to contain any enumeration name defined in this crate
 type PascalCaseBuf = [u8; 32];
@@ -134,6 +127,9 @@ pub use document_link::*;
 
 mod document_symbols;
 pub use document_symbols::*;
+
+mod notebook;
+pub use notebook::*;
 
 mod file_operations;
 pub use file_operations::*;
@@ -275,12 +271,12 @@ impl Range {
 /// Represents a location inside a resource, such as a line inside a text file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct Location {
-    pub uri: Url,
+    pub uri: Uri,
     pub range: Range,
 }
 
 impl Location {
-    pub fn new(uri: Url, range: Range) -> Location {
+    pub fn new(uri: Uri, range: Range) -> Location {
         Location { uri, range }
     }
 }
@@ -297,7 +293,7 @@ pub struct LocationLink {
     pub origin_selection_range: Option<Range>,
 
     /// The target resource identifier of this link.
-    pub target_uri: Url,
+    pub target_uri: Uri,
 
     /// The full target range of this link.
     pub target_range: Range,
@@ -402,7 +398,7 @@ pub struct Diagnostic {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeDescription {
-    pub href: Url,
+    pub href: Uri,
 }
 
 impl Diagnostic {
@@ -623,7 +619,7 @@ pub struct CreateFileOptions {
 #[serde(rename_all = "camelCase")]
 pub struct CreateFile {
     /// The resource to create.
-    pub uri: Url,
+    pub uri: Uri,
     /// Additional options
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<CreateFileOptions>,
@@ -652,9 +648,9 @@ pub struct RenameFileOptions {
 #[serde(rename_all = "camelCase")]
 pub struct RenameFile {
     /// The old (existing) location.
-    pub old_uri: Url,
+    pub old_uri: Uri,
     /// The new location.
-    pub new_uri: Url,
+    pub new_uri: Uri,
     /// Rename options.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<RenameFileOptions>,
@@ -689,7 +685,7 @@ pub struct DeleteFileOptions {
 #[serde(rename_all = "camelCase")]
 pub struct DeleteFile {
     /// The file to delete.
-    pub uri: Url,
+    pub uri: Uri,
     /// Delete options.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<DeleteFileOptions>,
@@ -703,10 +699,9 @@ pub struct DeleteFile {
 #[serde(rename_all = "camelCase")]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
-    #[serde(with = "url_map")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub changes: Option<HashMap<Url, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
+    pub changes: Option<HashMap<Uri, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
 
     /// Depending on the client capability `workspace.workspaceEdit.resourceOperations` document changes
     /// are either an array of `TextDocumentEdit`s to express changes to n different text documents
@@ -783,132 +778,15 @@ pub struct ConfigurationParams {
 pub struct ConfigurationItem {
     /// The scope to get the configuration section for.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub scope_uri: Option<Url>,
+    pub scope_uri: Option<Uri>,
 
     ///The configuration section asked for.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub section: Option<String>,
 }
 
-mod url_map {
-    use std::fmt;
-    use std::marker::PhantomData;
-
-    use super::*;
-
-    pub fn deserialize<'de, D, V>(deserializer: D) -> Result<Option<HashMap<Url, V>>, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-        V: de::DeserializeOwned,
-    {
-        struct UrlMapVisitor<V> {
-            _marker: PhantomData<V>,
-        }
-
-        impl<V: de::DeserializeOwned> Default for UrlMapVisitor<V> {
-            fn default() -> Self {
-                UrlMapVisitor {
-                    _marker: PhantomData,
-                }
-            }
-        }
-        impl<'de, V: de::DeserializeOwned> de::Visitor<'de> for UrlMapVisitor<V> {
-            type Value = HashMap<Url, V>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("map")
-            }
-
-            fn visit_map<M>(self, mut visitor: M) -> Result<Self::Value, M::Error>
-            where
-                M: de::MapAccess<'de>,
-            {
-                let mut values = HashMap::with_capacity(visitor.size_hint().unwrap_or(0));
-
-                // While there are entries remaining in the input, add them
-                // into our map.
-                while let Some((key, value)) = visitor.next_entry::<Url, _>()? {
-                    values.insert(key, value);
-                }
-
-                Ok(values)
-            }
-        }
-
-        struct OptionUrlMapVisitor<V> {
-            _marker: PhantomData<V>,
-        }
-        impl<V: de::DeserializeOwned> Default for OptionUrlMapVisitor<V> {
-            fn default() -> Self {
-                OptionUrlMapVisitor {
-                    _marker: PhantomData,
-                }
-            }
-        }
-        impl<'de, V: de::DeserializeOwned> de::Visitor<'de> for OptionUrlMapVisitor<V> {
-            type Value = Option<HashMap<Url, V>>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("option")
-            }
-
-            #[inline]
-            fn visit_unit<E>(self) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                Ok(None)
-            }
-
-            #[inline]
-            fn visit_none<E>(self) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                Ok(None)
-            }
-
-            #[inline]
-            fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
-            where
-                D: serde::Deserializer<'de>,
-            {
-                deserializer
-                    .deserialize_map(UrlMapVisitor::<V>::default())
-                    .map(Some)
-            }
-        }
-
-        // Instantiate our Visitor and ask the Deserializer to drive
-        // it over the input data, resulting in an instance of MyMap.
-        deserializer.deserialize_option(OptionUrlMapVisitor::default())
-    }
-
-    pub fn serialize<S, V>(
-        changes: &Option<HashMap<Url, V>>,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-        V: serde::Serialize,
-    {
-        use serde::ser::SerializeMap;
-
-        match *changes {
-            Some(ref changes) => {
-                let mut map = serializer.serialize_map(Some(changes.len()))?;
-                for (k, v) in changes {
-                    map.serialize_entry(k.as_str(), v)?;
-                }
-                map.end()
-            }
-            None => serializer.serialize_none(),
-        }
-    }
-}
-
 impl WorkspaceEdit {
-    pub fn new(changes: HashMap<Url, Vec<TextEdit>>) -> WorkspaceEdit {
+    pub fn new(changes: HashMap<Uri, Vec<TextEdit>>) -> WorkspaceEdit {
         WorkspaceEdit {
             changes: Some(changes),
             document_changes: None,
@@ -925,11 +803,11 @@ pub struct TextDocumentIdentifier {
     // This modelled by "mixing-in" TextDocumentIdentifier in VersionedTextDocumentIdentifier,
     // so any changes to this type must be effected in the sub-type as well.
     /// The text document's URI.
-    pub uri: Url,
+    pub uri: Uri,
 }
 
 impl TextDocumentIdentifier {
-    pub fn new(uri: Url) -> TextDocumentIdentifier {
+    pub fn new(uri: Uri) -> TextDocumentIdentifier {
         TextDocumentIdentifier { uri }
     }
 }
@@ -939,7 +817,7 @@ impl TextDocumentIdentifier {
 #[serde(rename_all = "camelCase")]
 pub struct TextDocumentItem {
     /// The text document's URI.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// The text document's language identifier.
     pub language_id: String,
@@ -953,7 +831,7 @@ pub struct TextDocumentItem {
 }
 
 impl TextDocumentItem {
-    pub fn new(uri: Url, language_id: String, version: i32, text: String) -> TextDocumentItem {
+    pub fn new(uri: Uri, language_id: String, version: i32, text: String) -> TextDocumentItem {
         TextDocumentItem {
             uri,
             language_id,
@@ -968,7 +846,7 @@ impl TextDocumentItem {
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// The version number of this document.
     ///
@@ -978,7 +856,7 @@ pub struct VersionedTextDocumentIdentifier {
 }
 
 impl VersionedTextDocumentIdentifier {
-    pub fn new(uri: Url, version: i32) -> VersionedTextDocumentIdentifier {
+    pub fn new(uri: Uri, version: i32) -> VersionedTextDocumentIdentifier {
         VersionedTextDocumentIdentifier { uri, version }
     }
 }
@@ -988,7 +866,7 @@ impl VersionedTextDocumentIdentifier {
 pub struct OptionalVersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// The version number of this document. If an optional versioned text document
     /// identifier is sent from the server to the client and the file is not
@@ -1003,7 +881,7 @@ pub struct OptionalVersionedTextDocumentIdentifier {
 }
 
 impl OptionalVersionedTextDocumentIdentifier {
-    pub fn new(uri: Url, version: i32) -> OptionalVersionedTextDocumentIdentifier {
+    pub fn new(uri: Uri, version: i32) -> OptionalVersionedTextDocumentIdentifier {
         OptionalVersionedTextDocumentIdentifier {
             uri,
             version: Some(version),
@@ -1084,7 +962,7 @@ pub struct InitializeParams {
     ///
     /// Deprecated in favour of `workspaceFolders`
     #[serde(default)]
-    pub root_uri: Option<Url>,
+    pub root_uri: Option<Uri>,
 
     /// User provided initialization options.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1611,6 +1489,12 @@ pub struct ClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document: Option<TextDocumentClientCapabilities>,
 
+    /// Capabilities specific to the notebook document support.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document: Option<NotebookDocumentClientCapabilities>,
+
     /// Window specific client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub window: Option<WindowClientCapabilities>,
@@ -1926,6 +1810,13 @@ pub struct ServerCapabilities {
     /// Defines how text documents are synced.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text_document_sync: Option<TextDocumentSyncCapability>,
+
+    /// Defines how notebook documents are synced.
+    ///
+    /// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notebook_document_sync:
+        Option<OneOf<NotebookDocumentSyncOptions, NotebookDocumentSyncRegistrationOptions>>,
 
     /// Capabilities specific to `textDocument/selectionRange` requests.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2402,7 +2293,7 @@ impl FileChangeType {
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
 pub struct FileEvent {
     /// The file's URI.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// The change type.
     #[serde(rename = "type")]
@@ -2410,7 +2301,7 @@ pub struct FileEvent {
 }
 
 impl FileEvent {
-    pub fn new(uri: Url, typ: FileChangeType) -> FileEvent {
+    pub fn new(uri: Uri, typ: FileChangeType) -> FileEvent {
         FileEvent { uri, typ }
     }
 }
@@ -2471,7 +2362,7 @@ impl From<RelativePattern> for GlobPattern {
 pub struct RelativePattern {
     /// A workspace folder or a base URI to which this pattern will be matched
     /// against relatively.
-    pub base_uri: OneOf<WorkspaceFolder, Url>,
+    pub base_uri: OneOf<WorkspaceFolder, Uri>,
 
     /// The actual glob pattern.
     pub pattern: Pattern,
@@ -2528,7 +2419,7 @@ impl serde::Serialize for WatchKind {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// An array of diagnostic information items.
     pub diagnostics: Vec<Diagnostic>,
@@ -2540,7 +2431,7 @@ pub struct PublishDiagnosticsParams {
 
 impl PublishDiagnosticsParams {
     pub fn new(
-        uri: Url,
+        uri: Uri,
         diagnostics: Vec<Diagnostic>,
         version: Option<i32>,
     ) -> PublishDiagnosticsParams {
@@ -2841,14 +2732,14 @@ mod tests {
         test_serialization(
             &WorkspaceEdit {
                 changes: Some(
-                    vec![(Url::parse("file://test").unwrap(), vec![])]
+                    vec![("file://test".parse().unwrap(), vec![])]
                         .into_iter()
                         .collect(),
                 ),
                 document_changes: None,
                 ..Default::default()
             },
-            r#"{"changes":{"file://test/":[]}}"#,
+            r#"{"changes":{"file://test":[]}}"#,
         );
     }
 
