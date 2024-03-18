@@ -258,7 +258,7 @@ pub enum ItemKind {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Item {
-    pub document: Id,
+    pub shard: Id,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub property: Option<ItemKind>,
     #[serde(flatten)]
