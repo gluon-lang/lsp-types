@@ -3,7 +3,7 @@ use super::*;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub trait Notification {
-    type Params: DeserializeOwned + Serialize;
+    type Params: DeserializeOwned + Serialize + Send + Sync + 'static;
     const METHOD: &'static str;
 }
 
@@ -167,7 +167,7 @@ impl Notification for LogMessage {
 pub enum TelemetryEvent {}
 
 impl Notification for TelemetryEvent {
-    type Params = serde_json::Value;
+    type Params = OneOf<LSPObject, LSPArray>;
     const METHOD: &'static str = "telemetry/event";
 }
 
