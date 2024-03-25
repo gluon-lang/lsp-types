@@ -248,8 +248,9 @@ impl Request for ShowMessageRequest {
 }
 
 /// The client/registerCapability request is sent from the server to the client to register for a new capability
-/// on the client side. Not all clients need to support dynamic capability registration. A client opts in via the
-/// ClientCapabilities.GenericCapability property.
+/// on the client side. Not all clients need to support dynamic capability registration. A client opts in via a
+/// DynamicRegistrationClientCapabilities type, or other dynamic_registration field of a capability
+/// struct.
 #[derive(Debug)]
 pub enum RegisterCapability {}
 
