@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     DocumentSelector, DynamicRegistrationClientCapabilities, Range, TextDocumentIdentifier,
-    TextDocumentPositionParams, WorkDoneProgressParams,
+    TextDocumentPositionParams, TextDocumentRegistrationOptions, WorkDoneProgressOptions,
+    WorkDoneProgressParams,
 };
 
 use std::collections::HashMap;
@@ -10,6 +11,38 @@ use std::collections::HashMap;
 pub type DocumentFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
 pub type DocumentRangeFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
 pub type DocumentOnTypeFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentFormattingOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentFormattingRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+    #[serde(flatten)]
+    pub document_formatting_options: DocumentFormattingOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentRangeFormattingOptions {
+    #[serde(flatten)]
+    pub work_done_progress_options: WorkDoneProgressOptions,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DocumentRangeFormattingRegistrationOptions {
+    #[serde(flatten)]
+    pub text_document_registration_options: TextDocumentRegistrationOptions,
+    #[serde(flatten)]
+    pub document_range_formatting_options: DocumentRangeFormattingOptions,
+}
 
 /// Format document on type options
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
