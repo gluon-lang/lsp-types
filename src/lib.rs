@@ -234,7 +234,9 @@ pub type LSPArray = Vec<serde_json::Value>;
 
 /// Position in a text document expressed as zero-based line and character offset.
 /// A position is between two characters like an 'insert' cursor in a editor.
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize, Hash)]
+#[derive(
+    Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize, Hash,
+)]
 pub struct Position {
     /// Line position in a document (zero-based).
     pub line: u32,
@@ -961,7 +963,7 @@ pub struct InitializeParams {
     /// `rootUri` wins.
     #[serde(default)]
     #[deprecated(note = "Use `workspace_folders` instead when possible")]
-    pub root_uri: Option<Url>,
+    pub root_uri: Option<Uri>,
 
     /// User provided initialization options.
     #[serde(skip_serializing_if = "Option::is_none")]
