@@ -3,8 +3,8 @@ use super::*;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub trait Request {
-    type Params: DeserializeOwned + Serialize;
-    type Result: DeserializeOwned + Serialize;
+    type Params: DeserializeOwned + Serialize + Send + Sync + 'static;
+    type Result: DeserializeOwned + Serialize + Send + Sync + 'static;
     const METHOD: &'static str;
 }
 
@@ -658,6 +658,17 @@ impl Request for PrepareRenameRequest {
     type Params = TextDocumentPositionParams;
     type Result = Option<PrepareRenameResponse>;
     const METHOD: &'static str = "textDocument/prepareRename";
+}
+
+#[derive(Debug)]
+#[cfg(feature = "proposed")]
+pub enum InlineCompletionRequest {}
+
+#[cfg(feature = "proposed")]
+impl Request for InlineCompletionRequest {
+    type Params = InlineCompletionParams;
+    type Result = Option<InlineCompletionResponse>;
+    const METHOD: &'static str = "textDocument/inlineCompletion";
 }
 
 /// The workspace/workspaceFolders request is sent from the server to the client to fetch the current open list of

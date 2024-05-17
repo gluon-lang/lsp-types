@@ -149,6 +149,11 @@ pub use inlay_hint::*;
 mod inline_value;
 pub use inline_value::*;
 
+#[cfg(feature = "proposed")]
+mod inline_completion;
+#[cfg(feature = "proposed")]
+pub use inline_completion::*;
+
 mod moniker;
 pub use moniker::*;
 
@@ -229,7 +234,7 @@ pub type LSPArray = Vec<serde_json::Value>;
 
 /// Position in a text document expressed as zero-based line and character offset.
 /// A position is between two characters like an 'insert' cursor in a editor.
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize, Hash)]
 pub struct Position {
     /// Line position in a document (zero-based).
     pub line: u32,
@@ -249,7 +254,7 @@ impl Position {
 
 /// A range in a text document expressed as (zero-based) start and end positions.
 /// A range is comparable to a selection in an editor. Therefore the end position is exclusive.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Default, Deserialize, Serialize, Hash)]
 pub struct Range {
     /// The range's start position.
     pub start: Position,
@@ -264,7 +269,7 @@ impl Range {
 }
 
 /// Represents a location inside a resource, such as a line inside a text file.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Hash)]
 pub struct Location {
     pub uri: Uri,
     pub range: Range,
@@ -954,10 +959,9 @@ pub struct InitializeParams {
     /// The rootUri of the workspace. Is null if no
     /// folder is open. If both `rootPath` and `rootUri` are set
     /// `rootUri` wins.
-    ///
-    /// Deprecated in favour of `workspaceFolders`
     #[serde(default)]
-    pub root_uri: Option<Uri>,
+    #[deprecated(note = "Use `workspace_folders` instead when possible")]
+    pub root_uri: Option<Url>,
 
     /// User provided initialization options.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -992,6 +996,11 @@ pub struct InitializeParams {
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
+
+    /// The LSP server may report about initialization progress to the client
+    /// by using the following work done token if it was passed by the client.
+    #[serde(flatten)]
+    pub work_done_progress_params: WorkDoneProgressParams,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -1458,6 +1467,13 @@ pub struct TextDocumentClientCapabilities {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub diagnostic: Option<DiagnosticClientCapabilities>,
+
+    /// Capabilities specific to the `textDocument/inlineCompletion` request.
+    ///
+    /// @since 3.18.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub inline_completion: Option<InlineCompletionClientCapabilities>,
 }
 
 /// Where ClientCapabilities are currently empty:
@@ -1928,6 +1944,13 @@ pub struct ServerCapabilities {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub diagnostic_provider: Option<DiagnosticServerCapabilities>,
+
+    /// The server provides inline completions.
+    ///
+    /// @since 3.18.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "proposed")]
+    pub inline_completion_provider: Option<OneOf<bool, InlineCompletionOptions>>,
 
     /// Experimental server capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
