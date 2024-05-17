@@ -1,7 +1,7 @@
 use crate::{
     DynamicRegistrationClientCapabilities, LSPAny, PartialResultParams, Range,
     StaticRegistrationOptions, SymbolKind, SymbolTag, TextDocumentPositionParams,
-    TextDocumentRegistrationOptions, Url, WorkDoneProgressOptions, WorkDoneProgressParams,
+    TextDocumentRegistrationOptions, Uri, WorkDoneProgressOptions, WorkDoneProgressParams,
 };
 
 use serde::{Deserialize, Serialize};
@@ -70,7 +70,7 @@ pub struct TypeHierarchyItem {
     pub detail: Option<String>,
 
     /// The resource identifier of this item.
-    pub uri: Url,
+    pub uri: Uri,
 
     /// The range enclosing this symbol not including leading/trailing whitespace
     /// but everything else, e.g. comments and code.
