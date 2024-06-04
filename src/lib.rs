@@ -1712,7 +1712,7 @@ pub struct TextDocumentSyncOptions {
     pub open_close: Option<bool>,
 
     /// Change notifications are sent to the server. See TextDocumentSyncKind.None, TextDocumentSyncKind.Full
-    /// and TextDocumentSyncKindIncremental.
+    /// and TextDocumentSyncKind.Incremental.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub change: Option<TextDocumentSyncKind>,
 
@@ -2187,8 +2187,8 @@ pub struct TextDocumentChangeRegistrationOptions {
     pub document_selector: Option<DocumentSelector>,
 
     /// How documents are synced to the server. See TextDocumentSyncKind.Full
-    /// and TextDocumentSyncKindIncremental.
-    pub sync_kind: i32,
+    /// and TextDocumentSyncKind.Incremental.
+    pub sync_kind: TextDocumentSyncKind,
 }
 
 /// The parameters send in a will save text document notification.
@@ -2458,8 +2458,8 @@ pub enum Documentation {
 ///
 /// The pair of a language and a value is an equivalent to markdown:
 ///
-/// ```${language}
-/// ${value}
+/// ```LANGUAGE
+/// VALUE
 /// ```
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
