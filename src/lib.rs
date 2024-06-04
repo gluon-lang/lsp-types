@@ -2458,8 +2458,8 @@ pub enum Documentation {
 ///
 /// The pair of a language and a value is an equivalent to markdown:
 ///
-/// ```${language}
-/// ${value}
+/// ```LANGUAGE
+/// VALUE
 /// ```
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
