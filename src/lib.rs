@@ -2043,20 +2043,6 @@ pub struct WorkDoneProgressOptions {
     pub work_done_progress: Option<bool>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DocumentFormattingOptions {
-    #[serde(flatten)]
-    pub work_done_progress_options: WorkDoneProgressOptions,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DocumentRangeFormattingOptions {
-    #[serde(flatten)]
-    pub work_done_progress_options: WorkDoneProgressOptions,
-}
-
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DefinitionOptions {
