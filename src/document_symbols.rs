@@ -35,23 +35,11 @@ pub struct DocumentSymbolClientCapabilities {
     pub tag_support: Option<TagSupport<SymbolTag>>,
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, derive_more::From)]
 #[serde(untagged)]
 pub enum DocumentSymbolResponse {
     Flat(Vec<SymbolInformation>),
     Nested(Vec<DocumentSymbol>),
-}
-
-impl From<Vec<SymbolInformation>> for DocumentSymbolResponse {
-    fn from(info: Vec<SymbolInformation>) -> Self {
-        DocumentSymbolResponse::Flat(info)
-    }
-}
-
-impl From<Vec<DocumentSymbol>> for DocumentSymbolResponse {
-    fn from(symbols: Vec<DocumentSymbol>) -> Self {
-        DocumentSymbolResponse::Nested(symbols)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

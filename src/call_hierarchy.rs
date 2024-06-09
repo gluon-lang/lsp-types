@@ -15,23 +15,11 @@ pub struct CallHierarchyOptions {
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy, derive_more::From)]
 #[serde(untagged)]
 pub enum CallHierarchyServerCapability {
     Simple(bool),
     Options(CallHierarchyOptions),
-}
-
-impl From<CallHierarchyOptions> for CallHierarchyServerCapability {
-    fn from(from: CallHierarchyOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for CallHierarchyServerCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

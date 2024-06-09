@@ -30,30 +30,12 @@ pub struct SelectionRangeRegistrationOptions {
     pub registration_options: StaticTextDocumentRegistrationOptions,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum SelectionRangeProviderCapability {
     Simple(bool),
     Options(SelectionRangeOptions),
     RegistrationOptions(SelectionRangeRegistrationOptions),
-}
-
-impl From<SelectionRangeRegistrationOptions> for SelectionRangeProviderCapability {
-    fn from(from: SelectionRangeRegistrationOptions) -> Self {
-        Self::RegistrationOptions(from)
-    }
-}
-
-impl From<SelectionRangeOptions> for SelectionRangeProviderCapability {
-    fn from(from: SelectionRangeOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<bool> for SelectionRangeProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 /// A parameter literal used in selection range requests.

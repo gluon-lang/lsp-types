@@ -16,30 +16,12 @@ pub struct FoldingRangeParams {
     pub partial_result_params: PartialResultParams,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum FoldingRangeProviderCapability {
     Simple(bool),
     FoldingProvider(FoldingProviderOptions),
     Options(StaticTextDocumentColorProviderOptions),
-}
-
-impl From<StaticTextDocumentColorProviderOptions> for FoldingRangeProviderCapability {
-    fn from(from: StaticTextDocumentColorProviderOptions) -> Self {
-        Self::Options(from)
-    }
-}
-
-impl From<FoldingProviderOptions> for FoldingRangeProviderCapability {
-    fn from(from: FoldingProviderOptions) -> Self {
-        Self::FoldingProvider(from)
-    }
-}
-
-impl From<bool> for FoldingRangeProviderCapability {
-    fn from(from: bool) -> Self {
-        Self::Simple(from)
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]

@@ -136,46 +136,18 @@ pub struct InlayHint {
     pub data: Option<LSPAny>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum InlayHintLabel {
     String(String),
     LabelParts(Vec<InlayHintLabelPart>),
 }
 
-impl From<String> for InlayHintLabel {
-    #[inline]
-    fn from(from: String) -> Self {
-        Self::String(from)
-    }
-}
-
-impl From<Vec<InlayHintLabelPart>> for InlayHintLabel {
-    #[inline]
-    fn from(from: Vec<InlayHintLabelPart>) -> Self {
-        Self::LabelParts(from)
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum InlayHintTooltip {
     String(String),
     MarkupContent(MarkupContent),
-}
-
-impl From<String> for InlayHintTooltip {
-    #[inline]
-    fn from(from: String) -> Self {
-        Self::String(from)
-    }
-}
-
-impl From<MarkupContent> for InlayHintTooltip {
-    #[inline]
-    fn from(from: MarkupContent) -> Self {
-        Self::MarkupContent(from)
-    }
 }
 
 /// An inlay hint label part allows for interactive and composite labels
@@ -214,25 +186,11 @@ pub struct InlayHintLabelPart {
     pub command: Option<Command>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum InlayHintLabelPartTooltip {
     String(String),
     MarkupContent(MarkupContent),
-}
-
-impl From<String> for InlayHintLabelPartTooltip {
-    #[inline]
-    fn from(from: String) -> Self {
-        Self::String(from)
-    }
-}
-
-impl From<MarkupContent> for InlayHintLabelPartTooltip {
-    #[inline]
-    fn from(from: MarkupContent) -> Self {
-        Self::MarkupContent(from)
-    }
 }
 
 /// Inlay hint kinds.

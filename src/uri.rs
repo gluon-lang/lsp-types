@@ -1,9 +1,9 @@
-use std::{hash::Hash, ops::Deref, str::FromStr};
+use std::{hash::Hash, str::FromStr};
 
 use serde::{de::Error, Deserialize, Serialize};
 
 /// Newtype struct around `fluent_uri::Uri<String>` with serialization implementations that use `as_str()` and 'from_str()' respectively.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, derive_more::Deref)]
 pub struct Uri(fluent_uri::Uri<String>);
 
 impl Serialize for Uri {
@@ -49,14 +49,6 @@ impl FromStr for Uri {
         // gets merged.
         // fluent_uri::Uri::from_str(s).map(Self)
         fluent_uri::Uri::parse(s).map(|uri| Self(uri.to_owned()))
-    }
-}
-
-impl Deref for Uri {
-    type Target = fluent_uri::Uri<String>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 

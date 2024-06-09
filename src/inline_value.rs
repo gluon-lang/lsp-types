@@ -135,33 +135,12 @@ pub struct InlineValueEvaluatableExpression {
 /// The InlineValue types combines all inline value types into one type.
 ///
 /// @since 3.17.0
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, derive_more::From)]
 #[serde(untagged)]
 pub enum InlineValue {
     Text(InlineValueText),
     VariableLookup(InlineValueVariableLookup),
     EvaluatableExpression(InlineValueEvaluatableExpression),
-}
-
-impl From<InlineValueText> for InlineValue {
-    #[inline]
-    fn from(from: InlineValueText) -> Self {
-        Self::Text(from)
-    }
-}
-
-impl From<InlineValueVariableLookup> for InlineValue {
-    #[inline]
-    fn from(from: InlineValueVariableLookup) -> Self {
-        Self::VariableLookup(from)
-    }
-}
-
-impl From<InlineValueEvaluatableExpression> for InlineValue {
-    #[inline]
-    fn from(from: InlineValueEvaluatableExpression) -> Self {
-        Self::EvaluatableExpression(from)
-    }
 }
 
 /// Client workspace capabilities specific to inline values.
