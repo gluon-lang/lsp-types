@@ -255,12 +255,84 @@ pub struct InsertReplaceEdit {
     /// The range if the replace is requested.
     pub replace: Range,
 }
-
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize)]
 #[serde(untagged)]
 pub enum CompletionTextEdit {
     Edit(TextEdit),
     InsertAndReplace(InsertReplaceEdit),
+}
+
+impl<'de> Deserialize<'de> for CompletionTextEdit {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(field_identifier, rename_all = "camelCase")]
+        enum Field {
+            NewText,
+            Insert,
+            Replace,
+            Range,
+        }
+
+        struct CompletionTextEditVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for CompletionTextEditVisitor {
+            type Value = CompletionTextEdit;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct CompletionTextEdit")
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
+            where
+                V: serde::de::MapAccess<'de>,
+            {
+                let mut new_text = None;
+                let mut insert = None;
+                let mut replace = None;
+                let mut range = None;
+
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::NewText => {
+                            new_text = Some(map.next_value()?);
+                        }
+                        Field::Insert => {
+                            insert = Some(map.next_value()?);
+                        }
+                        Field::Replace => {
+                            replace = Some(map.next_value()?);
+                        }
+                        Field::Range => {
+                            range = Some(map.next_value()?);
+                        }
+                    }
+                }
+                if let Some(range) = range {
+                    Ok(CompletionTextEdit::Edit(TextEdit {
+                        new_text: new_text
+                            .ok_or_else(|| serde::de::Error::missing_field("newText"))?,
+                        range,
+                    }))
+                } else if let (Some(new_text), Some(insert), Some(replace)) =
+                    (new_text, insert, replace)
+                {
+                    Ok(CompletionTextEdit::InsertAndReplace(InsertReplaceEdit {
+                        new_text,
+                        insert,
+                        replace,
+                    }))
+                } else {
+                    Err(serde::de::Error::custom("missing required fields"))
+                }
+            }
+        }
+
+        const FIELDS: &[&str] = &["newText", "insert", "replace", "range"];
+        deserializer.deserialize_struct("CompletionTextEdit", FIELDS, CompletionTextEditVisitor)
+    }
 }
 
 impl From<TextEdit> for CompletionTextEdit {
@@ -340,11 +412,48 @@ pub struct CompletionRegistrationOptions {
     pub completion_options: CompletionOptions,
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 #[serde(untagged)]
 pub enum CompletionResponse {
     Array(Vec<CompletionItem>),
     List(CompletionList),
+}
+
+impl<'de> Deserialize<'de> for CompletionResponse {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct CompletionResponseVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for CompletionResponseVisitor {
+            type Value = CompletionResponse;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("an array or a struct for CompletionResponse")
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let items: Vec<CompletionItem> =
+                    Deserialize::deserialize(serde::de::value::SeqAccessDeserializer::new(seq))?;
+                Ok(CompletionResponse::Array(items))
+            }
+
+            fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::MapAccess<'de>,
+            {
+                let list: CompletionList =
+                    Deserialize::deserialize(serde::de::value::MapAccessDeserializer::new(map))?;
+                Ok(CompletionResponse::List(list))
+            }
+        }
+
+        deserializer.deserialize_any(CompletionResponseVisitor)
+    }
 }
 
 impl From<Vec<CompletionItem>> for CompletionResponse {
