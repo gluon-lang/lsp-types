@@ -7,8 +7,6 @@ Based on: <https://microsoft.github.io/language-server-protocol/specification>
 */
 #![allow(non_upper_case_globals)]
 #![forbid(unsafe_code)]
-#[macro_use]
-extern crate bitflags;
 
 use std::{collections::HashMap, fmt::Debug};
 
@@ -2385,7 +2383,8 @@ pub struct RelativePattern {
 /// @since 3.17.0
 pub type Pattern = String;
 
-bitflags! {
+bitflags::bitflags! {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct WatchKind: u8 {
     /// Interested in create events.
     const Create = 1;
