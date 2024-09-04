@@ -9,14 +9,14 @@ use serde::{Deserialize, Serialize};
 
 pub type Id = crate::NumberOrString;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum LocationOrRangeId {
     Location(crate::Location),
     RangeId(Id),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Entry {
     pub id: Id,
@@ -24,7 +24,7 @@ pub struct Entry {
     pub data: Element,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub enum Element {
@@ -32,7 +32,7 @@ pub enum Element {
     Edge(Edge),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ToolInfo {
     pub name: String,
     #[serde(default = "Default::default")]
@@ -42,14 +42,14 @@ pub struct ToolInfo {
     pub version: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Encoding {
     /// Currently only 'utf-16' is supported due to the limitations in LSP.
     #[serde(rename = "utf-16")]
     Utf16,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RangeBasedDocumentSymbol {
     pub id: Id,
     #[serde(default = "Default::default")]
@@ -57,7 +57,7 @@ pub struct RangeBasedDocumentSymbol {
     pub children: Vec<RangeBasedDocumentSymbol>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum DocumentSymbolOrRangeBasedVec {
@@ -65,7 +65,7 @@ pub enum DocumentSymbolOrRangeBasedVec {
     RangeBased(Vec<RangeBasedDocumentSymbol>),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DefinitionTag {
     /// The text covered by the range     
@@ -84,7 +84,7 @@ pub struct DefinitionTag {
     detail: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeclarationTag {
     /// The text covered by the range     
@@ -102,19 +102,19 @@ pub struct DeclarationTag {
     detail: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReferenceTag {
     text: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UnknownTag {
     text: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub enum RangeTag {
@@ -124,7 +124,7 @@ pub enum RangeTag {
     Unknown(UnknownTag),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "label")]
 pub enum Vertex {
@@ -169,28 +169,28 @@ pub enum Vertex {
     },
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum EventKind {
     Begin,
     End,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum EventScope {
     Document,
     Project,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Event {
     pub kind: EventKind,
     pub scope: EventScope,
     pub data: Id,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "label")]
 pub enum Edge {
@@ -224,28 +224,28 @@ pub enum Edge {
     Diagnostic(EdgeData),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EdgeData {
     pub in_v: Id,
     pub out_v: Id,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EdgeDataMultiIn {
     pub in_vs: Vec<Id>,
     pub out_v: Id,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum DefinitionResultType {
     Scalar(LocationOrRangeId),
     Array(LocationOrRangeId),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemKind {
     Declarations,
@@ -255,7 +255,7 @@ pub enum ItemKind {
     ImplementationResults,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Item {
     pub document: Id,
@@ -265,7 +265,7 @@ pub struct Item {
     pub edge_data: EdgeDataMultiIn,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Document {
     pub uri: Uri,
@@ -273,7 +273,7 @@ pub struct Document {
 }
 
 /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#result-set>
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ResultSet {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -281,7 +281,7 @@ pub struct ResultSet {
 }
 
 /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex>
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Project {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -291,7 +291,7 @@ pub struct Project {
     pub kind: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MetaData {
     /// The version of the LSIF format using semver notation. See <https://semver.org/>. Please note
@@ -311,7 +311,7 @@ pub struct MetaData {
     pub tool_info: Option<ToolInfo>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Repository {
     pub r#type: String,
@@ -320,7 +320,7 @@ pub struct Repository {
     pub commit_id: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PackageInformation {
     pub name: String,
