@@ -9,12 +9,14 @@ pub type MonikerClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum MonikerServerCapabilities {
     Options(MonikerOptions),
     RegistrationOptions(MonikerRegistrationOptions),
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MonikerOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -22,6 +24,7 @@ pub struct MonikerOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MonikerRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -33,6 +36,7 @@ pub struct MonikerRegistrationOptions {
 /// Moniker uniqueness level to define scope of the moniker.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum UniquenessLevel {
     /// The moniker is only unique inside a document
     Document,
@@ -49,6 +53,7 @@ pub enum UniquenessLevel {
 /// The moniker kind.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum MonikerKind {
     /// The moniker represent a symbol that is imported into a project
     Import,
@@ -61,6 +66,7 @@ pub enum MonikerKind {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MonikerParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -75,6 +81,7 @@ pub struct MonikerParams {
 /// Moniker definition to match LSIF 0.5 moniker definition.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Moniker {
     /// The scheme of the moniker. For example tsc or .Net
     pub scheme: String,

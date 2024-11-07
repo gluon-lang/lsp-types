@@ -4,6 +4,7 @@ use crate::{OneOf, Uri};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceFoldersServerCapabilities {
     /// The server has support for workspace folders
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -22,6 +23,7 @@ pub struct WorkspaceFoldersServerCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceFolder {
     /// The associated URI for this workspace folder.
     pub uri: Uri,
@@ -31,6 +33,7 @@ pub struct WorkspaceFolder {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidChangeWorkspaceFoldersParams {
     /// The actual workspace folder change event.
     pub event: WorkspaceFoldersChangeEvent,
@@ -39,6 +42,7 @@ pub struct DidChangeWorkspaceFoldersParams {
 /// The workspace folder change event.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceFoldersChangeEvent {
     /// The array of added workspace folders
     pub added: Vec<WorkspaceFolder>,

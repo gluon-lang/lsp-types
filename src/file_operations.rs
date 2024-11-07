@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceFileOperationsClientCapabilities {
     /// Whether the client supports dynamic registration for file
     /// requests/notifications.
@@ -35,6 +36,7 @@ pub struct WorkspaceFileOperationsClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceFileOperationsServerCapabilities {
     /// The server is interested in receiving didCreateFiles
     /// notifications.
@@ -70,6 +72,7 @@ pub struct WorkspaceFileOperationsServerCapabilities {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileOperationRegistrationOptions {
     /// The actual filters.
     pub filters: Vec<FileOperationFilter>,
@@ -81,6 +84,7 @@ pub struct FileOperationRegistrationOptions {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileOperationFilter {
     /// A Uri like `file` or `untitled`.
     pub scheme: Option<String>,
@@ -95,6 +99,7 @@ pub struct FileOperationFilter {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum FileOperationPatternKind {
     /// The pattern matches a file only.
     File,
@@ -109,6 +114,7 @@ pub enum FileOperationPatternKind {
 ///
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileOperationPatternOptions {
     /// The pattern should be matched ignoring casing.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -121,6 +127,7 @@ pub struct FileOperationPatternOptions {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileOperationPattern {
     /// The glob pattern to match. Glob patterns can have the following syntax:
     /// - `*` to match one or more characters in a path segment
@@ -152,6 +159,7 @@ pub struct FileOperationPattern {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CreateFilesParams {
     /// An array of all files/folders created in this operation.
     pub files: Vec<FileCreate>,
@@ -161,6 +169,7 @@ pub struct CreateFilesParams {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileCreate {
     /// A file:// URI for the location of the file/folder being created.
     pub uri: String,
@@ -172,6 +181,7 @@ pub struct FileCreate {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RenameFilesParams {
     /// An array of all files/folders renamed in this operation. When a folder
     /// is renamed, only the folder will be included, and not its children.
@@ -183,6 +193,7 @@ pub struct RenameFilesParams {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileRename {
     /// A file:// URI for the original location of the file/folder being renamed.
     pub old_uri: String,
@@ -197,6 +208,7 @@ pub struct FileRename {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DeleteFilesParams {
     /// An array of all files/folders deleted in this operation.
     pub files: Vec<FileDelete>,
@@ -207,6 +219,7 @@ pub struct DeleteFilesParams {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileDelete {
     /// A file:// URI for the location of the file/folder being deleted.
     pub uri: String,

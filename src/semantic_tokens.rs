@@ -12,7 +12,8 @@ use crate::{
 /// corresponding client capabilities.
 ///
 /// @since 3.16.0
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokenType(Cow<'static, str>);
 
 impl SemanticTokenType {
@@ -68,7 +69,8 @@ impl From<&'static str> for SemanticTokenType {
 /// corresponding client capabilities.
 ///
 /// @since 3.16.0
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokenModifier(Cow<'static, str>);
 
 impl SemanticTokenModifier {
@@ -104,7 +106,8 @@ impl From<&'static str> for SemanticTokenModifier {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TokenFormat(Cow<'static, str>);
 
 impl TokenFormat {
@@ -134,6 +137,7 @@ impl From<&'static str> for TokenFormat {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensLegend {
     /// The token types a server uses.
     pub token_types: Vec<SemanticTokenType>,
@@ -144,6 +148,7 @@ pub struct SemanticTokensLegend {
 
 /// The actual tokens.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Default)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticToken {
     pub delta_line: u32,
     pub delta_start: u32,
@@ -231,6 +236,7 @@ impl SemanticToken {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokens {
     /// An optional result id. If provided and clients support delta updating
     /// the client will include the result id in the next semantic token request.
@@ -252,6 +258,7 @@ pub struct SemanticTokens {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensPartialResult {
     #[serde(
         deserialize_with = "SemanticToken::deserialize_tokens",
@@ -263,6 +270,7 @@ pub struct SemanticTokensPartialResult {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensResult {
     Tokens(SemanticTokens),
     Partial(SemanticTokensPartialResult),
@@ -283,6 +291,7 @@ impl From<SemanticTokensPartialResult> for SemanticTokensResult {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensEdit {
     pub start: u32,
     pub delete_count: u32,
@@ -299,6 +308,7 @@ pub struct SemanticTokensEdit {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensFullDeltaResult {
     Tokens(SemanticTokens),
     TokensDelta(SemanticTokensDelta),
@@ -320,6 +330,7 @@ impl From<SemanticTokensDelta> for SemanticTokensFullDeltaResult {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensDelta {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result_id: Option<String>,
@@ -333,6 +344,7 @@ pub struct SemanticTokensDelta {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensClientCapabilities {
     /// Whether implementation supports dynamic registration. If this is set to `true`
     /// the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
@@ -392,6 +404,7 @@ pub struct SemanticTokensClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensClientCapabilitiesRequests {
     /// The client will send the `textDocument/semanticTokens/range` request if the server provides a corresponding handler.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -405,6 +418,7 @@ pub struct SemanticTokensClientCapabilitiesRequests {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensFullOptions {
     Bool(bool),
     Delta {
@@ -418,6 +432,7 @@ pub enum SemanticTokensFullOptions {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -437,6 +452,7 @@ pub struct SemanticTokensOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -451,6 +467,7 @@ pub struct SemanticTokensRegistrationOptions {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensServerCapabilities {
     SemanticTokensOptions(SemanticTokensOptions),
     SemanticTokensRegistrationOptions(SemanticTokensRegistrationOptions),
@@ -470,6 +487,7 @@ impl From<SemanticTokensRegistrationOptions> for SemanticTokensServerCapabilitie
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensWorkspaceClientCapabilities {
     /// Whether the client implementation supports a refresh request sent from
     /// the server to the client.
@@ -483,6 +501,7 @@ pub struct SemanticTokensWorkspaceClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
@@ -496,6 +515,7 @@ pub struct SemanticTokensParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensDeltaParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
@@ -513,6 +533,7 @@ pub struct SemanticTokensDeltaParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SemanticTokensRangeParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
@@ -530,6 +551,7 @@ pub struct SemanticTokensRangeParams {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensRangeResult {
     Tokens(SemanticTokens),
     Partial(SemanticTokensPartialResult),

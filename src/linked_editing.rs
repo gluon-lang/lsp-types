@@ -10,6 +10,7 @@ pub type LinkedEditingRangeClientCapabilities = DynamicRegistrationClientCapabil
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LinkedEditingRangeOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -17,6 +18,7 @@ pub struct LinkedEditingRangeOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LinkedEditingRangeRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -30,6 +32,7 @@ pub struct LinkedEditingRangeRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum LinkedEditingRangeServerCapabilities {
     Simple(bool),
     Options(LinkedEditingRangeOptions),
@@ -38,6 +41,7 @@ pub enum LinkedEditingRangeServerCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LinkedEditingRangeParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -48,6 +52,7 @@ pub struct LinkedEditingRangeParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LinkedEditingRanges {
     /// A list of ranges that can be renamed together. The ranges must have
     /// identical length and contain identical text content. The ranges cannot overlap.

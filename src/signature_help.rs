@@ -7,6 +7,7 @@ use crate::{
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureInformationSettings {
     /// Client supports the follow content formats for the documentation
     /// property. The order describes the preferred format of the client.
@@ -26,6 +27,7 @@ pub struct SignatureInformationSettings {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ParameterInformationSettings {
     /// The client supports processing label offsets instead of a
     /// simple label string.
@@ -37,6 +39,7 @@ pub struct ParameterInformationSettings {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelpClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -60,6 +63,7 @@ pub struct SignatureHelpClientCapabilities {
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelpOptions {
     /// The characters that trigger signature help automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -77,6 +81,7 @@ pub struct SignatureHelpOptions {
 
 /// Signature help options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelpRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -85,6 +90,7 @@ pub struct SignatureHelpRegistrationOptions {
 /// Signature help options.
 #[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelpTriggerKind(i32);
 lsp_enum! {
 impl SignatureHelpTriggerKind {
@@ -99,6 +105,7 @@ impl SignatureHelpTriggerKind {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelpParams {
     /// The signature help context. This is only available if the client specifies
     /// to send this using the client capability  `textDocument.signatureHelp.contextSupport === true`
@@ -114,6 +121,7 @@ pub struct SignatureHelpParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelpContext {
     /// Action that caused signature help to be triggered.
     pub trigger_kind: SignatureHelpTriggerKind,
@@ -140,6 +148,7 @@ pub struct SignatureHelpContext {
 /// active and only one active parameter.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureHelp {
     /// One or more signatures.
     pub signatures: Vec<SignatureInformation>,
@@ -158,6 +167,7 @@ pub struct SignatureHelp {
 /// a set of parameters.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SignatureInformation {
     /// The label of this signature. Will be shown in
     /// the UI.
@@ -185,6 +195,7 @@ pub struct SignatureInformation {
 /// have a label and a doc-comment.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ParameterInformation {
     /// The label of this parameter information.
     ///
@@ -201,6 +212,7 @@ pub struct ParameterInformation {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ParameterLabel {
     Simple(String),
     LabelOffsets([u32; 2]),

@@ -13,6 +13,7 @@ use std::fmt::Debug;
 /// Defines how to interpret the insert text in a completion item
 #[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InsertTextFormat(i32);
 lsp_enum! {
 impl InsertTextFormat {
@@ -24,6 +25,7 @@ impl InsertTextFormat {
 /// The kind of a completion entry.
 #[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItemKind(i32);
 lsp_enum! {
 impl CompletionItemKind {
@@ -57,6 +59,7 @@ impl CompletionItemKind {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItemCapability {
     /// Client supports snippets as insert text.
     ///
@@ -128,6 +131,7 @@ pub struct CompletionItemCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItemCapabilityResolveSupport {
     /// The properties that a client can resolve lazily.
     pub properties: Vec<String>,
@@ -135,6 +139,7 @@ pub struct CompletionItemCapabilityResolveSupport {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InsertTextModeSupport {
     pub value_set: Vec<InsertTextMode>,
 }
@@ -145,6 +150,7 @@ pub struct InsertTextModeSupport {
 /// @since 3.16.0
 #[derive(Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InsertTextMode(i32);
 lsp_enum! {
 impl InsertTextMode {
@@ -168,6 +174,7 @@ impl InsertTextMode {
 
 #[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItemTag(i32);
 lsp_enum! {
 impl CompletionItemTag {
@@ -177,6 +184,7 @@ impl CompletionItemTag {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItemKindCapability {
     /// The completion item kind values the client supports. When this
     /// property exists the client also guarantees that it will
@@ -192,6 +200,7 @@ pub struct CompletionItemKindCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionListCapability {
     /// The client supports the following itemDefaults on
     /// a completion list.
@@ -207,6 +216,7 @@ pub struct CompletionListCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -245,6 +255,7 @@ pub struct CompletionClientCapabilities {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InsertReplaceEdit {
     /// The string to be inserted.
     pub new_text: String,
@@ -258,6 +269,7 @@ pub struct InsertReplaceEdit {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CompletionTextEdit {
     Edit(TextEdit),
     InsertAndReplace(InsertReplaceEdit),
@@ -278,6 +290,7 @@ impl From<InsertReplaceEdit> for CompletionTextEdit {
 /// Completion options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionOptions {
     /// The server provides support to resolve additional information for a completion item.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -321,6 +334,7 @@ pub struct CompletionOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionOptionsCompletionItem {
     /// The server has support for completion item label
     /// details (see also `CompletionItemLabelDetails`) when receiving
@@ -332,6 +346,7 @@ pub struct CompletionOptionsCompletionItem {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -342,6 +357,7 @@ pub struct CompletionRegistrationOptions {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CompletionResponse {
     Array(Vec<CompletionItem>),
     List(CompletionList),
@@ -361,6 +377,7 @@ impl From<CompletionList> for CompletionResponse {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionParams {
     // This field was "mixed-in" from TextDocumentPositionParams
     #[serde(flatten)]
@@ -379,6 +396,7 @@ pub struct CompletionParams {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionContext {
     /// How the completion was triggered.
     pub trigger_kind: CompletionTriggerKind,
@@ -392,6 +410,7 @@ pub struct CompletionContext {
 /// How a completion was triggered.
 #[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionTriggerKind(i32);
 lsp_enum! {
 impl CompletionTriggerKind {
@@ -405,6 +424,7 @@ impl CompletionTriggerKind {
 /// in the editor.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionList {
     /// This list it not complete. Further typing should result in recomputing
     /// this list.
@@ -416,6 +436,7 @@ pub struct CompletionList {
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItem {
     /// The label of this completion item. By default
     /// also the text that is inserted when selecting
@@ -557,6 +578,7 @@ impl CompletionItem {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompletionItemLabelDetails {
     /// An optional string which is rendered less prominently directly after
     /// {@link CompletionItemLabel.label label}, without any spacing. Should be

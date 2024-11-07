@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentSymbolClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -37,6 +38,7 @@ pub struct DocumentSymbolClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentSymbolResponse {
     Flat(Vec<SymbolInformation>),
     Nested(Vec<DocumentSymbol>),
@@ -56,6 +58,7 @@ impl From<Vec<DocumentSymbol>> for DocumentSymbolResponse {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentSymbolParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
@@ -73,6 +76,7 @@ pub struct DocumentSymbolParams {
 /// e.g. the range of an identifier.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentSymbol {
     /// The name of this symbol.
     pub name: String,
@@ -107,6 +111,7 @@ pub struct DocumentSymbol {
 /// interfaces etc.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SymbolInformation {
     /// The name of this symbol.
     pub name: String,

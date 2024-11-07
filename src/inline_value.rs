@@ -9,6 +9,7 @@ pub type InlineValueClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlineValueServerCapabilities {
     Options(InlineValueOptions),
     RegistrationOptions(InlineValueRegistrationOptions),
@@ -18,6 +19,7 @@ pub enum InlineValueServerCapabilities {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -27,6 +29,7 @@ pub struct InlineValueOptions {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueRegistrationOptions {
     #[serde(flatten)]
     pub inline_value_options: InlineValueOptions,
@@ -43,6 +46,7 @@ pub struct InlineValueRegistrationOptions {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
@@ -61,6 +65,7 @@ pub struct InlineValueParams {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueContext {
     /// The stack frame (as a DAP Id) where the execution has stopped.
     pub frame_id: i32,
@@ -75,6 +80,7 @@ pub struct InlineValueContext {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueText {
     /// The document range for which the inline value applies.
     pub range: Range,
@@ -93,6 +99,7 @@ pub struct InlineValueText {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueVariableLookup {
     /// The document range for which the inline value applies.
     /// The range is used to extract the variable name from the underlying
@@ -117,6 +124,7 @@ pub struct InlineValueVariableLookup {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueEvaluatableExpression {
     /// The document range for which the inline value applies.
     /// The range is used to extract the evaluatable expression from the
@@ -137,6 +145,7 @@ pub struct InlineValueEvaluatableExpression {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlineValue {
     Text(InlineValueText),
     VariableLookup(InlineValueVariableLookup),
@@ -169,6 +178,7 @@ impl From<InlineValueEvaluatableExpression> for InlineValue {
 ///
 /// @since 3.17.0
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineValueWorkspaceClientCapabilities {
     /// Whether the client implementation supports a refresh request sent from
     /// the server to the client.

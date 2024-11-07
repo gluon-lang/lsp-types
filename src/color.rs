@@ -8,10 +8,12 @@ pub type DocumentColorClientCapabilities = DynamicRegistrationClientCapabilities
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ColorProviderOptions {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct StaticTextDocumentColorProviderOptions {
     /// A document selector to identify the scope of the registration. If set to null
     /// the document selector provided on the client side will be used.
@@ -23,6 +25,7 @@ pub struct StaticTextDocumentColorProviderOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ColorProviderCapability {
     Simple(bool),
     ColorProvider(ColorProviderOptions),
@@ -49,6 +52,7 @@ impl From<bool> for ColorProviderCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentColorParams {
     /// The text document
     pub text_document: TextDocumentIdentifier,
@@ -62,6 +66,7 @@ pub struct DocumentColorParams {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ColorInformation {
     /// The range in the document where this color appears.
     pub range: Range,
@@ -82,8 +87,19 @@ pub struct Color {
     pub alpha: f32,
 }
 
+#[cfg(feature = "hash")]
+impl std::hash::Hash for Color {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.red.to_bits().hash(state);
+        self.green.to_bits().hash(state);
+        self.blue.to_bits().hash(state);
+        self.alpha.to_bits().hash(state);
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ColorPresentationParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
@@ -103,6 +119,7 @@ pub struct ColorPresentationParams {
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize, Default, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ColorPresentation {
     /// The label of this color presentation. It will be shown on the color
     /// picker header. By default this is also the text that is inserted when selecting

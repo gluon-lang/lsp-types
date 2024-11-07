@@ -215,6 +215,7 @@ macro_rules! lsp_request {
 /// * for a request the respond should be errored with `code: -32001`. The message can be picked by the server.
 /// * notifications should be dropped.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Initialize {}
 
 impl Request for Initialize {
@@ -227,6 +228,7 @@ impl Request for Initialize {
 /// but to not exit (otherwise the response might not be delivered correctly to the client).
 /// There is a separate exit notification that asks the server to exit.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Shutdown {}
 
 impl Request for Shutdown {
@@ -239,6 +241,7 @@ impl Request for Shutdown {
 /// in the user interface. In addition to the show message notification the request allows to pass actions and to
 /// wait for an answer from the client.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ShowMessageRequest {}
 
 impl Request for ShowMessageRequest {
@@ -251,6 +254,7 @@ impl Request for ShowMessageRequest {
 /// on the client side. Not all clients need to support dynamic capability registration. A client opts in via the
 /// ClientCapabilities.GenericCapability property.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum RegisterCapability {}
 
 impl Request for RegisterCapability {
@@ -262,6 +266,7 @@ impl Request for RegisterCapability {
 /// The client/unregisterCapability request is sent from the server to the client to unregister a
 /// previously register capability.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum UnregisterCapability {}
 
 impl Request for UnregisterCapability {
@@ -281,6 +286,7 @@ impl Request for UnregisterCapability {
 /// However, properties that are needed for the initial sorting and filtering, like sortText, filterText, insertText,
 /// and textEdit must be provided in the textDocument/completion request and must not be changed during resolve.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Completion {}
 
 impl Request for Completion {
@@ -291,6 +297,7 @@ impl Request for Completion {
 
 /// The request is sent from the client to the server to resolve additional information for a given completion item.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ResolveCompletionItem {}
 
 impl Request for ResolveCompletionItem {
@@ -302,6 +309,7 @@ impl Request for ResolveCompletionItem {
 /// The hover request is sent from the client to the server to request hover information at a given text
 /// document position.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum HoverRequest {}
 
 impl Request for HoverRequest {
@@ -313,6 +321,7 @@ impl Request for HoverRequest {
 /// The signature help request is sent from the client to the server to request signature information at
 /// a given cursor position.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SignatureHelpRequest {}
 
 impl Request for SignatureHelpRequest {
@@ -322,6 +331,7 @@ impl Request for SignatureHelpRequest {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GotoDeclaration {}
 pub type GotoDeclarationParams = GotoDefinitionParams;
 pub type GotoDeclarationResponse = GotoDefinitionResponse;
@@ -337,6 +347,7 @@ impl Request for GotoDeclaration {
 /// The goto definition request is sent from the client to the server to resolve the definition location of
 /// a symbol at a given text document position.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GotoDefinition {}
 
 impl Request for GotoDefinition {
@@ -348,6 +359,7 @@ impl Request for GotoDefinition {
 /// The references request is sent from the client to the server to resolve project-wide references for the
 /// symbol denoted by the given text document position.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum References {}
 
 impl Request for References {
@@ -360,6 +372,7 @@ impl Request for References {
 /// server to resolve the type definition location of a symbol at a
 /// given text document position.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GotoTypeDefinition {}
 
 pub type GotoTypeDefinitionParams = GotoDefinitionParams;
@@ -375,6 +388,7 @@ impl Request for GotoTypeDefinition {
 /// server to resolve the implementation location of a symbol at a
 /// given text document position.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GotoImplementation {}
 
 pub type GotoImplementationParams = GotoTypeDefinitionParams;
@@ -394,6 +408,7 @@ impl Request for GotoImplementation {
 /// Symbol matches usually have a DocumentHighlightKind of Read or Write whereas fuzzy or textual matches
 /// use Text as the kind.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentHighlightRequest {}
 
 impl Request for DocumentHighlightRequest {
@@ -405,6 +420,7 @@ impl Request for DocumentHighlightRequest {
 /// The document symbol request is sent from the client to the server to list all symbols found in a given
 /// text document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentSymbolRequest {}
 
 impl Request for DocumentSymbolRequest {
@@ -416,6 +432,7 @@ impl Request for DocumentSymbolRequest {
 /// The workspace symbol request is sent from the client to the server to list project-wide symbols
 /// matching the query string.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceSymbolRequest {}
 
 impl Request for WorkspaceSymbolRequest {
@@ -427,6 +444,7 @@ impl Request for WorkspaceSymbolRequest {
 /// The `workspaceSymbol/resolve` request is sent from the client to the server to resolve
 /// additional information for a given workspace symbol.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceSymbolResolve {}
 
 impl Request for WorkspaceSymbolResolve {
@@ -439,6 +457,7 @@ impl Request for WorkspaceSymbolResolve {
 /// In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request
 /// workspace/applyEdit which is sent from the server to the client.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ExecuteCommand {}
 
 impl Request for ExecuteCommand {
@@ -453,6 +472,7 @@ impl Request for ExecuteCommand {
 /// edits took too long or if a server constantly fails on this request. This is done to keep the
 /// save fast and reliable.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WillSaveWaitUntil {}
 
 impl Request for WillSaveWaitUntil {
@@ -464,6 +484,7 @@ impl Request for WillSaveWaitUntil {
 /// The workspace/applyEdit request is sent from the server to the client to modify resource on the
 /// client side.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ApplyWorkspaceEdit {}
 
 impl Request for ApplyWorkspaceEdit {
@@ -486,6 +507,7 @@ impl Request for ApplyWorkspaceEdit {
 /// settings the configuration should be returned for the passed resource URI. If the client can’t provide a
 /// configuration setting for a given scope then null need to be present in the returned array.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceConfiguration {}
 
 impl Request for WorkspaceConfiguration {
@@ -498,6 +520,7 @@ impl Request for WorkspaceConfiguration {
 /// and range. The request is triggered when the user moves the cursor into a problem marker in the editor or
 /// presses the lightbulb associated with a marker.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeActionRequest {}
 
 impl Request for CodeActionRequest {
@@ -512,6 +535,7 @@ impl Request for CodeActionRequest {
 ///
 /// @since 3.16.0
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeActionResolveRequest {}
 
 impl Request for CodeActionResolveRequest {
@@ -522,6 +546,7 @@ impl Request for CodeActionResolveRequest {
 
 /// The code lens request is sent from the client to the server to compute code lenses for a given text document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeLensRequest {}
 
 impl Request for CodeLensRequest {
@@ -533,6 +558,7 @@ impl Request for CodeLensRequest {
 /// The code lens resolve request is sent from the client to the server to resolve the command for a
 /// given code lens item.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeLensResolve {}
 
 impl Request for CodeLensResolve {
@@ -543,6 +569,7 @@ impl Request for CodeLensResolve {
 
 /// The document links request is sent from the client to the server to request the location of links in a document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentLinkRequest {}
 
 impl Request for DocumentLinkRequest {
@@ -554,6 +581,7 @@ impl Request for DocumentLinkRequest {
 /// The document link resolve request is sent from the client to the server to resolve the target of
 /// a given document link.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentLinkResolve {}
 
 impl Request for DocumentLinkResolve {
@@ -564,6 +592,7 @@ impl Request for DocumentLinkResolve {
 
 /// The document formatting request is sent from the server to the client to format a whole document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Formatting {}
 
 impl Request for Formatting {
@@ -574,6 +603,7 @@ impl Request for Formatting {
 
 /// The document range formatting request is sent from the client to the server to format a given range in a document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum RangeFormatting {}
 
 impl Request for RangeFormatting {
@@ -585,6 +615,7 @@ impl Request for RangeFormatting {
 /// The document on type formatting request is sent from the client to the server to format parts of
 /// the document during typing.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum OnTypeFormatting {}
 
 impl Request for OnTypeFormatting {
@@ -599,6 +630,7 @@ impl Request for OnTypeFormatting {
 /// to all other ranges if the new content is valid. If no result-specific word pattern is provided, the word pattern from
 /// the client’s language configuration is used.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum LinkedEditingRange {}
 
 impl Request for LinkedEditingRange {
@@ -609,6 +641,7 @@ impl Request for LinkedEditingRange {
 
 /// The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Rename {}
 
 impl Request for Rename {
@@ -620,6 +653,7 @@ impl Request for Rename {
 /// The document color request is sent from the client to the server to list all color references found in a given text document.
 /// Along with the range, a color value in RGB is returned.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentColor {}
 
 impl Request for DocumentColor {
@@ -631,6 +665,7 @@ impl Request for DocumentColor {
 /// The color presentation request is sent from the client to the server to obtain a list of presentations for a color value
 /// at a given location.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ColorPresentationRequest {}
 
 impl Request for ColorPresentationRequest {
@@ -641,6 +676,7 @@ impl Request for ColorPresentationRequest {
 
 /// The folding range request is sent from the client to the server to return all folding ranges found in a given text document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum FoldingRangeRequest {}
 
 impl Request for FoldingRangeRequest {
@@ -652,6 +688,7 @@ impl Request for FoldingRangeRequest {
 /// The prepare rename request is sent from the client to the server to setup and test the validity of a rename operation
 /// at a given location.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum PrepareRenameRequest {}
 
 impl Request for PrepareRenameRequest {
@@ -662,6 +699,7 @@ impl Request for PrepareRenameRequest {
 
 #[derive(Debug)]
 #[cfg(feature = "proposed")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlineCompletionRequest {}
 
 #[cfg(feature = "proposed")]
@@ -675,6 +713,7 @@ impl Request for InlineCompletionRequest {
 /// workspace folders. Returns null in the response if only a single file is open in the tool.
 /// Returns an empty array if a workspace is open but no folders are configured.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceFoldersRequest {}
 
 impl Request for WorkspaceFoldersRequest {
@@ -686,6 +725,7 @@ impl Request for WorkspaceFoldersRequest {
 /// The `window/workDoneProgress/create` request is sent from the server
 /// to the client to ask the client to create a work done progress.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkDoneProgressCreate {}
 
 impl Request for WorkDoneProgressCreate {
@@ -703,6 +743,7 @@ impl Request for WorkDoneProgressCreate {
 ///
 /// Typically, but not necessary, selection ranges correspond to the nodes of the
 /// syntax tree.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SelectionRangeRequest {}
 
 impl Request for SelectionRangeRequest {
@@ -711,6 +752,7 @@ impl Request for SelectionRangeRequest {
     const METHOD: &'static str = "textDocument/selectionRange";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CallHierarchyPrepare {}
 
 impl Request for CallHierarchyPrepare {
@@ -719,6 +761,7 @@ impl Request for CallHierarchyPrepare {
     const METHOD: &'static str = "textDocument/prepareCallHierarchy";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CallHierarchyIncomingCalls {}
 
 impl Request for CallHierarchyIncomingCalls {
@@ -727,6 +770,7 @@ impl Request for CallHierarchyIncomingCalls {
     const METHOD: &'static str = "callHierarchy/incomingCalls";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CallHierarchyOutgoingCalls {}
 
 impl Request for CallHierarchyOutgoingCalls {
@@ -735,6 +779,7 @@ impl Request for CallHierarchyOutgoingCalls {
     const METHOD: &'static str = "callHierarchy/outgoingCalls";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensFullRequest {}
 
 impl Request for SemanticTokensFullRequest {
@@ -743,6 +788,7 @@ impl Request for SemanticTokensFullRequest {
     const METHOD: &'static str = "textDocument/semanticTokens/full";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensFullDeltaRequest {}
 
 impl Request for SemanticTokensFullDeltaRequest {
@@ -751,6 +797,7 @@ impl Request for SemanticTokensFullDeltaRequest {
     const METHOD: &'static str = "textDocument/semanticTokens/full/delta";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensRangeRequest {}
 
 impl Request for SemanticTokensRangeRequest {
@@ -764,6 +811,7 @@ impl Request for SemanticTokensRangeRequest {
 /// As a result the client should ask the server to recompute the semantic tokens for these editors.
 /// This is useful if a server detects a project wide configuration change which requires a re-calculation of all semantic tokens.
 /// Note that the client still has the freedom to delay the re-calculation of the semantic tokens if for example an editor is currently not visible.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SemanticTokensRefresh {}
 
 impl Request for SemanticTokensRefresh {
@@ -777,6 +825,7 @@ impl Request for SemanticTokensRefresh {
 /// As a result the client should ask the server to recompute the code lenses for these editors.
 /// This is useful if a server detects a configuration change which requires a re-calculation of all code lenses.
 /// Note that the client still has the freedom to delay the re-calculation of the code lenses if for example an editor is currently not visible.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeLensRefresh {}
 
 impl Request for CodeLensRefresh {
@@ -786,6 +835,7 @@ impl Request for CodeLensRefresh {
 }
 
 /// The will create files request is sent from the client to the server before files are actually created as long as the creation is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are created. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep creates fast and reliable.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WillCreateFiles {}
 
 impl Request for WillCreateFiles {
@@ -795,6 +845,7 @@ impl Request for WillCreateFiles {
 }
 
 /// The will rename files request is sent from the client to the server before files are actually renamed as long as the rename is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are renamed. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep renames fast and reliable.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WillRenameFiles {}
 
 impl Request for WillRenameFiles {
@@ -804,6 +855,7 @@ impl Request for WillRenameFiles {
 }
 
 /// The will delete files request is sent from the client to the server before files are actually deleted as long as the deletion is triggered from within the client. The request can return a WorkspaceEdit which will be applied to workspace before the files are deleted. Please note that clients might drop results if computing the edit took too long or if a server constantly fails on this request. This is done to keep deletes fast and reliable.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WillDeleteFiles {}
 
 impl Request for WillDeleteFiles {
@@ -813,6 +865,7 @@ impl Request for WillDeleteFiles {
 }
 
 /// The show document request is sent from a server to a client to ask the client to display a particular document in the user interface.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ShowDocument {}
 
 impl Request for ShowDocument {
@@ -821,6 +874,7 @@ impl Request for ShowDocument {
     const METHOD: &'static str = "window/showDocument";
 }
 
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum MonikerRequest {}
 
 impl Request for MonikerRequest {
@@ -831,6 +885,7 @@ impl Request for MonikerRequest {
 
 /// The inlay hints request is sent from the client to the server to compute inlay hints for a given
 /// [text document, range] tuple that may be rendered in the editor in place with other text.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintRequest {}
 
 impl Request for InlayHintRequest {
@@ -843,6 +898,7 @@ impl Request for InlayHintRequest {
 /// information for a given inlay hint. This is usually used to compute the tooltip, location or
 /// command properties of a inlay hint’s label part to avoid its unnecessary computation during the
 /// `textDocument/inlayHint` request.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintResolveRequest {}
 
 impl Request for InlayHintResolveRequest {
@@ -857,6 +913,7 @@ impl Request for InlayHintResolveRequest {
 /// detects a configuration change which requires a re-calculation of all inlay hints. Note that the
 /// client still has the freedom to delay the re-calculation of the inlay hints if for example an
 /// editor is currently not visible.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintRefreshRequest {}
 
 impl Request for InlayHintRefreshRequest {
@@ -867,6 +924,7 @@ impl Request for InlayHintRefreshRequest {
 
 /// The inline value request is sent from the client to the server to compute inline values for a
 /// given text document that may be rendered in the editor at the end of lines.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlineValueRequest {}
 
 impl Request for InlineValueRequest {
@@ -881,6 +939,7 @@ impl Request for InlineValueRequest {
 /// a server detects a configuration change which requires a re-calculation of all inline values.
 /// Note that the client still has the freedom to delay the re-calculation of the inline values if
 /// for example an editor is currently not visible.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlineValueRefreshRequest {}
 
 impl Request for InlineValueRefreshRequest {
@@ -893,6 +952,7 @@ impl Request for InlineValueRefreshRequest {
 /// compute the diagnostics for a given document. As with other pull requests the server is asked
 /// to compute the diagnostics for the currently synced version of the document.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentDiagnosticRequest {}
 
 impl Request for DocumentDiagnosticRequest {
@@ -908,6 +968,7 @@ impl Request for DocumentDiagnosticRequest {
 /// workspace diagnostic pull it is legal to provide a document diagnostic report multiple times
 /// for the same document URI. The last one reported will win over previous reports.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceDiagnosticRequest {}
 
 impl Request for WorkspaceDiagnosticRequest {
@@ -921,6 +982,7 @@ impl Request for WorkspaceDiagnosticRequest {
 /// if a server detects a project wide configuration change which requires a re-calculation of all
 /// diagnostics.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceDiagnosticRefresh {}
 
 impl Request for WorkspaceDiagnosticRefresh {
@@ -935,6 +997,7 @@ impl Request for WorkspaceDiagnosticRefresh {
 ///
 /// 1. first a type hierarchy item is prepared for the given text document position.
 /// 2. for a type hierarchy item the supertype or subtype type hierarchy items are resolved.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TypeHierarchyPrepare {}
 
 impl Request for TypeHierarchyPrepare {
@@ -948,6 +1011,7 @@ impl Request for TypeHierarchyPrepare {
 /// valid type from item in the params. The request doesn’t define its own client and server
 /// capabilities. It is only issued if a server registers for the
 /// `textDocument/prepareTypeHierarchy` request.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TypeHierarchySupertypes {}
 
 impl Request for TypeHierarchySupertypes {
@@ -960,6 +1024,7 @@ impl Request for TypeHierarchySupertypes {
 /// subtypes for a given type hierarchy item. Will return null if the server couldn’t infer a valid
 /// type from item in the params. The request doesn’t define its own client and server capabilities.
 /// It is only issued if a server registers for the textDocument/prepareTypeHierarchy request.
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TypeHierarchySubtypes {}
 
 impl Request for TypeHierarchySubtypes {

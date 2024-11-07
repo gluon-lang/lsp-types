@@ -9,12 +9,14 @@ use serde::{Deserialize, Serialize};
 pub type TypeHierarchyClientCapabilities = DynamicRegistrationClientCapabilities;
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TypeHierarchyOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TypeHierarchyRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -25,6 +27,7 @@ pub struct TypeHierarchyRegistrationOptions {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TypeHierarchyPrepareParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -33,6 +36,7 @@ pub struct TypeHierarchyPrepareParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TypeHierarchySupertypesParams {
     pub item: TypeHierarchyItem,
 
@@ -43,6 +47,7 @@ pub struct TypeHierarchySupertypesParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TypeHierarchySubtypesParams {
     pub item: TypeHierarchyItem,
 
@@ -54,6 +59,7 @@ pub struct TypeHierarchySubtypesParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TypeHierarchyItem {
     /// The name of this item.
     pub name: String,

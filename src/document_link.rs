@@ -7,6 +7,7 @@ use serde_json::Value;
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentLinkClientCapabilities {
     /// Whether document link supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -19,6 +20,7 @@ pub struct DocumentLinkClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentLinkOptions {
     /// Document links have a resolve provider as well.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -30,6 +32,7 @@ pub struct DocumentLinkOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentLinkParams {
     /// The document to provide document links for.
     pub text_document: TextDocumentIdentifier,
@@ -44,6 +47,7 @@ pub struct DocumentLinkParams {
 /// A document link is a range in a text document that links to an internal or external resource, like another
 /// text document or a web site.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentLink {
     /// The range this link applies to.
     pub range: Range,

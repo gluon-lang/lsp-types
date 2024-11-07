@@ -1,13 +1,12 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
 use serde_json::Value;
 
-use crate::{Range, Uri};
+use crate::{Map, Range, Uri};
 
 #[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MessageType(i32);
 lsp_enum! {
 impl MessageType {
@@ -25,6 +24,7 @@ impl MessageType {
 /// Window specific client capabilities.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WindowClientCapabilities {
     /// Whether client supports handling progress notifications. If set
     /// servers are allowed to report in `workDoneProgress` property in the
@@ -50,6 +50,7 @@ pub struct WindowClientCapabilities {
 /// Show message request client capabilities
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ShowMessageRequestClientCapabilities {
     /// Capabilities specific to the `MessageActionItem` type.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,6 +59,7 @@ pub struct ShowMessageRequestClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MessageActionItemCapabilities {
     /// Whether the client supports additional attributes which
     /// are preserved and send back to the server in the
@@ -68,6 +70,7 @@ pub struct MessageActionItemCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MessageActionItem {
     /// A short title like 'Retry', 'Open Log' etc.
     pub title: String,
@@ -76,11 +79,12 @@ pub struct MessageActionItem {
     /// sends back to the server. This depends on the client
     /// capability window.messageActionItem.additionalPropertiesSupport
     #[serde(flatten)]
-    pub properties: HashMap<String, MessageActionItemProperty>,
+    pub properties: Map<String, MessageActionItemProperty>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum MessageActionItemProperty {
     String(String),
     Boolean(bool),
@@ -89,6 +93,7 @@ pub enum MessageActionItemProperty {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LogMessageParams {
     /// The message type. See {@link MessageType}
     #[serde(rename = "type")]
@@ -99,6 +104,7 @@ pub struct LogMessageParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ShowMessageParams {
     /// The message type. See {@link MessageType}.
     #[serde(rename = "type")]
@@ -109,6 +115,7 @@ pub struct ShowMessageParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ShowMessageRequestParams {
     /// The message type. See {@link MessageType}
     #[serde(rename = "type")]
@@ -125,6 +132,7 @@ pub struct ShowMessageRequestParams {
 /// Client capabilities for the show document request.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ShowDocumentClientCapabilities {
     /// The client has support for the show document request.
     pub support: bool,
@@ -135,6 +143,7 @@ pub struct ShowDocumentClientCapabilities {
 /// @since 3.16.0
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ShowDocumentParams {
     /// The document uri to show.
     pub uri: Uri,
@@ -165,6 +174,7 @@ pub struct ShowDocumentParams {
 /// @since 3.16.0
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ShowDocumentResult {
     /// A boolean indicating if the show was successful.
     pub success: bool,

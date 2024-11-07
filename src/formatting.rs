@@ -1,11 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    DocumentSelector, DynamicRegistrationClientCapabilities, Range, TextDocumentIdentifier,
+    DocumentSelector, DynamicRegistrationClientCapabilities, Map, Range, TextDocumentIdentifier,
     TextDocumentPositionParams, WorkDoneProgressParams,
 };
-
-use std::collections::HashMap;
 
 pub type DocumentFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
 pub type DocumentRangeFormattingClientCapabilities = DynamicRegistrationClientCapabilities;
@@ -14,6 +12,7 @@ pub type DocumentOnTypeFormattingClientCapabilities = DynamicRegistrationClientC
 /// Format document on type options
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentOnTypeFormattingOptions {
     /// A character on which formatting should be triggered, like `}`.
     pub first_trigger_character: String,
@@ -25,6 +24,7 @@ pub struct DocumentOnTypeFormattingOptions {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentFormattingParams {
     /// The document to format.
     pub text_document: TextDocumentIdentifier,
@@ -39,6 +39,7 @@ pub struct DocumentFormattingParams {
 /// Value-object describing what options formatting should use.
 #[derive(Debug, PartialEq, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FormattingOptions {
     /// Size of a tab in spaces.
     pub tab_size: u32,
@@ -48,7 +49,7 @@ pub struct FormattingOptions {
 
     /// Signature for further properties.
     #[serde(flatten)]
-    pub properties: HashMap<String, FormattingProperty>,
+    pub properties: Map<String, FormattingProperty>,
 
     /// Trim trailing whitespace on a line.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -65,6 +66,7 @@ pub struct FormattingOptions {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum FormattingProperty {
     Bool(bool),
     Number(i32),
@@ -73,6 +75,7 @@ pub enum FormattingProperty {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentRangeFormattingParams {
     /// The document to format.
     pub text_document: TextDocumentIdentifier,
@@ -89,6 +92,7 @@ pub struct DocumentRangeFormattingParams {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentOnTypeFormattingParams {
     /// Text Document and Position fields.
     #[serde(flatten)]
@@ -104,6 +108,7 @@ pub struct DocumentOnTypeFormattingParams {
 /// Extends TextDocumentRegistrationOptions
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentOnTypeFormattingRegistrationOptions {
     /// A document selector to identify the scope of the registration. If set to null
     /// the document selector provided on the client side will be used.
@@ -128,7 +133,7 @@ mod tests {
             &FormattingOptions {
                 tab_size: 123,
                 insert_spaces: true,
-                properties: HashMap::new(),
+                properties: Map::new(),
                 trim_trailing_whitespace: None,
                 insert_final_newline: None,
                 trim_final_newlines: None,

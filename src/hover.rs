@@ -7,6 +7,7 @@ use crate::{
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct HoverClientCapabilities {
     /// Whether completion supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -21,6 +22,7 @@ pub struct HoverClientCapabilities {
 /// Hover options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct HoverOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -28,6 +30,7 @@ pub struct HoverOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct HoverRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -38,6 +41,7 @@ pub struct HoverRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum HoverProviderCapability {
     Simple(bool),
     Options(HoverOptions),
@@ -57,6 +61,7 @@ impl From<bool> for HoverProviderCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct HoverParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -67,6 +72,7 @@ pub struct HoverParams {
 
 /// The result of a hover request.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Hover {
     /// The hover's content
     pub contents: HoverContents,
@@ -79,6 +85,7 @@ pub struct Hover {
 /// Hover contents could be single entry or multiple entries.
 #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum HoverContents {
     Scalar(MarkedString),
     Array(Vec<MarkedString>),

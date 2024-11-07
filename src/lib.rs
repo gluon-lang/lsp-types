@@ -10,13 +10,18 @@ Based on: <https://microsoft.github.io/language-server-protocol/specification>
 #[macro_use]
 extern crate bitflags;
 
-use std::{collections::HashMap, fmt::Debug};
+use std::fmt::Debug;
 
 use serde::{de, de::Error, Deserialize, Serialize};
 use serde_json::Value;
 
 pub use uri::Uri;
 mod uri;
+
+#[cfg(not(feature = "hash"))]
+pub(crate) type Map<K, V> = std::collections::HashMap<K, V>;
+#[cfg(feature = "hash")]
+pub(crate) type Map<K, V> = ordermap::OrderMap<K, V>;
 
 // Large enough to contain any enumeration name defined in this crate
 type PascalCaseBuf = [u8; 32];
@@ -200,8 +205,9 @@ pub use trace::*;
 
 /* ----------------- Auxiliary types ----------------- */
 
-#[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum NumberOrString {
     Number(i32),
     String(String),
@@ -210,6 +216,7 @@ pub enum NumberOrString {
 /* ----------------- Cancel support ----------------- */
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CancelParams {
     /// The request id to cancel.
     pub id: NumberOrString,
@@ -234,9 +241,8 @@ pub type LSPArray = Vec<serde_json::Value>;
 
 /// Position in a text document expressed as zero-based line and character offset.
 /// A position is between two characters like an 'insert' cursor in a editor.
-#[derive(
-    Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize, Hash,
-)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Position {
     /// Line position in a document (zero-based).
     pub line: u32,
@@ -256,7 +262,8 @@ impl Position {
 
 /// A range in a text document expressed as (zero-based) start and end positions.
 /// A range is comparable to a selection in an editor. Therefore the end position is exclusive.
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Default, Deserialize, Serialize, Hash)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Range {
     /// The range's start position.
     pub start: Position,
@@ -271,7 +278,8 @@ impl Range {
 }
 
 /// Represents a location inside a resource, such as a line inside a text file.
-#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Hash)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Location {
     pub uri: Uri,
     pub range: Range,
@@ -286,6 +294,7 @@ impl Location {
 /// Represents a link between a source and a target location.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LocationLink {
     /// Span of the origin of this link.
     ///
@@ -308,7 +317,8 @@ pub struct LocationLink {
 /// specifically what column offsets mean.
 ///
 /// @since 3.17.0
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PositionEncodingKind(std::borrow::Cow<'static, str>);
 
 impl PositionEncodingKind {
@@ -353,6 +363,7 @@ impl From<&'static str> for PositionEncodingKind {
 /// Diagnostic objects are only valid in the scope of a resource.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Diagnostic {
     /// The range at which the message applies.
     pub range: Range,
@@ -399,6 +410,7 @@ pub struct Diagnostic {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeDescription {
     pub href: Uri,
 }
@@ -444,6 +456,7 @@ impl Diagnostic {
 /// The protocol currently supports the following diagnostic severities:
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticSeverity(i32);
 lsp_enum! {
 impl DiagnosticSeverity {
@@ -462,6 +475,7 @@ impl DiagnosticSeverity {
 /// should be used to point to code locations that cause or related to a
 /// diagnostics, e.g when duplicating a symbol in a scope.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticRelatedInformation {
     /// The location of this related diagnostic information.
     pub location: Location,
@@ -473,6 +487,7 @@ pub struct DiagnosticRelatedInformation {
 /// The diagnostic tags.
 #[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticTag(i32);
 lsp_enum! {
 impl DiagnosticTag {
@@ -493,6 +508,7 @@ impl DiagnosticTag {
 /// Alternatively the tool extension code could handle the command.
 /// The protocol currently doesn’t specify a set of well-known commands.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Command {
     /// Title of the command, like `save`.
     pub title: String,
@@ -521,6 +537,7 @@ impl Command {
 /// are not supported.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextEdit {
     /// The range of the text document to be manipulated. To insert
     /// text into a document create a range where start === end.
@@ -547,6 +564,7 @@ pub type ChangeAnnotationIdentifier = String;
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct AnnotatedTextEdit {
     #[serde(flatten)]
     pub text_edit: TextEdit,
@@ -562,6 +580,7 @@ pub struct AnnotatedTextEdit {
 /// sort the array or do any kind of ordering. However the edits must be non overlapping.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentEdit {
     /// The text document to change.
     pub text_document: OptionalVersionedTextDocumentIdentifier,
@@ -578,6 +597,7 @@ pub struct TextDocumentEdit {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ChangeAnnotation {
     /// A human-readable string describing the actual change. The string
     /// is rendered prominent in the user interface.
@@ -596,6 +616,7 @@ pub struct ChangeAnnotation {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ChangeAnnotationWorkspaceEditClientCapabilities {
     /// Whether the client groups edits with equal labels into tree nodes,
     /// for instance all edits labelled with "Changes in Strings" would
@@ -607,6 +628,7 @@ pub struct ChangeAnnotationWorkspaceEditClientCapabilities {
 /// Options to create a file.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CreateFileOptions {
     /// Overwrite existing file. Overwrite wins over `ignoreIfExists`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -619,6 +641,7 @@ pub struct CreateFileOptions {
 /// Create file operation
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CreateFile {
     /// The resource to create.
     pub uri: Uri,
@@ -636,6 +659,7 @@ pub struct CreateFile {
 /// Rename file options
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RenameFileOptions {
     /// Overwrite target if existing. Overwrite wins over `ignoreIfExists`
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -648,6 +672,7 @@ pub struct RenameFileOptions {
 /// Rename file operation
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RenameFile {
     /// The old (existing) location.
     pub old_uri: Uri,
@@ -667,6 +692,7 @@ pub struct RenameFile {
 /// Delete file options
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DeleteFileOptions {
     /// Delete the content recursively if a folder is denoted.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -685,6 +711,7 @@ pub struct DeleteFileOptions {
 /// Delete file operation
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DeleteFile {
     /// The file to delete.
     pub uri: Uri,
@@ -699,11 +726,12 @@ pub struct DeleteFile {
 /// the latter are preferred over `changes`.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceEdit {
     /// Holds changes to existing resources.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub changes: Option<HashMap<Uri, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
+    pub changes: Option<Map<Uri, Vec<TextEdit>>>, //    changes?: { [uri: string]: TextEdit[]; };
 
     /// Depending on the client capability `workspace.workspaceEdit.resourceOperations` document changes
     /// are either an array of `TextDocumentEdit`s to express changes to n different text documents
@@ -727,11 +755,12 @@ pub struct WorkspaceEdit {
     ///
     /// @since 3.16.0
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub change_annotations: Option<HashMap<ChangeAnnotationIdentifier, ChangeAnnotation>>,
+    pub change_annotations: Option<Map<ChangeAnnotationIdentifier, ChangeAnnotation>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentChanges {
     Edits(Vec<TextDocumentEdit>),
     Operations(Vec<DocumentChangeOperation>),
@@ -754,6 +783,7 @@ pub enum DocumentChanges {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged, rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentChangeOperation {
     Op(ResourceOp),
     Edit(TextDocumentEdit),
@@ -761,6 +791,7 @@ pub enum DocumentChangeOperation {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ResourceOp {
     Create(CreateFile),
     Rename(RenameFile),
@@ -771,12 +802,14 @@ pub type DidChangeConfigurationClientCapabilities = DynamicRegistrationClientCap
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ConfigurationParams {
     pub items: Vec<ConfigurationItem>,
 }
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ConfigurationItem {
     /// The scope to get the configuration section for.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -788,7 +821,7 @@ pub struct ConfigurationItem {
 }
 
 impl WorkspaceEdit {
-    pub fn new(changes: HashMap<Uri, Vec<TextEdit>>) -> WorkspaceEdit {
+    pub fn new(changes: Map<Uri, Vec<TextEdit>>) -> WorkspaceEdit {
         WorkspaceEdit {
             changes: Some(changes),
             document_changes: None,
@@ -799,6 +832,7 @@ impl WorkspaceEdit {
 
 /// Text documents are identified using a URI. On the protocol level, URIs are passed as strings.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentIdentifier {
     // !!!!!! Note:
     // In the spec VersionedTextDocumentIdentifier extends TextDocumentIdentifier
@@ -817,6 +851,7 @@ impl TextDocumentIdentifier {
 /// An item to transfer a text document from the client to the server.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentItem {
     /// The text document's URI.
     pub uri: Uri,
@@ -845,6 +880,7 @@ impl TextDocumentItem {
 
 /// An identifier to denote a specific version of a text document. This information usually flows from the client to the server.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct VersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
@@ -865,6 +901,7 @@ impl VersionedTextDocumentIdentifier {
 
 /// An identifier which optionally denotes a specific version of a text document. This information usually flows from the server to the client
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct OptionalVersionedTextDocumentIdentifier {
     // This field was "mixed-in" from TextDocumentIdentifier
     /// The text document's URI.
@@ -894,6 +931,7 @@ impl OptionalVersionedTextDocumentIdentifier {
 /// A parameter literal used in requests to pass a text document and a position inside that document.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentPositionParams {
     // !!!!!! Note:
     // In the spec ReferenceParams extends TextDocumentPositionParams
@@ -925,6 +963,7 @@ impl TextDocumentPositionParams {
 /// { language: 'typescript', scheme: 'file' }
 /// { language: 'json', pattern: '**/package.json' }
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentFilter {
     /// A language id, like `typescript`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -946,6 +985,7 @@ pub type DocumentSelector = Vec<DocumentFilter>;
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InitializeParams {
     /// The process Id of the parent process that started
     /// the server. Is null if the process has not been started by another process.
@@ -1006,6 +1046,7 @@ pub struct InitializeParams {
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ClientInfo {
     /// The name of the client as defined by the client.
     pub name: String,
@@ -1015,9 +1056,11 @@ pub struct ClientInfo {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InitializedParams {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct GenericRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -1030,12 +1073,14 @@ pub struct GenericRegistrationOptions {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct GenericOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct GenericParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -1049,6 +1094,7 @@ pub struct GenericParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DynamicRegistrationClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1057,6 +1103,7 @@ pub struct DynamicRegistrationClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct GotoCapability {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dynamic_registration: Option<bool>,
@@ -1068,6 +1115,7 @@ pub struct GotoCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceEditClientCapabilities {
     /// The client supports versioned document changes in `WorkspaceEdit`s
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1101,6 +1149,7 @@ pub struct WorkspaceEditClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ResourceOperationKind {
     Create,
     Rename,
@@ -1109,6 +1158,7 @@ pub enum ResourceOperationKind {
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum FailureHandlingKind {
     Abort,
     Transactional,
@@ -1119,6 +1169,7 @@ pub enum FailureHandlingKind {
 /// A symbol kind.
 #[derive(Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SymbolKind(i32);
 lsp_enum! {
 impl SymbolKind {
@@ -1154,6 +1205,7 @@ impl SymbolKind {
 /// Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SymbolKindCapability {
     /// The symbol kind values the client supports. When this
     /// property exists the client also guarantees that it will
@@ -1169,6 +1221,7 @@ pub struct SymbolKindCapability {
 /// Workspace specific client capabilities.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceClientCapabilities {
     /// The client supports applying batch edits to the workspace by supporting
     /// the request 'workspace/applyEdit'
@@ -1245,6 +1298,7 @@ pub struct WorkspaceClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentSyncClientCapabilities {
     /// Whether text document synchronization supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1267,6 +1321,7 @@ pub struct TextDocumentSyncClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PublishDiagnosticsClientCapabilities {
     /// Whether the clients accepts diagnostics with related information.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1305,6 +1360,7 @@ pub struct PublishDiagnosticsClientCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TagSupport<T> {
     /// The tags supported by the client.
     pub value_set: Vec<T>,
@@ -1335,6 +1391,7 @@ impl<T> TagSupport<T> {
 /// Text document specific client capabilities.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentClientCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub synchronization: Option<TextDocumentSyncClientCapabilities>,
@@ -1481,6 +1538,7 @@ pub struct TextDocumentClientCapabilities {
 /// Where ClientCapabilities are currently empty:
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ClientCapabilities {
     /// Workspace specific client capabilities.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1518,6 +1576,7 @@ pub struct ClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct GeneralClientCapabilities {
     /// Client capabilities specific to regular expressions.
     ///
@@ -1568,6 +1627,7 @@ pub struct GeneralClientCapabilities {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct StaleRequestSupportClientCapabilities {
     /// The client will actively cancel the request.
     pub cancel: bool,
@@ -1580,6 +1640,7 @@ pub struct StaleRequestSupportClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RegularExpressionsClientCapabilities {
     /// The engine's name.
     pub engine: String,
@@ -1591,6 +1652,7 @@ pub struct RegularExpressionsClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MarkdownClientCapabilities {
     /// The name of the parser.
     pub parser: String,
@@ -1609,6 +1671,7 @@ pub struct MarkdownClientCapabilities {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InitializeResult {
     /// The capabilities the language server provides.
     pub capabilities: ServerCapabilities,
@@ -1626,6 +1689,7 @@ pub struct InitializeResult {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ServerInfo {
     /// The name of the server as defined by the server.
     pub name: String,
@@ -1635,6 +1699,7 @@ pub struct ServerInfo {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InitializeError {
     /// Indicates whether the client execute the following retry logic:
     ///
@@ -1649,6 +1714,7 @@ pub struct InitializeError {
 /// Defines how the host (editor) should sync document changes to the language server.
 #[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentSyncKind(i32);
 lsp_enum! {
 impl TextDocumentSyncKind {
@@ -1668,6 +1734,7 @@ pub type ExecuteCommandClientCapabilities = DynamicRegistrationClientCapabilitie
 
 /// Execute command options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ExecuteCommandOptions {
     /// The commands to be executed on the server
     pub commands: Vec<String>,
@@ -1679,6 +1746,7 @@ pub struct ExecuteCommandOptions {
 /// Save options.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SaveOptions {
     /// The client is supposed to include the content on save.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1687,6 +1755,7 @@ pub struct SaveOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TextDocumentSyncSaveOptions {
     Supported(bool),
     SaveOptions(SaveOptions),
@@ -1706,6 +1775,7 @@ impl From<bool> for TextDocumentSyncSaveOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentSyncOptions {
     /// Open and close notifications are sent to the server.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1731,6 +1801,7 @@ pub struct TextDocumentSyncOptions {
 
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum OneOf<A, B> {
     Left(A),
     Right(B),
@@ -1738,6 +1809,7 @@ pub enum OneOf<A, B> {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TextDocumentSyncCapability {
     Kind(TextDocumentSyncKind),
     Options(TextDocumentSyncOptions),
@@ -1757,6 +1829,7 @@ impl From<TextDocumentSyncKind> for TextDocumentSyncCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ImplementationProviderCapability {
     Simple(bool),
     Options(StaticTextDocumentRegistrationOptions),
@@ -1776,6 +1849,7 @@ impl From<bool> for ImplementationProviderCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TypeDefinitionProviderCapability {
     Simple(bool),
     Options(StaticTextDocumentRegistrationOptions),
@@ -1795,6 +1869,7 @@ impl From<bool> for TypeDefinitionProviderCapability {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ServerCapabilities {
     /// The position encoding the server picked from the encodings offered
     /// by the client via the client capability `general.positionEncodings`.
@@ -1961,6 +2036,7 @@ pub struct ServerCapabilities {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceServerCapabilities {
     /// The server supports workspace folder.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1973,6 +2049,7 @@ pub struct WorkspaceServerCapabilities {
 /// General parameters to to register for a capability.
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Registration {
     /// The id used to register the request. The id can be used to deregister
     /// the request again.
@@ -1987,6 +2064,7 @@ pub struct Registration {
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RegistrationParams {
     pub registrations: Vec<Registration>,
 }
@@ -1995,6 +2073,7 @@ pub struct RegistrationParams {
 /// interface that can be used.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentRegistrationOptions {
     /// A document selector to identify the scope of the registration. If set to null
     /// the document selector provided on the client side will be used.
@@ -2003,6 +2082,7 @@ pub struct TextDocumentRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DeclarationCapability {
     Simple(bool),
     RegistrationOptions(DeclarationRegistrationOptions),
@@ -2011,6 +2091,7 @@ pub enum DeclarationCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DeclarationRegistrationOptions {
     #[serde(flatten)]
     pub declaration_options: DeclarationOptions,
@@ -2024,6 +2105,7 @@ pub struct DeclarationRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DeclarationOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2031,6 +2113,7 @@ pub struct DeclarationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct StaticRegistrationOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -2038,6 +2121,7 @@ pub struct StaticRegistrationOptions {
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_progress: Option<bool>,
@@ -2045,6 +2129,7 @@ pub struct WorkDoneProgressOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentFormattingOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2052,6 +2137,7 @@ pub struct DocumentFormattingOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentRangeFormattingOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2059,6 +2145,7 @@ pub struct DocumentRangeFormattingOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DefinitionOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2066,6 +2153,7 @@ pub struct DefinitionOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentSymbolOptions {
     /// A human-readable string that is shown when multiple outlines trees are
     /// shown for the same document.
@@ -2080,6 +2168,7 @@ pub struct DocumentSymbolOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ReferencesOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2087,6 +2176,7 @@ pub struct ReferencesOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentHighlightOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2094,6 +2184,7 @@ pub struct DocumentHighlightOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceSymbolOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -2108,6 +2199,7 @@ pub struct WorkspaceSymbolOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct StaticTextDocumentRegistrationOptions {
     /// A document selector to identify the scope of the registration. If set to null
     /// the document selector provided on the client side will be used.
@@ -2119,6 +2211,7 @@ pub struct StaticTextDocumentRegistrationOptions {
 
 /// General parameters to unregister a capability.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Unregistration {
     /// The id used to unregister the request or notification. Usually an id
     /// provided during the register request.
@@ -2129,11 +2222,13 @@ pub struct Unregistration {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct UnregistrationParams {
     pub unregisterations: Vec<Unregistration>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidChangeConfigurationParams {
     /// The actual changed settings
     pub settings: Value,
@@ -2141,6 +2236,7 @@ pub struct DidChangeConfigurationParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidOpenTextDocumentParams {
     /// The document that was opened.
     pub text_document: TextDocumentItem,
@@ -2148,6 +2244,7 @@ pub struct DidOpenTextDocumentParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidChangeTextDocumentParams {
     /// The document that did change. The version number points
     /// to the version after all provided content changes have
@@ -2161,6 +2258,7 @@ pub struct DidChangeTextDocumentParams {
 /// the new text is considered to be the full content of the document.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentContentChangeEvent {
     /// The range of the document that changed.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2181,6 +2279,7 @@ pub struct TextDocumentContentChangeEvent {
 /// Extends TextDocumentRegistrationOptions
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentChangeRegistrationOptions {
     /// A document selector to identify the scope of the registration. If set to null
     /// the document selector provided on the client side will be used.
@@ -2194,6 +2293,7 @@ pub struct TextDocumentChangeRegistrationOptions {
 /// The parameters send in a will save text document notification.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WillSaveTextDocumentParams {
     /// The document that will be saved.
     pub text_document: TextDocumentIdentifier,
@@ -2205,6 +2305,7 @@ pub struct WillSaveTextDocumentParams {
 /// Represents reasons why a text document is saved.
 #[derive(Copy, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentSaveReason(i32);
 lsp_enum! {
 impl TextDocumentSaveReason {
@@ -2222,6 +2323,7 @@ impl TextDocumentSaveReason {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidCloseTextDocumentParams {
     /// The document that was closed.
     pub text_document: TextDocumentIdentifier,
@@ -2229,6 +2331,7 @@ pub struct DidCloseTextDocumentParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidSaveTextDocumentParams {
     /// The document that was saved.
     pub text_document: TextDocumentIdentifier,
@@ -2241,6 +2344,7 @@ pub struct DidSaveTextDocumentParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct TextDocumentSaveRegistrationOptions {
     /// The client is supposed to include the content on save.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2252,6 +2356,7 @@ pub struct TextDocumentSaveRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidChangeWatchedFilesClientCapabilities {
     /// Did change watched files notification supports dynamic registration.
     /// Please note that the current protocol doesn't support static
@@ -2268,14 +2373,16 @@ pub struct DidChangeWatchedFilesClientCapabilities {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidChangeWatchedFilesParams {
     /// The actual file events.
     pub changes: Vec<FileEvent>,
 }
 
 /// The file event type.
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileChangeType(i32);
 lsp_enum! {
 impl FileChangeType {
@@ -2291,7 +2398,8 @@ impl FileChangeType {
 }
 
 /// An event describing a file change.
-#[derive(Debug, Eq, Hash, PartialEq, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileEvent {
     /// The file's URI.
     pub uri: Uri,
@@ -2309,6 +2417,7 @@ impl FileEvent {
 
 /// Describe options to be used when registered for text document change events.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DidChangeWatchedFilesRegistrationOptions {
     /// The watchers to register.
     pub watchers: Vec<FileSystemWatcher>,
@@ -2316,6 +2425,7 @@ pub struct DidChangeWatchedFilesRegistrationOptions {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FileSystemWatcher {
     /// The glob pattern to watch. See {@link GlobPattern glob pattern}
     /// for more detail.
@@ -2334,6 +2444,7 @@ pub struct FileSystemWatcher {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GlobPattern {
     String(Pattern),
     Relative(RelativePattern),
@@ -2360,6 +2471,7 @@ impl From<RelativePattern> for GlobPattern {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RelativePattern {
     /// A workspace folder or a base URI to which this pattern will be matched
     /// against relatively.
@@ -2418,6 +2530,7 @@ impl serde::Serialize for WatchKind {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PublishDiagnosticsParams {
     /// The URI for which diagnostic information is reported.
     pub uri: Uri,
@@ -2446,6 +2559,7 @@ impl PublishDiagnosticsParams {
 
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Documentation {
     String(String),
     MarkupContent(MarkupContent),
@@ -2463,12 +2577,14 @@ pub enum Documentation {
 /// ```
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum MarkedString {
     String(String),
     LanguageString(LanguageString),
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LanguageString {
     pub language: String,
     pub value: String,
@@ -2489,6 +2605,7 @@ impl MarkedString {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct GotoDefinitionParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -2503,6 +2620,7 @@ pub struct GotoDefinitionParams {
 /// GotoDefinition response can be single location, or multiple Locations or a link.
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GotoDefinitionResponse {
     Scalar(Location),
     Array(Vec<Location>),
@@ -2528,6 +2646,7 @@ impl From<Vec<LocationLink>> for GotoDefinitionResponse {
 }
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ExecuteCommandParams {
     /// The identifier of the actual command handler.
     pub command: String,
@@ -2541,6 +2660,7 @@ pub struct ExecuteCommandParams {
 
 /// Execute command registration options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ExecuteCommandRegistrationOptions {
     /// The commands to be executed on the server
     pub commands: Vec<String>,
@@ -2551,6 +2671,7 @@ pub struct ExecuteCommandRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ApplyWorkspaceEditParams {
     /// An optional label of the workspace edit. This label is
     /// presented in the user interface for example on an undo
@@ -2564,6 +2685,7 @@ pub struct ApplyWorkspaceEditParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ApplyWorkspaceEditResponse {
     /// Indicates whether the edit was applied or not.
     pub applied: bool,
@@ -2589,6 +2711,7 @@ pub struct ApplyWorkspaceEditResponse {
 /// are reserved for internal usage.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum MarkupKind {
     /// Plain text is supported as a content format
     PlainText,
@@ -2620,6 +2743,7 @@ pub enum MarkupKind {
 /// Please *Note* that clients might sanitize the return markdown. A client could decide to
 /// remove HTML from the markdown to avoid script execution.
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MarkupContent {
     pub kind: MarkupKind,
     pub value: String,
@@ -2628,6 +2752,7 @@ pub struct MarkupContent {
 /// A parameter literal used to pass a partial result token.
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PartialResultParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub partial_result_token: Option<ProgressToken>,
@@ -2638,6 +2763,7 @@ pub struct PartialResultParams {
 /// @since 3.16.0
 #[derive(Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SymbolTag(i32);
 lsp_enum! {
 impl SymbolTag {

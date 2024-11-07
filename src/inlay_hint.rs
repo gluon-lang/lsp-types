@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintServerCapabilities {
     Options(InlayHintOptions),
     RegistrationOptions(InlayHintRegistrationOptions),
@@ -18,6 +19,7 @@ pub enum InlayHintServerCapabilities {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintClientCapabilities {
     /// Whether inlay hints support dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -34,6 +36,7 @@ pub struct InlayHintClientCapabilities {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -49,6 +52,7 @@ pub struct InlayHintOptions {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintRegistrationOptions {
     #[serde(flatten)]
     pub inlay_hint_options: InlayHintOptions,
@@ -65,6 +69,7 @@ pub struct InlayHintRegistrationOptions {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
@@ -81,6 +86,7 @@ pub struct InlayHintParams {
 /// @since 3.17.0
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHint {
     /// The position of this hint.
     pub position: Position,
@@ -138,6 +144,7 @@ pub struct InlayHint {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintLabel {
     String(String),
     LabelParts(Vec<InlayHintLabelPart>),
@@ -159,6 +166,7 @@ impl From<Vec<InlayHintLabelPart>> for InlayHintLabel {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintTooltip {
     String(String),
     MarkupContent(MarkupContent),
@@ -182,6 +190,7 @@ impl From<MarkupContent> for InlayHintTooltip {
 /// of inlay hints.
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintLabelPart {
     /// The value of this label part.
     pub value: String,
@@ -216,6 +225,7 @@ pub struct InlayHintLabelPart {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlayHintLabelPartTooltip {
     String(String),
     MarkupContent(MarkupContent),
@@ -240,6 +250,7 @@ impl From<MarkupContent> for InlayHintLabelPartTooltip {
 /// @since 3.17.0
 #[derive(Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintKind(i32);
 lsp_enum! {
 impl InlayHintKind {
@@ -256,6 +267,7 @@ impl InlayHintKind {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintResolveClientCapabilities {
     /// The properties that a client can resolve lazily.
     pub properties: Vec<String>,
@@ -266,6 +278,7 @@ pub struct InlayHintResolveClientCapabilities {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlayHintWorkspaceClientCapabilities {
     /// Whether the client implementation supports a refresh request sent from
     /// the server to the client.

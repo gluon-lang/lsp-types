@@ -10,6 +10,7 @@ use crate::{
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticWorkspaceClientCapabilities {
     /// Whether the client implementation supports a refresh request sent from
     /// the server to the client.
@@ -26,6 +27,7 @@ pub struct DiagnosticWorkspaceClientCapabilities {
 ///
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PreviousResultId {
     /// The URI for which the client knows a result ID.
     pub uri: Uri,
@@ -39,6 +41,7 @@ pub struct PreviousResultId {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceDiagnosticParams {
     /// The additional identifier provided during registration.
     pub identifier: Option<String>,
@@ -59,6 +62,7 @@ pub struct WorkspaceDiagnosticParams {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceFullDocumentDiagnosticReport {
     /// The URI for which diagnostic information is reported.
     pub uri: Uri,
@@ -77,6 +81,7 @@ pub struct WorkspaceFullDocumentDiagnosticReport {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceUnchangedDocumentDiagnosticReport {
     /// The URI for which diagnostic information is reported.
     pub uri: Uri,
@@ -95,6 +100,7 @@ pub struct WorkspaceUnchangedDocumentDiagnosticReport {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceDocumentDiagnosticReport {
     Full(WorkspaceFullDocumentDiagnosticReport),
     Unchanged(WorkspaceUnchangedDocumentDiagnosticReport),
@@ -116,6 +122,7 @@ impl From<WorkspaceUnchangedDocumentDiagnosticReport> for WorkspaceDocumentDiagn
 ///
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceDiagnosticReport {
     pub items: Vec<WorkspaceDocumentDiagnosticReport>,
 }
@@ -124,12 +131,14 @@ pub struct WorkspaceDiagnosticReport {
 ///
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceDiagnosticReportPartialResult {
     pub items: Vec<WorkspaceDocumentDiagnosticReport>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceDiagnosticReportResult {
     Report(WorkspaceDiagnosticReport),
     Partial(WorkspaceDiagnosticReportPartialResult),

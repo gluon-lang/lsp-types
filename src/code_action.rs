@@ -9,6 +9,7 @@ use serde_json::Value;
 use std::borrow::Cow;
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeActionProviderCapability {
     Simple(bool),
     Options(CodeActionOptions),
@@ -28,6 +29,7 @@ impl From<bool> for CodeActionProviderCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionClientCapabilities {
     ///
     /// This capability supports dynamic registration.
@@ -84,6 +86,7 @@ pub struct CodeActionClientCapabilities {
 /// @since 3.16.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionCapabilityResolveSupport {
     /// The properties that a client can resolve lazily.
     pub properties: Vec<String>,
@@ -91,6 +94,7 @@ pub struct CodeActionCapabilityResolveSupport {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionLiteralSupport {
     /// The code action kind is support with the following value set.
     pub code_action_kind: CodeActionKindLiteralSupport,
@@ -98,6 +102,7 @@ pub struct CodeActionLiteralSupport {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionKindLiteralSupport {
     /// The code action kind values the client supports. When this
     /// property exists the client also guarantees that it will
@@ -109,6 +114,7 @@ pub struct CodeActionKindLiteralSupport {
 /// Params for the CodeActionRequest
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionParams {
     /// The document in which the command was invoked.
     pub text_document: TextDocumentIdentifier,
@@ -131,6 +137,7 @@ pub type CodeActionResponse = Vec<CodeActionOrCommand>;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CodeActionOrCommand {
     Command(Command),
     CodeAction(CodeAction),
@@ -148,7 +155,8 @@ impl From<CodeAction> for CodeActionOrCommand {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Clone, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionKind(Cow<'static, str>);
 
 impl CodeActionKind {
@@ -235,6 +243,7 @@ impl From<&'static str> for CodeActionKind {
 
 #[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeAction {
     /// A short, human-readable, title for this code action.
     pub title: String,
@@ -296,6 +305,7 @@ pub struct CodeAction {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionDisabled {
     /// Human readable description of why the code action is currently disabled.
     ///
@@ -308,6 +318,7 @@ pub struct CodeActionDisabled {
 /// @since 3.17.0
 #[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionTriggerKind(i32);
 lsp_enum! {
 impl CodeActionTriggerKind {
@@ -326,6 +337,7 @@ impl CodeActionTriggerKind {
 /// a code action is run.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionContext {
     /// An array of diagnostics.
     pub diagnostics: Vec<Diagnostic>,
@@ -346,6 +358,7 @@ pub struct CodeActionContext {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeActionOptions {
     /// CodeActionKinds that this server may return.
     ///

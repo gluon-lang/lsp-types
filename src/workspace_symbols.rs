@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceSymbolClientCapabilities {
     /// This capability supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -38,6 +39,7 @@ pub struct WorkspaceSymbolClientCapabilities {
 
 /// The parameters of a Workspace Symbol Request.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceSymbolParams {
     #[serde(flatten)]
     pub partial_result_params: PartialResultParams,
@@ -50,6 +52,7 @@ pub struct WorkspaceSymbolParams {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceSymbolResolveSupportCapability {
     /// The properties that a client can resolve lazily. Usually
     /// `location.range`
@@ -61,6 +64,7 @@ pub struct WorkspaceSymbolResolveSupportCapability {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceSymbol {
     /// The name of this symbol.
     pub name: String,
@@ -93,12 +97,14 @@ pub struct WorkspaceSymbol {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkspaceLocation {
     pub uri: Uri,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkspaceSymbolResponse {
     Flat(Vec<SymbolInformation>),
     Nested(Vec<WorkspaceSymbol>),

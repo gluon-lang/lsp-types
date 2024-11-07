@@ -5,6 +5,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FoldingRangeParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
@@ -18,6 +19,7 @@ pub struct FoldingRangeParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum FoldingRangeProviderCapability {
     Simple(bool),
     FoldingProvider(FoldingProviderOptions),
@@ -43,10 +45,12 @@ impl From<bool> for FoldingRangeProviderCapability {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FoldingProviderOptions {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FoldingRangeKindCapability {
     /// The folding range kind values the client supports. When this
     /// property exists the client also guarantees that it will
@@ -58,6 +62,7 @@ pub struct FoldingRangeKindCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FoldingRangeCapability {
     /// If set, the client signals that it supports setting collapsedText on
     /// folding ranges to display custom labels instead of the default text.
@@ -69,6 +74,7 @@ pub struct FoldingRangeCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FoldingRangeClientCapabilities {
     /// Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
     /// the client supports the new `(FoldingRangeProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
@@ -102,6 +108,7 @@ pub struct FoldingRangeClientCapabilities {
 /// Enum of known range kinds
 #[derive(Debug, Eq, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum FoldingRangeKind {
     /// Folding range for a comment
     Comment,
@@ -114,6 +121,7 @@ pub enum FoldingRangeKind {
 /// Represents a folding range.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FoldingRange {
     /// The zero-based line number from where the folded range starts.
     pub start_line: u32,

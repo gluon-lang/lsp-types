@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub type ReferenceClientCapabilities = DynamicRegistrationClientCapabilities;
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ReferenceContext {
     /// Include the declaration of the current symbol.
     pub include_declaration: bool,
@@ -14,6 +15,7 @@ pub struct ReferenceContext {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ReferenceParams {
     // Text Document and Position fields
     #[serde(flatten)]

@@ -10,6 +10,7 @@ pub use notification_params::*;
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookDocument {
     /// The notebook document's URI.
     pub uri: Uri,
@@ -35,6 +36,7 @@ pub struct NotebookDocument {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookCell {
     /// The cell's kind
     pub kind: NotebookCellKind,
@@ -51,6 +53,7 @@ pub struct NotebookCell {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ExecutionSummary {
     /// A strict monotonically increasing value
     /// indicating the execution order of a cell
@@ -64,6 +67,7 @@ pub struct ExecutionSummary {
 
 #[derive(Debug, Eq, PartialEq, Clone, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum NotebookCellKind {
     /// A markup-cell is formatted source that is used for display.
     Markup = 1,
@@ -76,6 +80,7 @@ pub enum NotebookCellKind {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookDocumentClientCapabilities {
     /// Capabilities specific to notebook document synchronization
     ///
@@ -88,6 +93,7 @@ pub struct NotebookDocumentClientCapabilities {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookDocumentSyncClientCapabilities {
     /// Whether implementation supports dynamic registration. If this is
     /// set to `true` the client supports the new
@@ -116,6 +122,7 @@ pub struct NotebookDocumentSyncClientCapabilities {
 ///  @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookDocumentSyncOptions {
     /// The notebooks to be synced
     pub notebook_selector: Vec<NotebookSelector>,
@@ -130,6 +137,7 @@ pub struct NotebookDocumentSyncOptions {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookDocumentSyncRegistrationOptions {
     /// The notebooks to be synced
     pub notebook_selector: Vec<NotebookSelector>,
@@ -149,6 +157,7 @@ pub struct NotebookDocumentSyncRegistrationOptions {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookCellTextDocumentFilter {
     /// A filter that matches against the notebook
     /// containing the notebook cell. If a string
@@ -165,6 +174,7 @@ pub struct NotebookCellTextDocumentFilter {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum NotebookSelector {
     ByNotebook {
         /// The notebook to be synced. If a string
@@ -188,12 +198,14 @@ pub enum NotebookSelector {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct NotebookCellSelector {
     pub language: String,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Notebook {
     String(String),
     NotebookDocumentFilter(NotebookDocumentFilter),
@@ -205,6 +217,7 @@ pub enum Notebook {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum NotebookDocumentFilter {
     ByType {
         /// The type of the enclosing notebook.
@@ -253,6 +266,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct DidOpenNotebookDocumentParams {
         /// The notebook document that got opened.
         pub notebook_document: NotebookDocument,
@@ -266,6 +280,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct DidChangeNotebookDocumentParams {
         /// The notebook document that did change. The version number points
         /// to the version after all provided changes have been applied.
@@ -290,6 +305,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct VersionedNotebookDocumentIdentifier {
         /// The version number of this notebook document.
         pub version: i32,
@@ -302,6 +318,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct NotebookDocumentChangeEvent {
         /// The changed meta data if any.
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -314,6 +331,7 @@ mod notification_params {
 
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct NotebookDocumentCellChange {
         /// Changes to the cell structure to add or
         /// remove cells.
@@ -332,6 +350,7 @@ mod notification_params {
 
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct NotebookDocumentChangeTextContent {
         pub document: VersionedTextDocumentIdentifier,
         pub changes: Vec<TextDocumentContentChangeEvent>,
@@ -339,6 +358,7 @@ mod notification_params {
 
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct NotebookDocumentCellChangeStructure {
         /// The change to the cell array.
         pub array: NotebookCellArrayChange,
@@ -356,6 +376,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct NotebookCellArrayChange {
         /// The start offset of the cell that changed.
         pub start: u32,
@@ -373,6 +394,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct DidSaveNotebookDocumentParams {
         /// The notebook document that got saved.
         pub notebook_document: NotebookDocumentIdentifier,
@@ -383,6 +405,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct NotebookDocumentIdentifier {
         /// The notebook document's URI.
         pub uri: Uri,
@@ -393,6 +416,7 @@ mod notification_params {
     /// @since 3.17.0
     #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
+    #[cfg_attr(feature = "hash", derive(Hash))]
     pub struct DidCloseNotebookDocumentParams {
         /// The notebook document that got closed.
         pub notebook_document: NotebookDocumentIdentifier,

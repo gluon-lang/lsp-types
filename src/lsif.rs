@@ -11,6 +11,7 @@ pub type Id = crate::NumberOrString;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum LocationOrRangeId {
     Location(crate::Location),
     RangeId(Id),
@@ -18,6 +19,7 @@ pub enum LocationOrRangeId {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Entry {
     pub id: Id,
     #[serde(flatten)]
@@ -27,12 +29,14 @@ pub struct Entry {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "type")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Element {
     Vertex(Vertex),
     Edge(Edge),
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ToolInfo {
     pub name: String,
     #[serde(default = "Default::default")]
@@ -43,6 +47,7 @@ pub struct ToolInfo {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone, Copy)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Encoding {
     /// Currently only 'utf-16' is supported due to the limitations in LSP.
     #[serde(rename = "utf-16")]
@@ -50,6 +55,7 @@ pub enum Encoding {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RangeBasedDocumentSymbol {
     pub id: Id,
     #[serde(default = "Default::default")]
@@ -60,6 +66,7 @@ pub struct RangeBasedDocumentSymbol {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentSymbolOrRangeBasedVec {
     DocumentSymbol(Vec<crate::DocumentSymbol>),
     RangeBased(Vec<RangeBasedDocumentSymbol>),
@@ -67,6 +74,7 @@ pub enum DocumentSymbolOrRangeBasedVec {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DefinitionTag {
     /// The text covered by the range     
     text: String,
@@ -86,6 +94,7 @@ pub struct DefinitionTag {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DeclarationTag {
     /// The text covered by the range     
     text: String,
@@ -104,12 +113,14 @@ pub struct DeclarationTag {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ReferenceTag {
     text: String,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct UnknownTag {
     text: String,
 }
@@ -117,6 +128,7 @@ pub struct UnknownTag {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "type")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum RangeTag {
     Definition(DefinitionTag),
     Declaration(DeclarationTag),
@@ -127,6 +139,7 @@ pub enum RangeTag {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "label")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Vertex {
     MetaData(MetaData),
     /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex>
@@ -171,6 +184,7 @@ pub enum Vertex {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum EventKind {
     Begin,
     End,
@@ -178,12 +192,14 @@ pub enum EventKind {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum EventScope {
     Document,
     Project,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Event {
     pub kind: EventKind,
     pub scope: EventScope,
@@ -193,6 +209,7 @@ pub struct Event {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "label")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Edge {
     Contains(EdgeDataMultiIn),
     Moniker(EdgeData),
@@ -226,6 +243,7 @@ pub enum Edge {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct EdgeData {
     pub in_v: Id,
     pub out_v: Id,
@@ -233,6 +251,7 @@ pub struct EdgeData {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct EdgeDataMultiIn {
     pub in_vs: Vec<Id>,
     pub out_v: Id,
@@ -240,6 +259,7 @@ pub struct EdgeDataMultiIn {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DefinitionResultType {
     Scalar(LocationOrRangeId),
     Array(LocationOrRangeId),
@@ -247,6 +267,7 @@ pub enum DefinitionResultType {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ItemKind {
     Declarations,
     Definitions,
@@ -257,6 +278,7 @@ pub enum ItemKind {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Item {
     pub document: Id,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -267,6 +289,7 @@ pub struct Item {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Document {
     pub uri: Uri,
     pub language_id: String,
@@ -275,6 +298,7 @@ pub struct Document {
 /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#result-set>
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ResultSet {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
@@ -283,6 +307,7 @@ pub struct ResultSet {
 /// <https://github.com/Microsoft/language-server-protocol/blob/master/indexFormat/specification.md#the-project-vertex>
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Project {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resource: Option<Uri>,
@@ -293,6 +318,7 @@ pub struct Project {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct MetaData {
     /// The version of the LSIF format using semver notation. See <https://semver.org/>. Please note
     /// the version numbers starting with 0 don't adhere to semver and adopters have to assume
@@ -313,6 +339,7 @@ pub struct MetaData {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Repository {
     pub r#type: String,
     pub url: String,
@@ -322,6 +349,7 @@ pub struct Repository {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PackageInformation {
     pub name: String,
     pub manager: String,

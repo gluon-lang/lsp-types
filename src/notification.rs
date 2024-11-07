@@ -101,6 +101,7 @@ macro_rules! lsp_notification {
 /// It can not be left open / hanging. This is in line with the JSON RPC protocol that requires
 /// that every request sends a response back. In addition it allows for returning partial results on cancel.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Cancel {}
 
 impl Notification for Cancel {
@@ -111,6 +112,7 @@ impl Notification for Cancel {
 /// A notification that should be used by the client to modify the trace
 /// setting of the server.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SetTrace {}
 
 impl Notification for SetTrace {
@@ -124,6 +126,7 @@ impl Notification for SetTrace {
 /// `LogTrace` should be used for systematic trace reporting. For single debugging messages,
 /// the server should send `LogMessage` notifications.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum LogTrace {}
 
 impl Notification for LogTrace {
@@ -136,6 +139,7 @@ impl Notification for LogTrace {
 /// notification to the server. The server can use the initialized notification for example to
 /// dynamically register capabilities.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Initialized {}
 
 impl Notification for Initialized {
@@ -147,6 +151,7 @@ impl Notification for Initialized {
 /// The server should exit with success code 0 if the shutdown request has been received before;
 /// otherwise with error code 1.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Exit {}
 
 impl Notification for Exit {
@@ -157,6 +162,7 @@ impl Notification for Exit {
 /// The show message notification is sent from a server to a client to ask the client to display a particular message
 /// in the user interface.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ShowMessage {}
 
 impl Notification for ShowMessage {
@@ -166,6 +172,7 @@ impl Notification for ShowMessage {
 
 /// The log message notification is sent from the server to the client to ask the client to log a particular message.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum LogMessage {}
 
 impl Notification for LogMessage {
@@ -177,6 +184,7 @@ impl Notification for LogMessage {
 /// The protocol doesn't specify the payload since no interpretation of the data happens in the protocol. Most clients even don't handle
 /// the event directly but forward them to the extensions owning the corresponding server issuing the event.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TelemetryEvent {}
 
 impl Notification for TelemetryEvent {
@@ -186,6 +194,7 @@ impl Notification for TelemetryEvent {
 
 /// A notification sent from the client to the server to signal the change of configuration settings.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidChangeConfiguration {}
 
 impl Notification for DidChangeConfiguration {
@@ -197,6 +206,7 @@ impl Notification for DidChangeConfiguration {
 /// The document's truth is now managed by the client and the server must not try to read the document's truth
 /// using the document's uri.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidOpenTextDocument {}
 
 impl Notification for DidOpenTextDocument {
@@ -207,6 +217,7 @@ impl Notification for DidOpenTextDocument {
 /// The document change notification is sent from the client to the server to signal changes to a text document.
 /// In 2.0 the shape of the params has changed to include proper version numbers and language ids.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidChangeTextDocument {}
 
 impl Notification for DidChangeTextDocument {
@@ -217,6 +228,7 @@ impl Notification for DidChangeTextDocument {
 /// The document will save notification is sent from the client to the server before the document
 /// is actually saved.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WillSaveTextDocument {}
 
 impl Notification for WillSaveTextDocument {
@@ -228,6 +240,7 @@ impl Notification for WillSaveTextDocument {
 /// The document's truth now exists where the document's uri points to (e.g. if the document's uri is a file uri
 /// the truth now exists on disk).
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidCloseTextDocument {}
 
 impl Notification for DidCloseTextDocument {
@@ -237,6 +250,7 @@ impl Notification for DidCloseTextDocument {
 
 /// The document save notification is sent from the client to the server when the document was saved in the client.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidSaveTextDocument {}
 
 impl Notification for DidSaveTextDocument {
@@ -245,6 +259,7 @@ impl Notification for DidSaveTextDocument {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidOpenNotebookDocument {}
 impl Notification for DidOpenNotebookDocument {
     type Params = DidOpenNotebookDocumentParams;
@@ -252,6 +267,7 @@ impl Notification for DidOpenNotebookDocument {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidChangeNotebookDocument {}
 impl Notification for DidChangeNotebookDocument {
     type Params = DidChangeNotebookDocumentParams;
@@ -259,6 +275,7 @@ impl Notification for DidChangeNotebookDocument {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidSaveNotebookDocument {}
 impl Notification for DidSaveNotebookDocument {
     type Params = DidSaveNotebookDocumentParams;
@@ -266,6 +283,7 @@ impl Notification for DidSaveNotebookDocument {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidCloseNotebookDocument {}
 impl Notification for DidCloseNotebookDocument {
     type Params = DidCloseNotebookDocumentParams;
@@ -277,6 +295,7 @@ impl Notification for DidCloseNotebookDocument {
 /// It is recommended that servers register for these file system events using the registration mechanism.
 /// In former implementations clients pushed file events without the server actively asking for it.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidChangeWatchedFiles {}
 
 impl Notification for DidChangeWatchedFiles {
@@ -287,6 +306,7 @@ impl Notification for DidChangeWatchedFiles {
 /// The workspace/didChangeWorkspaceFolders notification is sent from the client to the server to inform the server
 /// about workspace folder configuration changes
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidChangeWorkspaceFolders {}
 
 impl Notification for DidChangeWorkspaceFolders {
@@ -296,6 +316,7 @@ impl Notification for DidChangeWorkspaceFolders {
 
 /// Diagnostics notification are sent from the server to the client to signal results of validation runs.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum PublishDiagnostics {}
 
 impl Notification for PublishDiagnostics {
@@ -306,6 +327,7 @@ impl Notification for PublishDiagnostics {
 /// The progress notification is sent from the server to the client to ask
 /// the client to indicate progress.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Progress {}
 
 impl Notification for Progress {
@@ -316,6 +338,7 @@ impl Notification for Progress {
 /// The `window/workDoneProgress/cancel` notification is sent from the client
 /// to the server to cancel a progress initiated on the server side using the `window/workDoneProgress/create`.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkDoneProgressCancel {}
 
 impl Notification for WorkDoneProgressCancel {
@@ -325,6 +348,7 @@ impl Notification for WorkDoneProgressCancel {
 
 /// The did create files notification is sent from the client to the server when files were created from within the client.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidCreateFiles {}
 
 impl Notification for DidCreateFiles {
@@ -334,6 +358,7 @@ impl Notification for DidCreateFiles {
 
 /// The did rename files notification is sent from the client to the server when files were renamed from within the client.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidRenameFiles {}
 
 impl Notification for DidRenameFiles {
@@ -343,6 +368,7 @@ impl Notification for DidRenameFiles {
 
 /// The did delete files notification is sent from the client to the server when files were deleted from within the client.
 #[derive(Debug)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DidDeleteFiles {}
 
 impl Notification for DidDeleteFiles {

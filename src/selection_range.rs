@@ -6,6 +6,7 @@ use crate::{
 };
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SelectionRangeClientCapabilities {
     /// Whether implementation supports dynamic registration for selection range
     /// providers. If this is set to `true` the client supports the new
@@ -16,12 +17,14 @@ pub struct SelectionRangeClientCapabilities {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SelectionRangeOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SelectionRangeRegistrationOptions {
     #[serde(flatten)]
     pub selection_range_options: SelectionRangeOptions,
@@ -32,6 +35,7 @@ pub struct SelectionRangeRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum SelectionRangeProviderCapability {
     Simple(bool),
     Options(SelectionRangeOptions),
@@ -59,6 +63,7 @@ impl From<bool> for SelectionRangeProviderCapability {
 /// A parameter literal used in selection range requests.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SelectionRangeParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
@@ -76,6 +81,7 @@ pub struct SelectionRangeParams {
 /// Represents a selection range.
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SelectionRange {
     /// Range of the selection.
     pub range: Range,

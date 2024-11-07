@@ -1,10 +1,8 @@
-use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    Diagnostic, PartialResultParams, StaticRegistrationOptions, TextDocumentIdentifier,
-    TextDocumentRegistrationOptions, Uri, WorkDoneProgressOptions, WorkDoneProgressParams,
+    Diagnostic, Map, PartialResultParams, StaticRegistrationOptions, TextDocumentIdentifier, TextDocumentRegistrationOptions, Uri, WorkDoneProgressOptions, WorkDoneProgressParams
 };
 
 /// Client capabilities specific to diagnostic pull requests.
@@ -12,6 +10,7 @@ use crate::{
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticClientCapabilities {
     /// Whether implementation supports dynamic registration.
     ///
@@ -30,6 +29,7 @@ pub struct DiagnosticClientCapabilities {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticOptions {
     /// An optional identifier under which the diagnostics are
     /// managed by the client.
@@ -53,6 +53,7 @@ pub struct DiagnosticOptions {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticRegistrationOptions {
     #[serde(flatten)]
     pub text_document_registration_options: TextDocumentRegistrationOptions,
@@ -66,6 +67,7 @@ pub struct DiagnosticRegistrationOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DiagnosticServerCapabilities {
     Options(DiagnosticOptions),
     RegistrationOptions(DiagnosticRegistrationOptions),
@@ -76,6 +78,7 @@ pub enum DiagnosticServerCapabilities {
 /// @since 3.17.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentDiagnosticParams {
     /// The text document.
     pub text_document: TextDocumentIdentifier,
@@ -98,6 +101,7 @@ pub struct DocumentDiagnosticParams {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct FullDocumentDiagnosticReport {
     /// An optional result ID. If provided it will be sent on the next diagnostic request for the
     /// same document.
@@ -115,6 +119,7 @@ pub struct FullDocumentDiagnosticReport {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct UnchangedDocumentDiagnosticReport {
     /// A result ID which will be sent on the next diagnostic request for the same document.
     pub result_id: String,
@@ -125,6 +130,7 @@ pub struct UnchangedDocumentDiagnosticReport {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentDiagnosticReportKind {
     /// A diagnostic report with a full set of problems.
     Full(FullDocumentDiagnosticReport),
@@ -149,6 +155,7 @@ impl From<UnchangedDocumentDiagnosticReport> for DocumentDiagnosticReportKind {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RelatedFullDocumentDiagnosticReport {
     /// Diagnostics of related documents.
     ///
@@ -159,7 +166,7 @@ pub struct RelatedFullDocumentDiagnosticReport {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<Map<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
     #[serde(flatten)]
     pub full_document_diagnostic_report: FullDocumentDiagnosticReport,
@@ -170,6 +177,7 @@ pub struct RelatedFullDocumentDiagnosticReport {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RelatedUnchangedDocumentDiagnosticReport {
     /// Diagnostics of related documents.
     ///
@@ -180,7 +188,7 @@ pub struct RelatedUnchangedDocumentDiagnosticReport {
     /// @since 3.17.0
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<Map<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
     #[serde(flatten)]
     pub unchanged_document_diagnostic_report: UnchangedDocumentDiagnosticReport,
@@ -195,6 +203,7 @@ pub struct RelatedUnchangedDocumentDiagnosticReport {
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentDiagnosticReport {
     /// A diagnostic report with a full set of problems.
     Full(RelatedFullDocumentDiagnosticReport),
@@ -219,15 +228,17 @@ impl From<RelatedUnchangedDocumentDiagnosticReport> for DocumentDiagnosticReport
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentDiagnosticReportPartialResult {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub related_documents: Option<HashMap<Uri, DocumentDiagnosticReportKind>>,
+    pub related_documents: Option<Map<Uri, DocumentDiagnosticReportKind>>,
     // relatedDocuments?: { [uri: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport; };
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum DocumentDiagnosticReportResult {
     Report(DocumentDiagnosticReport),
     Partial(DocumentDiagnosticReportPartialResult),
@@ -252,6 +263,7 @@ impl From<DocumentDiagnosticReportPartialResult> for DocumentDiagnosticReportRes
 /// @since 3.17.0
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DiagnosticServerCancellationData {
     pub retrigger_request: bool,
 }

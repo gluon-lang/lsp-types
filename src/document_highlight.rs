@@ -9,6 +9,7 @@ pub type DocumentHighlightClientCapabilities = DynamicRegistrationClientCapabili
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentHighlightParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -24,6 +25,7 @@ pub struct DocumentHighlightParams {
 /// special attention. Usually a document highlight is visualized by changing
 /// the background color of its range.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentHighlight {
     /// The range this highlight applies to.
     pub range: Range,
@@ -36,6 +38,7 @@ pub struct DocumentHighlight {
 /// A document highlight kind.
 #[derive(Eq, PartialEq, Copy, Clone, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct DocumentHighlightKind(i32);
 lsp_enum! {
 impl DocumentHighlightKind {

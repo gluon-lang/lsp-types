@@ -8,6 +8,7 @@ pub type ProgressToken = NumberOrString;
 /// the client to indicate progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ProgressParams {
     /// The progress token provided by the client.
     pub token: ProgressToken,
@@ -18,6 +19,7 @@ pub struct ProgressParams {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum ProgressParamsValue {
     WorkDone(WorkDoneProgress),
 }
@@ -26,6 +28,7 @@ pub enum ProgressParamsValue {
 /// from the server to the client to ask the client to create a work done progress.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressCreateParams {
     /// The token to be used to report progress.
     pub token: ProgressToken,
@@ -35,6 +38,7 @@ pub struct WorkDoneProgressCreateParams {
 /// to the server to cancel a progress initiated on the server side using the `window/workDoneProgress/create`.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressCancelParams {
     /// The token to be used to report progress.
     pub token: ProgressToken,
@@ -43,6 +47,7 @@ pub struct WorkDoneProgressCancelParams {
 /// Options to signal work done progress support in server capabilities.
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_progress: Option<bool>,
@@ -51,6 +56,7 @@ pub struct WorkDoneProgressOptions {
 /// An optional token that a server can use to report work done progress
 #[derive(Debug, Eq, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub work_done_token: Option<ProgressToken>,
@@ -58,6 +64,7 @@ pub struct WorkDoneProgressParams {
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressBegin {
     /// Mandatory title of the progress operation. Used to briefly inform
     /// about the kind of operation being performed.
@@ -90,6 +97,7 @@ pub struct WorkDoneProgressBegin {
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressReport {
     /// Controls if a cancel button should show to allow the user to cancel the
     /// long running operation. Clients that don't support cancellation are allowed
@@ -116,6 +124,7 @@ pub struct WorkDoneProgressReport {
 
 #[derive(Debug, PartialEq, Default, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct WorkDoneProgressEnd {
     /// Optional, more detailed associated progress message. Contains
     /// complementary information to the `title`.
@@ -127,6 +136,7 @@ pub struct WorkDoneProgressEnd {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum WorkDoneProgress {
     Begin(WorkDoneProgressBegin),
     Report(WorkDoneProgressReport),

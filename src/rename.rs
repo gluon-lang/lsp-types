@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RenameParams {
     /// Text Document and Position fields
     #[serde(flatten)]
@@ -19,6 +20,7 @@ pub struct RenameParams {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RenameOptions {
     /// Renames should be checked and tested before being executed.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -30,6 +32,7 @@ pub struct RenameOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct RenameClientCapabilities {
     /// Whether rename supports dynamic registration.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -63,6 +66,7 @@ pub struct RenameClientCapabilities {
 
 #[derive(Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PrepareSupportDefaultBehavior(i32);
 lsp_enum! {
 impl PrepareSupportDefaultBehavior {
@@ -75,6 +79,7 @@ impl PrepareSupportDefaultBehavior {
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum PrepareRenameResponse {
     Range(Range),
     RangeWithPlaceholder {

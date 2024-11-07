@@ -10,6 +10,7 @@ pub type CallHierarchyClientCapabilities = DynamicRegistrationClientCapabilities
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -17,6 +18,7 @@ pub struct CallHierarchyOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum CallHierarchyServerCapability {
     Simple(bool),
     Options(CallHierarchyOptions),
@@ -36,6 +38,7 @@ impl From<bool> for CallHierarchyServerCapability {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyPrepareParams {
     #[serde(flatten)]
     pub text_document_position_params: TextDocumentPositionParams,
@@ -46,6 +49,7 @@ pub struct CallHierarchyPrepareParams {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyItem {
     /// The name of this item.
     pub name: String,
@@ -78,6 +82,7 @@ pub struct CallHierarchyItem {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyIncomingCallsParams {
     pub item: CallHierarchyItem,
 
@@ -91,6 +96,7 @@ pub struct CallHierarchyIncomingCallsParams {
 /// Represents an incoming call, e.g. a caller of a method or constructor.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyIncomingCall {
     /// The item that makes the call.
     pub from: CallHierarchyItem,
@@ -102,6 +108,7 @@ pub struct CallHierarchyIncomingCall {
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyOutgoingCallsParams {
     pub item: CallHierarchyItem,
 
@@ -115,6 +122,7 @@ pub struct CallHierarchyOutgoingCallsParams {
 /// Represents an outgoing call, e.g. calling a getter from a method or a method from a constructor etc.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CallHierarchyOutgoingCall {
     /// The item that is called.
     pub to: CallHierarchyItem,

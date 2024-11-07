@@ -11,6 +11,7 @@ pub type CodeLensClientCapabilities = DynamicRegistrationClientCapabilities;
 /// Code Lens options.
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize, Copy)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeLensOptions {
     /// Code lens has a resolve provider as well.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -19,6 +20,7 @@ pub struct CodeLensOptions {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeLensParams {
     /// The document to request code lens for.
     pub text_document: TextDocumentIdentifier,
@@ -37,6 +39,7 @@ pub struct CodeLensParams {
 /// reasons the creation of a code lens and resolving should be done in two stages.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeLens {
     /// The range in which this code lens is valid. Should only span a single line.
     pub range: Range,
@@ -53,6 +56,7 @@ pub struct CodeLens {
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CodeLensWorkspaceClientCapabilities {
     /// Whether the client implementation supports a refresh request sent from the
     /// server to the client.

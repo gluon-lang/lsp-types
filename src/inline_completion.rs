@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 /// @since 3.18.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionClientCapabilities {
     /// Whether implementation supports dynamic registration for inline completion providers.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -19,6 +20,7 @@ pub struct InlineCompletionClientCapabilities {
 ///
 /// @since 3.18.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionOptions {
     #[serde(flatten)]
     pub work_done_progress_options: WorkDoneProgressOptions,
@@ -28,6 +30,7 @@ pub struct InlineCompletionOptions {
 ///
 // @since 3.18.0
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionRegistrationOptions {
     #[serde(flatten)]
     pub inline_completion_options: InlineCompletionOptions,
@@ -44,6 +47,7 @@ pub struct InlineCompletionRegistrationOptions {
 /// @since 3.18.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionParams {
     #[serde(flatten)]
     pub work_done_progress_params: WorkDoneProgressParams,
@@ -59,6 +63,7 @@ pub struct InlineCompletionParams {
 ///
 /// @since 3.18.0
 #[derive(Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionTriggerKind(i32);
 lsp_enum! {
 impl InlineCompletionTriggerKind {
@@ -76,6 +81,7 @@ impl InlineCompletionTriggerKind {
 ///
 /// @since 3.18.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SelectedCompletionInfo {
     /// The range that will be replaced if this completion item is accepted.
     pub range: Range,
@@ -90,6 +96,7 @@ pub struct SelectedCompletionInfo {
 /// @since 3.18.0
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionContext {
     /// Describes how the inline completion was triggered.
     pub trigger_kind: InlineCompletionTriggerKind,
@@ -112,6 +119,7 @@ pub struct InlineCompletionContext {
 /// InlineCompletion response can be multiple completion items, or a list of completion items
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum InlineCompletionResponse {
     Array(Vec<InlineCompletionItem>),
     List(InlineCompletionList),
@@ -121,6 +129,7 @@ pub enum InlineCompletionResponse {
 ///
 /// @since 3.18.0
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionList {
     /// The inline completion items
     pub items: Vec<InlineCompletionItem>,
@@ -132,6 +141,7 @@ pub struct InlineCompletionList {
 /// @since 3.18.0
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct InlineCompletionItem {
     /// The text to replace the range with. Must be set.
     /// Is used both for the preview and the accept operation.

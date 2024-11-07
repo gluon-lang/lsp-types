@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct SetTraceParams {
     /// The new value that should be assigned to the trace setting.
     pub value: TraceValue,
@@ -13,6 +14,7 @@ pub struct SetTraceParams {
 /// later using the `SetTrace` notification.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum TraceValue {
     /// The server should not send any `$/logTrace` notification
     #[default]
@@ -24,6 +26,7 @@ pub enum TraceValue {
 
 #[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct LogTraceParams {
     /// The message to be logged.
     pub message: String,
