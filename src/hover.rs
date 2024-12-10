@@ -80,7 +80,7 @@ pub struct Hover {
 #[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum HoverContents {
-    Scalar(MarkedString),
     Array(Vec<MarkedString>),
+    Scalar(MarkedString),
     Markup(MarkupContent),
 }
