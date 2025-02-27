@@ -1923,6 +1923,12 @@ pub struct ServerCapabilities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub moniker_provider: Option<OneOf<bool, MonikerServerCapabilities>>,
 
+    /// The server provides type hierarchy support.
+	///
+	/// @since 3.17.0
+    #[serde(skip_serializing_if = "Option::is_none")]
+	pub type_hierarchy_provider: Option<OneOf<bool,TypeHierarchyServerCapabilities>>,
+
     /// The server provides linked editing range support.
     ///
     /// @since 3.16.0

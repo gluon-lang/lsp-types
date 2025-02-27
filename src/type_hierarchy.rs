@@ -8,6 +8,13 @@ use serde::{Deserialize, Serialize};
 
 pub type TypeHierarchyClientCapabilities = DynamicRegistrationClientCapabilities;
 
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum TypeHierarchyServerCapabilities {
+    Options(TypeHierarchyOptions),
+    RegistrationOptions(TypeHierarchyRegistrationOptions),
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 pub struct TypeHierarchyOptions {
     #[serde(flatten)]
