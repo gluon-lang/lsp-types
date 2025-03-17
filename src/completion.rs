@@ -497,7 +497,6 @@ pub struct CompletionItem {
     /// insertText is ignored.
     ///
     /// Most editors support two different operation when accepting a completion item. One is to insert a
-
     /// completion text and the other is to replace an existing text with a completion text. Since this can
     /// usually not predetermined by a server it can report both ranges. Clients need to signal support for
     /// `InsertReplaceEdits` via the `textDocument.completion.insertReplaceSupport` client capability
@@ -578,20 +577,26 @@ mod tests {
 
     #[test]
     fn test_tag_support_deserialization() {
-        let mut empty = CompletionItemCapability::default();
-        empty.tag_support = None;
+        let empty = CompletionItemCapability {
+            tag_support: None,
+            ..Default::default()
+        };
 
         test_deserialization(r#"{}"#, &empty);
         test_deserialization(r#"{"tagSupport": false}"#, &empty);
 
-        let mut t = CompletionItemCapability::default();
-        t.tag_support = Some(TagSupport { value_set: vec![] });
+        let t = CompletionItemCapability {
+            tag_support: Some(TagSupport { value_set: vec![] }),
+            ..Default::default()
+        };
         test_deserialization(r#"{"tagSupport": true}"#, &t);
 
-        let mut t = CompletionItemCapability::default();
-        t.tag_support = Some(TagSupport {
-            value_set: vec![CompletionItemTag::DEPRECATED],
-        });
+        let t = CompletionItemCapability {
+            tag_support: Some(TagSupport {
+                value_set: vec![CompletionItemTag::DEPRECATED],
+            }),
+            ..Default::default()
+        };
         test_deserialization(r#"{"tagSupport": {"valueSet": [1]}}"#, &t);
     }
 
