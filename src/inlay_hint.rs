@@ -79,7 +79,7 @@ pub struct InlayHintParams {
 /// Inlay hint information.
 ///
 /// @since 3.17.0
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InlayHint {
     /// The position of this hint.
@@ -136,7 +136,7 @@ pub struct InlayHint {
     pub data: Option<LSPAny>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum InlayHintLabel {
     String(String),
@@ -157,7 +157,7 @@ impl From<Vec<InlayHintLabelPart>> for InlayHintLabel {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum InlayHintTooltip {
     String(String),
@@ -180,7 +180,7 @@ impl From<MarkupContent> for InlayHintTooltip {
 
 /// An inlay hint label part allows for interactive and composite labels
 /// of inlay hints.
-#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InlayHintLabelPart {
     /// The value of this label part.
