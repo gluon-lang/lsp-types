@@ -12,7 +12,7 @@ extern crate bitflags;
 
 use std::{collections::HashMap, fmt::Debug};
 
-use serde::{de, de::Error, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de, de::Error};
 use serde_json::Value;
 
 pub use uri::Uri;
@@ -2386,6 +2386,7 @@ pub struct RelativePattern {
 pub type Pattern = String;
 
 bitflags! {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub struct WatchKind: u8 {
     /// Interested in create events.
     const Create = 1;
