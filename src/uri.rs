@@ -1,4 +1,8 @@
-use std::{hash::Hash, ops::Deref, str::FromStr};
+use std::{
+    hash::Hash,
+    ops::{Deref, DerefMut},
+    str::FromStr,
+};
 
 use serde::{de::Error, Deserialize, Serialize};
 
@@ -24,6 +28,12 @@ impl<'de> Deserialize<'de> for Uri {
         fluent_uri::Uri::<String>::parse_from(string)
             .map(Uri)
             .map_err(|(_, error)| Error::custom(error.to_string()))
+    }
+}
+
+impl From<fluent_uri::Uri<String>> for Uri {
+    fn from(uri: fluent_uri::Uri<String>) -> Self {
+        Uri(uri)
     }
 }
 
@@ -57,6 +67,12 @@ impl Deref for Uri {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Uri {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
