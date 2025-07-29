@@ -21,9 +21,9 @@ impl<'de> Deserialize<'de> for Uri {
         D: serde::Deserializer<'de>,
     {
         let string = String::deserialize(deserializer)?;
-        fluent_uri::Uri::<String>::parse_from(string)
+        fluent_uri::Uri::parse(string)
             .map(Uri)
-            .map_err(|(_, error)| Error::custom(error.to_string()))
+            .map_err(|error| Error::custom(error.to_string()))
     }
 }
 
@@ -40,15 +40,10 @@ impl PartialOrd for Uri {
 }
 
 impl FromStr for Uri {
-    type Err = fluent_uri::ParseError;
+    type Err = fluent_uri::error::ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // TOUCH-UP:
-        // Use upstream `FromStr` implementation if and when
-        // https://github.com/yescallop/fluent-uri-rs/pull/10
-        // gets merged.
-        // fluent_uri::Uri::from_str(s).map(Self)
-        fluent_uri::Uri::parse(s).map(|uri| Self(uri.to_owned()))
+        fluent_uri::Uri::from_str(s).map(|uri| Self(uri.to_owned()))
     }
 }
 
@@ -60,11 +55,6 @@ impl Deref for Uri {
     }
 }
 
-/*
-    TOUCH-UP: `PartialEq`, `Eq` and `Hash` could all be derived
-    if and when the respective implementations get merged upstream:
-    https://github.com/yescallop/fluent-uri-rs/pull/9
-*/
 impl PartialEq for Uri {
     fn eq(&self, other: &Self) -> bool {
         self.as_str() == other.as_str()
