@@ -542,6 +542,47 @@ impl TextEdit {
 /// @since 3.16.0
 pub type ChangeAnnotationIdentifier = String;
 
+/// An interactive text edit.
+///
+/// @since 3.18.0
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SnippetTextEdit {
+    /// The range of the text document to be manipulated.
+    pub range: Range,
+
+    /// The snippet to be inserted.
+    pub snippet: StringValue,
+
+    /// The actual identifier of the snippet edit.
+    pub annotation_id: ChangeAnnotationIdentifier,
+}
+
+/// A string value used as a snippet is a template which allows to insert text
+/// and to control the editor cursor when insertion happens.
+///
+/// A snippet can define tab stops and placeholders with `$1`, `$2`
+/// and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+/// the end of the snippet. Variables are defined with `$name` and
+/// `${name:default value}`.
+///
+/// @since 3.18.0
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StringValue {
+    /// The kind of string value.
+    kind: StringValueKind,
+
+    /// The snippet string.
+    value: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StringValueKind {
+    Snippet,
+}
+
 /// A special text edit with an additional change annotation.
 ///
 /// @since 3.16.0
@@ -570,7 +611,18 @@ pub struct TextDocumentEdit {
     ///
     /// @since 3.16.0 - support for AnnotatedTextEdit. This is guarded by the
     /// client capability `workspace.workspaceEdit.changeAnnotationSupport`
-    pub edits: Vec<OneOf<TextEdit, AnnotatedTextEdit>>,
+    ///
+    /// @since 3.18.0 - support for SnippetTextEdit. This is guarded by the
+    /// client capability `workspace.workspaceEdit.snippetEditSupport`
+    pub edits: Vec<TextDocumentEditEdit>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum TextDocumentEditEdit {
+    TextEdit(TextEdit),
+    AnnotatedTextEdit(AnnotatedTextEdit),
+    SnippetTextEdit(SnippetTextEdit),
 }
 
 /// Additional information that describes document changes.
