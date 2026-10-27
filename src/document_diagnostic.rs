@@ -81,9 +81,11 @@ pub struct DocumentDiagnosticParams {
     pub text_document: TextDocumentIdentifier,
 
     /// The additional identifier provided during registration.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,
 
     /// The result ID of a previous response if provided.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub previous_result_id: Option<String>,
 
     #[serde(flatten)]
